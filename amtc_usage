@@ -1,0 +1,20 @@
+
+amtc v0.2.0 - Intel AMT(tm) mass management tool. 
+                              jan@hacker.ch/2013.
+
+usage:
+  amtc [actions] [options] host [host ...]
+
+actions:
+  -i(nfo) query powerstate via AMT (default)
+  -u(p)   powerup given host(s) 
+  -d(own) powerdown
+  -r      powercycle
+  -R      powerreset
+  -s(can) [port] - TCP port scan [notyet]
+options:
+  -t(imeout) in seconds, for curl and tcp scans
+  -w(ait)    seconds after each thread created
+  -T(LS)  [notyet]
+  -p(asswdfile) [notyet; set AMT_PASSWORD env var]
+
