@@ -10,7 +10,7 @@ features
 * brutally fast (queries my 180 PCs in less than a second) - ideal for monitoring
 * allows mass-powerups/downs/... using a custom delay
 * lightweight C application, only depends on libcurl and pthreads
-* currently builds fine on linux and OSX
+* currently builds fine on linux and OSX (and windows via cygwin)
 
 usage
 =====
@@ -47,7 +47,7 @@ building
 ========
 + OSX: Install XCode including CommandLineTools; type make
 + Linux: apt-get install libcurl3 libcurl4-openssl-dev build-essential; type make
-+ Windows: not native (yet?); but works using cygwin and its curl and pthreads packages
++ Windows: install cygwin's curl and pthreads (-dev) packages, make and gcc; type make
 
 todo
 ====
