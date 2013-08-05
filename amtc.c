@@ -161,6 +161,7 @@ static void *pull_one_url(void *url) {
   }
   
   curl_easy_cleanup(curl);
+  free(headers);
 
   sem_wait(&mutex);
   threadsRunning--;
