@@ -6,10 +6,11 @@ amtc - Intel [vPro](http://de.wikipedia.org/wiki/Intel_vPro)/[AMT](http://en.wik
 features
 ========
 
-* get status and power control AMT machines using 
-* lightweight application, only depends on curl and pthreads
-* really fast (queries 180 PCs in about one second)
-* currently builds on linux and OSX
+* performs vital AMT operations (info, powerup, powerdown, reset...)
+* brutally fast (queries my 180 PCs in less than a second) - ideal for monitoring
+* allows mass-powerups/downs/... using a custom delay
+* lightweight C application, only depends on libcurl and pthreads
+* currently builds fine on linux and OSX
 
 usage
 =====
@@ -41,6 +42,11 @@ usage
 status
 ======
 alpha. just for fun. against all odds. works for me.
+
+building
+========
++ OSX: Install XCode including CommandLineTools; type make
++ Linux: apt-get install libcurl3 libcurl4-openssl-dev build-essential; type make
 
 todo
 ====
