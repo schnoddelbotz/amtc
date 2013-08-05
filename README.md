@@ -17,22 +17,27 @@ usage
 =====
 
 ```bash
-usage:
+
+ amtc v0.2.1 - Intel AMT(tm) mass management tool 
+                               jan@hacker.ch/2013
+
+ usage:
   amtc [actions] [options] host [host ...]
 
-actions:
-  -i(nfo) query powerstate via AMT (default)  
+ actions:
+  -i(nfo) query powerstate via AMT (default)
   -u(p)   powerup given host(s) 
   -d(own) powerdown
   -r      powercycle
   -R      powerreset
   -s(can) [port] - TCP port scan [notyet]
-
-options:
-  -t(imeout) in seconds, for curl and tcp scans
-  -w(ait)    seconds after each thread created
+ options:
+  -t(imeout) in seconds, for curl and tcp scans [ 5]
+  -w(ait)    seconds after each thread created  [ 0]
+  -m(aximum) number of parallel workers to use  [40]
   -T(LS)  [notyet]
-  -p(asswdfile) [notyet; set AMT_PASSWORD env var]
+  -p(asswdfile) [notyet; export AMT_PASSWORD ]
+
 ```
 
 todo
