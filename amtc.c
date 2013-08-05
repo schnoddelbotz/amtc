@@ -99,6 +99,7 @@ int main(int argc,char **argv,char **envp) {
   curl_global_init(CURL_GLOBAL_ALL);
   process_hostlist();
   sem_destroy(&mutex);
+  curl_global_cleanup();
   return 0;
 }
 
