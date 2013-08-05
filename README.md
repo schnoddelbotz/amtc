@@ -8,11 +8,10 @@ A threading C implementation of the great perl [amttool](http://www.kraxel.org/c
 features
 ========
 
-* get status and power control intel(R) vPro(tm) machines using intel AMT(tm)
+* get status and power control [intel(R) vPro(tm)](http://de.wikipedia.org/wiki/Intel_vPro) machines using [intel(R) AMT(tm)](http://en.wikipedia.org/wiki/Intel_Active_Management_Technology)
 * lightweight application, only depends on curl and pthreads
-* threading allows parallel execution of AMT commands, making it really fast 
-  (query 180 PCs in about one second)
-* currently builds on linux and osx
+* really fast (queries 180 PCs in about one second)
+* currently builds on linux and OSX
 
 usage
 =====
