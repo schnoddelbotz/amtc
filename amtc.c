@@ -21,8 +21,7 @@
 #define CMD_POWERRESET 3
 #define CMD_POWERCYCLE 4
 #define CMD_SCAN 5
-#define MAX_HOSTS 200
-#define maxThreads 40
+#define MAX_HOSTS 255
 
 struct MemoryStruct {
   char *memory;
@@ -44,7 +43,6 @@ struct host {
 };
 struct host hostlist[MAX_HOSTS];
 
-/* forward declarations */
 void build_hostlist(int,char**);
 void dump_hostlist();
 void process_hostlist();
@@ -59,16 +57,16 @@ int   numHosts = 0;
 int   threadsRunning = 0;
 int   connectTimeout = 5;
 int   waitDelay = 0;
+int   maxThreads = 40;
 char  amtpasswd[32];
 char  *amtpasswdp;
-//int maxThreads = 32; ?? useropt?fixme?
 
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc,char **argv,char **envp) {
   int c;
   amtpasswdp = (char*)&amtpasswd;
     
-  while ((c = getopt(argc, argv, "viudrRs:t:w:")) != -1)
+  while ((c = getopt(argc, argv, "viudrRs:t:w:m:")) != -1)
   switch (c) {
     case 'v': verbosity += 1;         break; // verbosity
     case 'i': cmd = CMD_INFO;         break; 
@@ -78,6 +76,7 @@ int main(int argc,char **argv,char **envp) {
     case 'R': cmd = CMD_POWERRESET;    break; 
     case 's': cmd = CMD_SCAN; scan_port = atoi(optarg); break; 
     case 't': connectTimeout = atoi(optarg); break; 
+    case 'm': maxThreads = atoi(optarg); break; 
     case 'w': waitDelay = atoi(optarg); break; 
   }
   
