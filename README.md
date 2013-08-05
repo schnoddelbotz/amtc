@@ -47,6 +47,7 @@ building
 ========
 + OSX: Install XCode including CommandLineTools; type make
 + Linux: apt-get install libcurl3 libcurl4-openssl-dev build-essential; type make
++ Windows: not native (yet?); but works using cygwin and its curl and pthreads packages
 
 todo
 ====
