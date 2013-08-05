@@ -3,7 +3,7 @@ amtc
 
 amtc - Intel AMT/vPro mass management tool.
 
-A threading C implementation of the great perl http://www.kraxel.org/cgit/amtterm/tree/amttool
+A threading C implementation of the great perl [amttool](http://www.kraxel.org/cgit/amtterm/tree/amttool).
 
 features
 ========
