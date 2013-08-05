@@ -22,7 +22,7 @@
 #define CMD_POWERCYCLE 4
 #define CMD_SCAN 5
 #define MAX_HOSTS 200
-#define maxThreads 40 
+#define maxThreads 40
 
 struct MemoryStruct {
   char *memory;
@@ -48,13 +48,13 @@ struct host hostlist[MAX_HOSTS];
 void build_hostlist(int,char**);
 void dump_hostlist();
 void process_hostlist();
-int get_amt_response_status(void*);
+int  get_amt_response_status(void*);
 static size_t write_memory_callback(void*,size_t,size_t,void*);
 
+sem_t mutex;
 int   verbosity = 0;
 int   scan_port = 16992;
 int   cmd = 0;
-sem_t mutex;
 int   numHosts = 0;
 int   threadsRunning = 0;
 int   connectTimeout = 5;
@@ -80,7 +80,7 @@ int main(int argc,char **argv,char **envp) {
     case 't': connectTimeout = atoi(optarg); break; 
     case 'w': waitDelay = atoi(optarg); break; 
   }
-
+  
   if (argc>MAX_HOSTS) {
     printf("No more than %d hosts allowed at once.\n", MAX_HOSTS);
     exit(1);
@@ -124,15 +124,15 @@ static void *pull_one_url(void *url) {
    "SOAPAction: \"http://schemas.intel.com/platform/client/RemoteControl/2004/01#GetSystemPowerState\"");
   else
   headers = curl_slist_append(headers, 
-    "SOAPAction: \"http://schemas.intel.com/platform/client/RemoteControl/2004/01#RemoteControl\"");
+   "SOAPAction: \"http://schemas.intel.com/platform/client/RemoteControl/2004/01#RemoteControl\"");
 
   headers = curl_slist_append(headers, "Content-Type: text/xml; charset=utf-8");
 
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, "amtc/0.1 (libcurl/Linux)");
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "amtc (libcurl)");
   curl_easy_setopt(curl, CURLOPT_URL, url);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, (verbosity>0?1:0));
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, (verbosity>2?1:0));
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, connectTimeout); 
   curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
   curl_easy_setopt(curl, CURLOPT_USERNAME, "admin"  );
@@ -151,7 +151,7 @@ static void *pull_one_url(void *url) {
             -999,hcmds[cmd], (int)http_code, (char*)url, curl_easy_strerror(res));
   }
   else {
-    if (verbosity)
+    if (verbosity>1)
        printf("body (size:%4ld b) received: '%s'\n",
                      (long)chunk.size,chunk.memory);
 
@@ -164,12 +164,12 @@ static void *pull_one_url(void *url) {
 
   sem_wait(&mutex);
   threadsRunning--;
-  if (verbosity) 
+  if (verbosity>0) 
     printf("pull_one(%11d=%04ldb|http%03d): tr decreased to %3d by %s\n",
      (int)THREAD_ID,(long)chunk.size,(int)http_code,threadsRunning,(char*)url);
   sem_post(&mutex);
 
-  //free(&chunk);
+  free(chunk.memory);
   return NULL;
 }
 
@@ -226,34 +226,40 @@ static void *scan_one_hostport(void *host) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/* FIXME error-handling -- not only here :-/ */
 void process_hostlist() {
-  int a, b/* FIXME ,error -handling */;
+  int a, b;
   pthread_t tid[MAX_HOSTS];
+
   //printf("Firing max %d threads for %d hosts...\n",maxThreads, numHosts);
   for(a = 0; a < numHosts; a++) {
+
     if (cmd == CMD_SCAN)
-      /*error=*/ pthread_create(&tid[a], NULL, scan_one_hostport, (void *)hostlist[a].hostname);
+      pthread_create(&tid[a], NULL, scan_one_hostport,
+        (void *)hostlist[a].hostname);
     else
-      /*error=*/ pthread_create(&tid[a], NULL, pull_one_url, (void *)hostlist[a].url);
+      pthread_create(&tid[a], NULL, pull_one_url,
+        (void *)hostlist[a].url);
 
     sem_wait(&mutex);
     threadsRunning++;
     sem_post(&mutex);
     
-    if ((threadsRunning+1)>maxThreads) {
-      while ((threadsRunning+1)>maxThreads) {
-          //printf(" ... threads waiting for free slot (%d/%d running) ...\n", threadsRunning, maxThreads);
-          usleep(10000);
-      }
+    while ((threadsRunning+1)>maxThreads) {
+        if (verbosity>3)
+          printf(" ... threads waiting for free slot (%d/%d running) ...\n",
+                   threadsRunning, maxThreads);
+
+        usleep(10000);
     }
+     
     if (waitDelay)
       sleep(waitDelay);
   }
-  //printf("Firing threads... done. Waiting for them to finish...\n");
+
   for(b = 0; b < numHosts; b++) {
       pthread_join(tid[b], NULL);
   }
-  //printf("Waiting for threads...done.\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -284,3 +290,4 @@ void dump_hostlist() {
            hostlist[a].result, hostlist[a].url);
   }
 }
+
