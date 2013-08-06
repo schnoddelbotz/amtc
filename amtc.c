@@ -23,10 +23,6 @@
 #define CMD_SCAN 5
 #define MAX_HOSTS 255
 
-struct MemoryStruct {
-  char *memory;
-  size_t size;
-};
 unsigned char *acmds[5] = {
   /* SOAP/XML request bodies as included via amt.h */
   cmd_info,cmd_powerup,cmd_powerdown,cmd_powerreset,cmd_powercycle 
@@ -35,13 +31,18 @@ const char *hcmds[5] = {
   "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE"
 }; 
 struct host {
-  char url[100];
-  char hostname[100];
+  int hostnumber;
   int started;
   int stopped;
   int result;
+  char url[100];
+  char hostname[100];
 };
 struct host hostlist[MAX_HOSTS];
+struct MemoryStruct {
+  char *memory;
+  size_t size;
+};
 
 void build_hostlist(int,char**);
 void dump_hostlist();
@@ -104,7 +105,8 @@ int main(int argc,char **argv,char **envp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-static void *pull_one_url(void *url) {
+static void *pull_one_url(void* num) {
+  struct host *host = &hostlist[(int)num];
   CURL *curl;
   CURLcode res;
   long http_code = 0;
@@ -116,22 +118,24 @@ static void *pull_one_url(void *url) {
 
   curl = curl_easy_init();
   // FIXME add TLS support...
-  // http://marc.info/?l=php-doc-cvs&m=124127960522738&q=raw
+  // http://curl.haxx.se/libcurl/c/threaded-ssl.html
+  // --> produces lots of openssl deprecation warnings...
   // CURLPROTO_HTTP CURLPROTO_HTTPS
+  // http://marc.info/?l=php-doc-cvs&m=124127960522738&q=raw
 
   if (cmd==CMD_INFO)
-  headers = curl_slist_append(headers,
-   "SOAPAction: \"http://schemas.intel.com/platform/client/RemoteControl/2004/01#GetSystemPowerState\"");
+    headers = curl_slist_append(headers, "SOAPAction: \"http://schemas.intel" \
+           ".com/platform/client/RemoteControl/2004/01#GetSystemPowerState\"");
   else
-  headers = curl_slist_append(headers, 
-   "SOAPAction: \"http://schemas.intel.com/platform/client/RemoteControl/2004/01#RemoteControl\"");
+    headers = curl_slist_append(headers, "SOAPAction: \"http://schemas.intel" \
+                 ".com/platform/client/RemoteControl/2004/01#RemoteControl\"");
 
   headers = curl_slist_append(headers, "Content-Type: text/xml; charset=utf-8");
 
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "amtc (libcurl)");
-  curl_easy_setopt(curl, CURLOPT_URL, url);
+  curl_easy_setopt(curl, CURLOPT_URL, host->url);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, (verbosity>2?1:0));
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, connectTimeout); 
   curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
@@ -146,19 +150,25 @@ static void *pull_one_url(void *url) {
   res = curl_easy_perform(curl);
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
+  char umsg[100];
+  const char* umsgp = (char*)&umsg;
+
   if(res != CURLE_OK || http_code!=200) {
-    printf("%4d for cmd %s->%03d on %s: %s\n",
-            -999,hcmds[cmd], (int)http_code, (char*)url, curl_easy_strerror(res));
+    amt_result = -999;
+    umsgp = curl_easy_strerror(res);
   }
   else {
+    amt_result = get_amt_response_status(chunk.memory);
+
+    snprintf((char*)&umsg, sizeof umsg, "OK");
+
     if (verbosity>1)
        printf("body (size:%4ld b) received: '%s'\n",
                      (long)chunk.size,chunk.memory);
-
-    amt_result = get_amt_response_status(chunk.memory);
-    printf("%4d For cmd %s->%03d on %s.\n",
-            amt_result, hcmds[cmd],(int)http_code, (char*)url);
   }
+
+  printf("%s %s %4d %3d %s\n",
+    hcmds[cmd], (char*)host->hostname, amt_result, (int)http_code, umsgp);
   
   curl_easy_cleanup(curl);
   free(headers);
@@ -167,7 +177,7 @@ static void *pull_one_url(void *url) {
   threadsRunning--;
   if (verbosity>0) 
     printf("pull_one(%11d=%04ldb|http%03d): tr decreased to %3d by %s\n",
-     (int)THREAD_ID,(long)chunk.size,(int)http_code,threadsRunning,(char*)url);
+     (int)THREAD_ID,(long)chunk.size,(int)http_code,threadsRunning,(char*)host->url);
   sem_post(&mutex);
 
   free(chunk.memory);
@@ -181,9 +191,9 @@ int get_amt_response_status(void* chunk) {
   char gre[64]; // FIXME global
   char *grep = (char*)&gre;
   if (cmd==CMD_INFO) {
-    sprintf(grep,"<b:Status>0</b:Status><b:SystemPowerState>");
+    snprintf((char*)&gre,sizeof gre,"<b:Status>0</b:Status><b:SystemPowerState>");
   } else {
-    sprintf(grep,"<b:RemoteControlResponse><b:Status>");
+    snprintf((char*)&gre,sizeof gre,"<b:RemoteControlResponse><b:Status>");
   }
   pos = strstr(chunk, grep);
   if (pos==NULL) {
@@ -239,8 +249,8 @@ void process_hostlist() {
       pthread_create(&tid[a], NULL, scan_one_hostport,
         (void *)hostlist[a].hostname);
     else
-      pthread_create(&tid[a], NULL, pull_one_url,
-        (void *)hostlist[a].url);
+      pthread_create(&tid[a], NULL, pull_one_url, (void*)a);
+        //(void *)hostlist[a].url);
 
     sem_wait(&mutex);
     threadsRunning++;
