@@ -163,18 +163,19 @@ static void *pull_one_url(void* num) {
   }
   else {
     amt_result = get_amt_response_status(chunk.memory);
-    snprintf((char*)&umsg, sizeof umsg, "OK %s", powerstate[amt_result & 0x0f]);
+    snprintf((char*)&umsg, sizeof umsg, "OK %s%s", 
+      (cmd==CMD_INFO) ? powerstate[amt_result & 0x0f] : "",
+      (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
+    );
 
     if (verbosity>1)
        printf("body (size:%4ld b) received: '%s'\n",
                      (long)chunk.size,chunk.memory);
   }
 
-  printf("%s %15s AMT:%4d HTTP:%3d %s\n",
+  /* print results */
+  printf("%s %15s AMT:%04d HTTP:%3d %s\n",
     hcmds[cmd], (char*)host->hostname, amt_result, (int)http_code, umsgp);
-  
-  curl_easy_cleanup(curl);
-  free(headers);
 
   sem_wait(&mutex);
   threadsRunning--;
@@ -183,6 +184,8 @@ static void *pull_one_url(void* num) {
      (int)THREAD_ID,(long)chunk.size,(int)http_code,threadsRunning,(char*)host->url);
   sem_post(&mutex);
 
+  curl_easy_cleanup(curl);
+  free(headers);
   free(chunk.memory);
   return NULL;
 }
