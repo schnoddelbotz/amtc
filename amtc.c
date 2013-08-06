@@ -23,13 +23,16 @@
 #define CMD_SCAN 5
 #define MAX_HOSTS 255
 
-unsigned char *acmds[5] = {
+unsigned char *acmds[] = {
   /* SOAP/XML request bodies as included via amt.h */
   cmd_info,cmd_powerup,cmd_powerdown,cmd_powerreset,cmd_powercycle 
 }; 
-const char *hcmds[5] = {
+const char *hcmds[] = {
   "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE"
 }; 
+const char *powerstate[] = {
+ "S0 (ON)", "S1", "S2", "S3 (sleep)", "S4", "S5 (off)", "S4/S5", "Off"
+};
 struct host {
   int hostnumber;
   int started;
@@ -105,6 +108,7 @@ int main(int argc,char **argv,char **envp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+//static void *pull_one_url(void* num) {
 static void *pull_one_url(void* num) {
   struct host *host = &hostlist[(int)num];
   CURL *curl;
@@ -159,15 +163,14 @@ static void *pull_one_url(void* num) {
   }
   else {
     amt_result = get_amt_response_status(chunk.memory);
-
-    snprintf((char*)&umsg, sizeof umsg, "OK");
+    snprintf((char*)&umsg, sizeof umsg, "OK %s", powerstate[amt_result & 0x0f]);
 
     if (verbosity>1)
        printf("body (size:%4ld b) received: '%s'\n",
                      (long)chunk.size,chunk.memory);
   }
 
-  printf("%s %s %4d %3d %s\n",
+  printf("%s %15s AMT:%4d HTTP:%3d %s\n",
     hcmds[cmd], (char*)host->hostname, amt_result, (int)http_code, umsgp);
   
   curl_easy_cleanup(curl);
@@ -249,8 +252,7 @@ void process_hostlist() {
       pthread_create(&tid[a], NULL, scan_one_hostport,
         (void *)hostlist[a].hostname);
     else
-      pthread_create(&tid[a], NULL, pull_one_url, (void*)a);
-        //(void *)hostlist[a].url);
+      pthread_create(&tid[a], NULL, pull_one_url, a);
 
     sem_wait(&mutex);
     threadsRunning++;
