@@ -34,12 +34,13 @@ const char *powerstate[] = {
  "S0 (ON)", "S1", "S2", "S3 (sleep)", "S4", "S5 (off)", "S4/S5", "Off"
 };
 struct host {
-  int hostnumber;
-  int started;
-  int stopped;
-  int result;
+  int id;
+  int http_result;
+  int amt_result;
+  int duration;
   char url[100];
   char hostname[100];
+  char usrmsg[100];
 };
 struct host hostlist[MAX_HOSTS];
 struct MemoryStruct {
@@ -60,8 +61,9 @@ int   cmd = 0;
 int   numHosts = 0;
 int   threadsRunning = 0;
 int   connectTimeout = 5;
-int   waitDelay = 0;
+int   waitDelay = -1;
 int   maxThreads = 40;
+int   produceJSON = 0;
 char  amtpasswd[32];
 char  *amtpasswdp;
 
@@ -70,9 +72,10 @@ int main(int argc,char **argv,char **envp) {
   int c;
   amtpasswdp = (char*)&amtpasswd;
     
-  while ((c = getopt(argc, argv, "viudrRs:t:w:m:")) != -1)
+  while ((c = getopt(argc, argv, "viudrRjs:t:w:m:")) != -1)
   switch (c) {
-    case 'v': verbosity += 1;         break; // verbosity
+    case 'v': verbosity += 1;         break;
+    case 'j': produceJSON = 1;        break;
     case 'i': cmd = CMD_INFO;         break; 
     case 'u': cmd = CMD_POWERUP;      break; 
     case 'd': cmd = CMD_POWERDOWN;    break; 
@@ -83,7 +86,14 @@ int main(int argc,char **argv,char **envp) {
     case 'm': maxThreads = atoi(optarg); break; 
     case 'w': waitDelay = atoi(optarg); break; 
   }
-  
+
+  if (waitDelay==-1 && cmd == CMD_POWERUP) {
+    printf("#Info: No -w(wait) delay specified for powerup.\n" \
+           "#Info: Using default delay of 5 seconds to prevent spikes.\n");
+    waitDelay=5;
+  } else if (waitDelay==-1)
+    waitDelay=0;
+
   if (argc>MAX_HOSTS) {
     printf("No more than %d hosts allowed at once.\n", MAX_HOSTS);
     exit(1);
@@ -104,13 +114,14 @@ int main(int argc,char **argv,char **envp) {
   process_hostlist();
   sem_destroy(&mutex);
   curl_global_cleanup();
+  dump_hostlist();
   return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//static void *pull_one_url(void* num) {
 static void *pull_one_url(void* num) {
-  struct host *host = &hostlist[(int)num];
+  int hostid = (int)(intptr_t)num;
+  struct host *host = &hostlist[hostid];
   CURL *curl;
   CURLcode res;
   long http_code = 0;
@@ -124,8 +135,6 @@ static void *pull_one_url(void* num) {
   // FIXME add TLS support...
   // http://curl.haxx.se/libcurl/c/threaded-ssl.html
   // --> produces lots of openssl deprecation warnings...
-  // CURLPROTO_HTTP CURLPROTO_HTTPS
-  // http://marc.info/?l=php-doc-cvs&m=124127960522738&q=raw
 
   if (cmd==CMD_INFO)
     headers = curl_slist_append(headers, "SOAPAction: \"http://schemas.intel" \
@@ -173,13 +182,17 @@ static void *pull_one_url(void* num) {
                      (long)chunk.size,chunk.memory);
   }
 
-  /* print results */
-  printf("%s %15s AMT:%04d HTTP:%3d %s\n",
-    hcmds[cmd], (char*)host->hostname, amt_result, (int)http_code, umsgp);
+  /* print results while processing, if verbose */
+  if (verbosity>0)
+    printf("-%s %14s AMT:%04d HTTP:%3d %s\n",
+      hcmds[cmd], (char*)host->hostname, amt_result, (int)http_code, umsgp);
 
   sem_wait(&mutex);
   threadsRunning--;
-  if (verbosity>0) 
+  hostlist[hostid].http_result=(int)http_code;
+  hostlist[hostid].amt_result=(int)amt_result;
+  snprintf(hostlist[hostid].usrmsg, 100, "%s", umsgp);
+  if (verbosity>1) 
     printf("pull_one(%11d=%04ldb|http%03d): tr decreased to %3d by %s\n",
      (int)THREAD_ID,(long)chunk.size,(int)http_code,threadsRunning,(char*)host->url);
   sem_post(&mutex);
@@ -255,7 +268,7 @@ void process_hostlist() {
       pthread_create(&tid[a], NULL, scan_one_hostport,
         (void *)hostlist[a].hostname);
     else
-      pthread_create(&tid[a], NULL, pull_one_url, a);
+      pthread_create(&tid[a], NULL, pull_one_url, (void*)(intptr_t)a);
 
     sem_wait(&mutex);
     threadsRunning++;
@@ -282,13 +295,14 @@ void process_hostlist() {
 void build_hostlist(int argc,char **argv) {
   int a;
   for(a = 0; a < MAX_HOSTS; a++) {
-    hostlist[a].started = 0;
-    hostlist[a].stopped = 0;
-    hostlist[a].result = 0;
+    hostlist[a].id = a;
+    hostlist[a].http_result = -1;
+    hostlist[a].amt_result = -1;
+    hostlist[a].duration = -1;
   }
   int i,h=0;
   for (i=optind; i<argc; i++) {
-    hostlist[h].started = 1;
+    hostlist[h].http_result = -2;
     sprintf(hostlist[h].url,"http://%s:16992/RemoteControlService",argv[i]);
     sprintf(hostlist[h].hostname,"%s",argv[i]);
     // FIXME should create ip here for scan
@@ -300,10 +314,19 @@ void build_hostlist(int argc,char **argv) {
 ///////////////////////////////////////////////////////////////////////////////
 void dump_hostlist() {
   int a;
-  for(a = 0; a < numHosts; a++) {
-    printf("dumphost %04d: %14s start=%08d stop=%08d res=%d url='%s'\n",
-           a, hostlist[a].hostname, hostlist[a].started,hostlist[a].stopped,
-           hostlist[a].result, hostlist[a].url);
+  if (produceJSON) {
+    printf("{");
+    for(a = 0; a < numHosts; a++) 
+      printf("\"%s\":{\"amt\":\"%d\",\"http\":\"%d\",\"msg\":\"%s\"},",
+         hostlist[a].hostname, hostlist[a].amt_result,
+         hostlist[a].http_result, hostlist[a].usrmsg);
+    printf("}\n");
+  } else {
+    for(a = 0; a < numHosts; a++) {
+      printf("%s %15s AMT:%04d HTTP:%03d %s\n",
+        hcmds[cmd], hostlist[a].hostname, hostlist[a].amt_result,
+        hostlist[a].http_result, hostlist[a].usrmsg);
+    }
   }
 }
 
