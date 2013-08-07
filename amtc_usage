@@ -1,6 +1,6 @@
 
- amtc v0.2.2 - Intel AMT(tm) mass management tool 
-                               jan@hacker.ch/2013
+ amtc v0.2.3 - Intel AMT(tm) mass management tool 
+            https://github.com/schnoddelbotz/amtc
 
  usage:
   amtc [actions] [options] host [host ...]
@@ -17,6 +17,7 @@
   -w(ait)    seconds after each thread created  [ 0]
   -m(aximum) number of parallel workers to use  [40]
   -v(erbosity) increase it by adding more v's
+  -j(son) produces JSON output of host states
   -T(LS)  [notyet]
   -p(asswdfile) [notyet; export AMT_PASSWORD ]
 

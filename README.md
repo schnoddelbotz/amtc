@@ -7,17 +7,19 @@ features
 ========
 
 * performs vital AMT operations (info, powerup, powerdown, reset...)
-* brutally fast (queries my 180 PCs in less than a second) - ideal for monitoring
+* brutally fast (queries 180 Core i5 PCs in a quarter of a second)
 * allows mass-powerups/downs/... using a custom delay
+* allows quick and comfortable control via shell
+* provides flexible and robust scheduled power management (using cron)
 * lightweight C application, only depends on libcurl and pthreads
 * currently builds fine on linux and OSX (and windows via cygwin)
 
 usage
 =====
 
-```bash
+```
 
- amtc v0.2.1 - Intel AMT(tm) mass management tool 
+ amtc v0.2.3 - Intel AMT(tm) mass management tool 
                                jan@hacker.ch/2013
 
  usage:
