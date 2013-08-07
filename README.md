@@ -36,6 +36,7 @@ usage
   -t(imeout) in seconds, for curl and tcp scans [ 5]
   -w(ait)    seconds after each thread created  [ 0]
   -m(aximum) number of parallel workers to use  [40]
+  -j(son) produce json output for CGI integration
   -T(LS)  [notyet]
   -p(asswdfile) [notyet; export AMT_PASSWORD ]
 
