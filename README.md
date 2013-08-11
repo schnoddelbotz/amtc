@@ -62,6 +62,10 @@ todo
 + add quiet mode (error-only) (for cron / free scheduled remote power management)
 + support hosts with AMT < v6.0 ?
 
+amtc-web screenshot
+===================
+![amtc-web screenshot](/amtc-web/img/amtc-web-0.2.4.png "amtc-web as of 0.2.4")
+
 alternatives
 ============
 - [amttool](http://www.kraxel.org/cgit/amtterm/tree/amttool):
