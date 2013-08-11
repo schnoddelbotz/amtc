@@ -1,6 +1,6 @@
 <html>
 <head>
- <title>amtc - Remote PowerManagement Web-Frontend</title>
+ <title>amtc - remote power management</title>
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
  <script src="amtc_config.js"></script>
@@ -63,6 +63,13 @@
     else
       $("#hosts").html("Please select a room.");
 
+    $('#ctrlSubmit').click(function() {
+      $(this).attr('disabled', 'disabled');
+      $("#wheel").show();
+      // FIMXE post
+    });
+    
+    // FIXME should be: click 1st: select, click 2nd: deselect - show it has been selected (border...)
     $("#hselect").html("");
     $("#hdselect").html("");
     $.each(powerstates, function(key, value) { buildSelectLinks(key,value,'hselect',1); } );
@@ -164,7 +171,7 @@
    <input type="radio" name="cmd" id="powercycle" value="r"><label for="powercycle">powercycle</label>
    <input type="radio" name="cmd" id="reset" value="R"><label for="reset">reset</label>
    ... using a inter-command-delay of <input type="text"  name="delay" value="5" size=3> seconds
-   <input type="submit">
+   <input type="button" id="ctrlSubmit" value="Do it" name="bar">
   </form>
 </div>
 
