@@ -11,10 +11,9 @@ features
 * allows mass-powerups/downs/... using a custom delay
 * lightweight C application, only depends on libcurl and pthreads
 * currently builds fine on linux and OSX (and windows via cygwin)
-
-* allows quick and comfortable power control via shell 
-* comes with a web interface for GUI-based powermanagement (work in progress...)
-* provides flexible and robust scheduled power management (using cron)
+* allows quick and comfortable mass-power control via shell and...
+* comes with a web interface for GUI-based powermanagement (work in progress...) and also...
+* provides flexible and robust scheduled power management (simply using cron)
 
 usage
 =====
