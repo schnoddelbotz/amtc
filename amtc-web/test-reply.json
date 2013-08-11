@@ -1,0 +1,17 @@
+{ 
+"192.168.99.99":{"amt":"9","http":"000","msg":"Connection refused"},
+"192.168.99.100":{"amt":"0","http":"200","msg":"OK S0 (on)"},
+"192.168.99.101":{"amt":"3","http":"200","msg":"OK S3 (sleep)"},
+"192.168.99.102":{"amt":"4","http":"200","msg":"OK S4 (hibernate)"},
+"192.168.99.103":{"amt":"5","http":"200","msg":"OK S5 (sotf-off)"},
+"192.168.99.104":{"amt":"9","http":"401","msg":"Authentication failed"},
+"192.168.99.109":{"amt":"9","http":"000","msg":"Connection refused"},
+"192.168.99.107":{"amt":"0","http":"200","msg":"OK S0 (on)"},
+"192.168.99.105":{"amt":"3","http":"200","msg":"OK S3 (sleep)"},
+"192.168.99.106":{"amt":"4","http":"200","msg":"OK S4 (hibernate)"},
+"192.168.99.110":{"amt":"5","http":"200","msg":"OK S5 (sotf-off)"},
+"192.168.99.111":{"amt":"9","http":"401","msg":"Authentication failed"},
+"192.168.99.112":{"amt":"5","http":"200","msg":"OK S5 (sotf-off)"},
+"192.168.99.113":{"amt":"5","http":"200","msg":"OK S5 (sotf-off)"},
+"192.168.99.114":{"amt":"5","http":"200","msg":"OK S5 (sotf-off)"}
+}
