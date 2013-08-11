@@ -31,7 +31,8 @@ const char *hcmds[] = {
   "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE"
 }; 
 const char *powerstate[] = {
- "S0 (ON)", "S1", "S2", "S3 (sleep)", "S4", "S5 (off)", "S4/S5", "Off"
+ "S0 (on)", "S1 (cpu stop)", "S2 (cpu off)", "S3 (sleep)",
+ "S4 (hibernate)", "S5 (sotf-off)", "S4/S5", "MechOff"
 };
 struct host {
   int id;
@@ -108,7 +109,6 @@ int main(int argc,char **argv,char **envp) {
   }
 
   build_hostlist(argc,argv);
-  //dump_hostlist();
   sem_init(&mutex, 0, 1);
   curl_global_init(CURL_GLOBAL_ALL);
   process_hostlist();
@@ -119,7 +119,7 @@ int main(int argc,char **argv,char **envp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-static void *pull_one_url(void* num) {
+static void *amtquery_single_client(void* num) {
   int hostid = (int)(intptr_t)num;
   struct host *host = &hostlist[hostid];
   CURL *curl;
@@ -157,7 +157,7 @@ static void *pull_one_url(void* num) {
   curl_easy_setopt(curl, CURLOPT_POST , 1);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS , acmds[cmd]);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER , headers);
-  // http://stackoverflow.com/questions/9191668/error-longjmp-causes-uninitialized-stack-frame ->
+  // http://stackoverflow.com/questions/9191668/error-longjmp-causes-uninitialized-stack-frame
   curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); 
   
   res = curl_easy_perform(curl);
@@ -193,12 +193,13 @@ static void *pull_one_url(void* num) {
   hostlist[hostid].amt_result=(int)amt_result;
   snprintf(hostlist[hostid].usrmsg, 100, "%s", umsgp);
   if (verbosity>1) 
-    printf("pull_one(%11d=%04ldb|http%03d): tr decreased to %3d by %s\n",
-     (int)THREAD_ID,(long)chunk.size,(int)http_code,threadsRunning,(char*)host->url);
+    printf("amtquery(%11d=%04ldb|http%03d): tr decreased to %3d by %s\n",
+      (int)THREAD_ID,(long)chunk.size,(int)http_code,
+      threadsRunning,(char*)host->url);
   sem_post(&mutex);
 
   curl_easy_cleanup(curl);
-  free(headers);
+  curl_slist_free_all(headers);
   free(chunk.memory);
   return NULL;
 }
@@ -265,10 +266,11 @@ void process_hostlist() {
   for(a = 0; a < numHosts; a++) {
 
     if (cmd == CMD_SCAN)
-      pthread_create(&tid[a], NULL, scan_one_hostport,
-        (void *)hostlist[a].hostname);
+      pthread_create(&tid[a], NULL,
+              scan_one_hostport, (void *)hostlist[a].hostname);
     else
-      pthread_create(&tid[a], NULL, pull_one_url, (void*)(intptr_t)a);
+      pthread_create(&tid[a], NULL,
+              amtquery_single_client, (void*)(intptr_t)a);
 
     sem_wait(&mutex);
     threadsRunning++;
@@ -317,8 +319,8 @@ void dump_hostlist() {
   if (produceJSON) {
     printf("{");
     for(a = 0; a < numHosts; a++) 
-      printf("\"%s\":{\"amt\":\"%d\",\"http\":\"%d\",\"msg\":\"%s\"},",
-         hostlist[a].hostname, hostlist[a].amt_result,
+      printf("%s\"%s\":{\"amt\":\"%d\",\"http\":\"%d\",\"msg\":\"%s\"}",
+         a==0?"":",", hostlist[a].hostname, hostlist[a].amt_result,
          hostlist[a].http_result, hostlist[a].usrmsg);
     printf("}\n");
   } else {

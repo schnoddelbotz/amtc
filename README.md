@@ -1,7 +1,7 @@
 amtc
 ====
 
-amtc - Intel [vPro](http://de.wikipedia.org/wiki/Intel_vPro)/[AMT](http://en.wikipedia.org/wiki/Intel_Active_Management_Technology) mass remote power management tool
+`amtc` - Intel [vPro](http://de.wikipedia.org/wiki/Intel_vPro)/[AMT](http://en.wikipedia.org/wiki/Intel_Active_Management_Technology) mass remote power management tool
 
 features
 ========
@@ -9,18 +9,20 @@ features
 * performs vital AMT operations (info, powerup, powerdown, reset...)
 * brutally fast (queries 180 Core i5 PCs in a quarter of a second)
 * allows mass-powerups/downs/... using a custom delay
-* allows quick and comfortable control via shell
-* provides flexible and robust scheduled power management (using cron)
 * lightweight C application, only depends on libcurl and pthreads
 * currently builds fine on linux and OSX (and windows via cygwin)
+
+* allows quick and comfortable power control via shell 
+* comes with a web interface for GUI-based powermanagement (work in progress...)
+* provides flexible and robust scheduled power management (using cron)
 
 usage
 =====
 
 ```
 
- amtc v0.2.3 - Intel AMT(tm) mass management tool 
-                               jan@hacker.ch/2013
+ amtc v0.2.4 - Intel AMT(tm) mass management tool 
+            https://github.com/schnoddelbotz/amtc
 
  usage:
   amtc [actions] [options] host [host ...]
@@ -36,7 +38,8 @@ usage
   -t(imeout) in seconds, for curl and tcp scans [ 5]
   -w(ait)    seconds after each thread created  [ 0]
   -m(aximum) number of parallel workers to use  [40]
-  -j(son) produce json output for CGI integration
+  -v(erbosity) increase it by adding more v's
+  -j(son) produces JSON output of host states
   -T(LS)  [notyet]
   -p(asswdfile) [notyet; export AMT_PASSWORD ]
 
@@ -56,7 +59,7 @@ todo
 ====
 + add TLS support
 + finish port/OS scanner; apply operations only if a given port is open
-+ supply bridge for web frontend
++ support control commands in amtc-web (info only atm)
 + add quiet mode (error-only) (for cron / free scheduled remote power management)
 + support hosts with AMT < v6.0 ?
 

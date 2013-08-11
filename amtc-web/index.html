@@ -1,0 +1,172 @@
+<html>
+<head>
+ <title>amtc - Remote PowerManagement Web-Frontend</title>
+ <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+ <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+ <script src="amtc_config.js"></script>
+ <style type="text/css">
+  body,a { font-family: arial; font-size:11px; text-decoration:none; color:#000; }
+  hr { clear:both; }
+  h2 { height:50px; line-height:50px; }
+  #ctrl { display:none; clear:both; }
+  #wheel { margin-left:20px;  }
+  #noscript { color:red; }
+  #hostselect dl { float:left; margin-right:20px; }
+  #hostselect dt { font-weight:bold; }
+  #hostselect dd { margin-top:5px; }
+  #hostselect dd span { margin-right:5px; padding:5px; line-height:30px; border:1px solid #aaa;
+                        background-repeat:no-repeat; }
+  #rooms,#hosts { clear:both; }
+  .room{ width:80px; font-size:13px; float:left; 
+         background:#cca; margin:0px 5px 1px 0px; text-align:center;
+         border-right:2px solid #aaa; border-top:2px solid #ccc; border-left:1px solid #888;}
+  .selected-room { background:#aa7; }
+  #hosts { min-height:300px; background:#eed; margin:5px 0px; padding:15px; 
+           border-bottom:1px solid #ccb; border-right:1px solid #aa9;} 
+  #hosts .pc  { width:130px; float:left; margin:0px 5px 5px 0px; padding:2px; overflow:hidden; }
+  #hosts .ui-selecting { background:black; color:gray; }
+  #hosts .ui-selected  { background:black; color:white; }
+  .addr{ font-weight:bold; margin:0;  }
+  /* ACPI power states */
+  .S0  { background:#9c9;   } /* on */
+  .S3  { background:orange; } /* sleep (suspend-to-ram) */
+  .S4  { background:#aae;   } /* hibernate (suspend-to-disk) */
+  .S5  { background:#aaa;   } /* soft-off */
+  .S9  { background:#c99;   } /* no amt reply */
+  .ssh { background-image:url(img/linux.png);   opacity:0.5 } /* OS by tcp/22   probe: linux */
+  .rdp { background-image:url(img/windows.png); opacity:0.5 } /* OS by tcp/3389 probe: windows */
+ </style>
+ <script type="text/javascript">
+  var currentRoom;
+  var hostList;
+  var showingHosts=0;
+  var powerstates = {"pc":"any", "S0":"on", "S3":"sleep", "S4":"hibernate", "S5":"soft-off",
+                     "S9":"no-reply", "SSH":"SSH","RDP":"RDP"};
+
+  $(document).ready(function() { 
+    if (typeof amtc_rooms === 'undefined') {
+      $("#hosts").html("No configuration data found. Please check amtc_config.js.");
+      $("#wheel").hide();
+      return;
+    }
+    $("#wheel").hide();
+    $.each( amtc_rooms, function( key, value ) {
+      var room = '<div id="'+key+'" class="room">' +  value + '</div>';
+      $("#rooms").append(room);
+      $("#"+key).click(function() {
+        setRoom($(this).attr("id"));
+      });
+      $("#"+key).css( 'cursor', 'pointer' );
+    });
+    if (window.location.hash)
+      setRoom(window.location.hash.substring(1))
+    else
+      $("#hosts").html("Please select a room.");
+
+    $("#hselect").html("");
+    $("#hdselect").html("");
+    $.each(powerstates, function(key, value) { buildSelectLinks(key,value,'hselect',1); } );
+    $.each(powerstates, function(key, value) { buildSelectLinks(key,value,'hdselect',-1); } );
+    $("#hselect span").css( 'cursor', 'pointer' );
+    $("#hdselect span").css( 'cursor', 'pointer' );
+  });
+
+  function buildSelectLinks(statecss, statename, selector,action) {
+    $("#"+selector).append('<span id="'+statename+selector+'" class="'+statecss+'">'+statename+'</span>');
+    $("#"+statename+selector).click(function() { modifySelection($(this).attr("class"),action); });
+  }
+
+  function modifySelection(id,action) {
+    if (action==1) 
+      $("#hosts ."+id).addClass("ui-selected")
+    else
+      $("#hosts ."+id).removeClass("ui-selected");
+
+    updatePowerController();
+  }
+
+  function initHosts() {
+    if (showingHosts)
+      $("#hosts").selectable("destroy");
+
+    $("#hosts").html("");
+    $.each( hostList, function( key, value ) {
+      var ps = value.amt & 0x0f;
+      var host = '<div host="'+key+'" class="pc S' + ps +
+                 '"><p class="addr">' + key + "</p><span>" + value.msg + '</span></div>';
+      $("#hosts").append(host);
+    });
+    $("#hosts").append('<p style="clear:both;"></p>');
+    $("#hosts").selectable({
+      stop: updatePowerController,
+      filter: '.pc', 
+    });
+    showingHosts=1;
+  }
+
+  function updatePowerController() {
+          /* only show action panel as long as we have hosts selected */
+          ($(".ui-selected").length>0)  ?  $("#ctrl").show() : $("#ctrl").hide();
+          $("#numselected").html( $(".ui-selected").length );
+  }
+
+  function setRoom(room) {
+    $("#rooms .selected-room").removeClass("selected-room");
+    $("#"+room).addClass("selected-room");
+    $("#ctrl").hide();
+    if (!(room in amtc_rooms)) {
+      $("#rooms").html("No such room.");
+      return;
+    }
+    $("#wheel").show();
+    $.getJSON(infoURL+room, function(data) {
+      hostList=data;
+      initHosts(); 
+      $("#wheel").hide();
+      window.location.hash = '#'+room;
+    });
+  }
+ </script>
+</head>
+<body>
+
+<h2 id="pageheader">AMT remote power management<img id="wheel" src="img/wheel.gif"></h2>
+
+<noscript>
+  <div id="noscript">... will not work without JavaScript being enabled in your browser</div>
+</noscript>
+
+<div id="rooms">
+</div>
+
+<div id="hosts">
+</div>
+<p style="margin:0;float:right;">
+  <a style="color:#aaa" href="https://github.com/schnoddelbotz/amtc">powered by amtc</a>
+</p>
+
+<div id="hostselect">
+<dl>
+  <dt>Select hosts in state</dt>
+  <dd id="hselect"></dd>
+</dl>
+<dl>
+  <dt>De-select hosts in state</dt>
+  <dd id="hdselect"></dd>
+</dl>
+</div>
+
+<div id="ctrl">
+  <h3>Action for selected <span id="numselected"></span> hosts</h3>
+  <form>
+   <input type="radio" name="cmd" id="powerdown" value="d"><label for="powerdown">powerdown</label>
+   <input type="radio" name="cmd" id="powerup" value="u"><label for="powerup">powerup</label>
+   <input type="radio" name="cmd" id="powercycle" value="r"><label for="powercycle">powercycle</label>
+   <input type="radio" name="cmd" id="reset" value="R"><label for="reset">reset</label>
+   ... using a inter-command-delay of <input type="text"  name="delay" value="5" size=3> seconds
+   <input type="submit">
+  </form>
+</div>
+
+</body>
+</html>
