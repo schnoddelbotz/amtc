@@ -1,5 +1,5 @@
 
- amtc v0.2.4 - Intel AMT(tm) mass management tool 
+ amtc v0.3.0 - Intel AMT(tm) mass management tool 
             https://github.com/schnoddelbotz/amtc
 
  usage:
@@ -19,5 +19,7 @@
   -v(erbosity) increase it by adding more v's
   -j(son) produces JSON output of host states
   -T(LS)  [notyet]
+  -S(SH)-scan: probe TCP port 22   for OS detection
+  -W(IN)-scan: probe TCP port 3389 for OS detection
   -p(asswdfile) [notyet; export AMT_PASSWORD ]
 

@@ -1,16 +1,21 @@
 /*
-  amtc v0.2 - Intel vPro(tm)/AMT(tm) mass management tool.
+  amtc v0.3 - Intel vPro(tm)/AMT(tm) mass management tool.
 
   written by jan@hacker.ch, 2013 
   http://jan.hacker.ch/projects/amtc/
 */
 #include <stdlib.h>
-#include <getopt.h>
-#include <string.h>
-#include <pthread.h>
-#include <semaphore.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <getopt.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include <curl/curl.h>
 #include "amt.h"
 
@@ -34,11 +39,13 @@ const char *powerstate[] = {
  "S0 (on)", "S1 (cpu stop)", "S2 (cpu off)", "S3 (sleep)",
  "S4 (hibernate)", "S5 (sotf-off)", "S4/S5", "MechOff"
 };
+char portnames[3390][8];
 struct host {
   int id;
   int http_result;
   int amt_result;
   int duration;
+  int osport;
   char url[100];
   char hostname[100];
   char usrmsg[100];
@@ -53,11 +60,13 @@ void build_hostlist(int,char**);
 void dump_hostlist();
 void process_hostlist();
 int  get_amt_response_status(void*);
+int  probe_one_hostport(int,int);
 static size_t write_memory_callback(void*,size_t,size_t,void*);
 
 sem_t mutex;
 int   verbosity = 0;
-int   scan_port = 16992;
+int   scan_ssh = 0;
+int   scan_rdp = 0;
 int   cmd = 0;
 int   numHosts = 0;
 int   threadsRunning = 0;
@@ -73,16 +82,17 @@ int main(int argc,char **argv,char **envp) {
   int c;
   amtpasswdp = (char*)&amtpasswd;
     
-  while ((c = getopt(argc, argv, "viudrRjs:t:w:m:")) != -1)
+  while ((c = getopt(argc, argv, "viudrRSWjs:t:w:m:")) != -1)
   switch (c) {
     case 'v': verbosity += 1;         break;
     case 'j': produceJSON = 1;        break;
     case 'i': cmd = CMD_INFO;         break; 
     case 'u': cmd = CMD_POWERUP;      break; 
     case 'd': cmd = CMD_POWERDOWN;    break; 
-    case 'r': cmd = CMD_POWERCYCLE;    break; 
-    case 'R': cmd = CMD_POWERRESET;    break; 
-    case 's': cmd = CMD_SCAN; scan_port = atoi(optarg); break; 
+    case 'r': cmd = CMD_POWERCYCLE;   break; 
+    case 'R': cmd = CMD_POWERRESET;   break; 
+    case 'S': scan_ssh = 1;           break; 
+    case 'W': scan_rdp = 1;           break; 
     case 't': connectTimeout = atoi(optarg); break; 
     case 'm': maxThreads = atoi(optarg); break; 
     case 'w': waitDelay = atoi(optarg); break; 
@@ -108,6 +118,12 @@ int main(int argc,char **argv,char **envp) {
     exit(3);
   }
 
+  strcpy(portnames[0],   "none");
+  strcpy(portnames[22],  "ssh");
+  strcpy(portnames[99],  "noluck");
+  strcpy(portnames[999], "noscan");
+  strcpy(portnames[3389],"rdp");
+
   build_hostlist(argc,argv);
   sem_init(&mutex, 0, 1);
   curl_global_init(CURL_GLOBAL_ALL);
@@ -130,6 +146,8 @@ static void *amtquery_single_client(void* num) {
   int amt_result = -1;
   chunk.memory = malloc(1);
   chunk.size = 0; 
+  int os_port = 999; 
+
 
   curl = curl_easy_init();
   // FIXME add TLS support...
@@ -182,6 +200,12 @@ static void *amtquery_single_client(void* num) {
                      (long)chunk.size,chunk.memory);
   }
 
+  if (!(cmd==CMD_INFO && amt_result==5/*pow-off*/) && (scan_ssh||scan_rdp))  {
+    os_port=99;
+    os_port=scan_rdp ? (probe_one_hostport(hostid,3389)==3389)?3389:os_port : os_port;
+    os_port=(os_port==99&&scan_ssh) ? (probe_one_hostport(hostid,22)==22)?22:os_port   : os_port;
+  }
+
   /* print results while processing, if verbose */
   if (verbosity>0)
     printf("-%s %14s AMT:%04d HTTP:%3d %s\n",
@@ -191,6 +215,7 @@ static void *amtquery_single_client(void* num) {
   threadsRunning--;
   hostlist[hostid].http_result=(int)http_code;
   hostlist[hostid].amt_result=(int)amt_result;
+  hostlist[hostid].osport = os_port;
   snprintf(hostlist[hostid].usrmsg, 100, "%s", umsgp);
   if (verbosity>1) 
     printf("amtquery(%11d=%04ldb|http%03d): tr decreased to %3d by %s\n",
@@ -200,6 +225,7 @@ static void *amtquery_single_client(void* num) {
 
   curl_easy_cleanup(curl);
   curl_slist_free_all(headers);
+  curl_global_cleanup();
   free(chunk.memory);
   return NULL;
 }
@@ -217,7 +243,7 @@ int get_amt_response_status(void* chunk) {
   }
   pos = strstr(chunk, grep);
   if (pos==NULL) {
-    response = -99; // may be wrong amt version, too
+    response = -99; // no match -- may be wrong amt version, too
   } else {
     pos = pos + strlen(grep);
     response = atoi(pos);
@@ -246,14 +272,28 @@ static size_t write_memory_callback(void *contents, size_t size, size_t nmemb, v
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-static void *scan_one_hostport(void *host) {
-  sem_wait(&mutex);
-  threadsRunning--;
-  printf("scan_one(%11d): tr %3d host %s port %d\n",
-            (int)THREAD_ID, threadsRunning, (char*)host,scan_port);
-  sem_post(&mutex);
-  pthread_exit(0);
-  return NULL;
+int probe_one_hostport(int hostid, int port) {
+  int sockfd,c;
+  struct sockaddr_in servaddr;
+  struct timeval timeout;      
+  timeout.tv_sec = 1;
+  timeout.tv_usec = 0;
+
+  sockfd=socket(AF_INET,SOCK_STREAM,0);
+  if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
+    printf("setsockopt failed\n");
+  if (setsockopt (sockfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
+    printf("setsockopt failed\n");
+
+  bzero(&servaddr,sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr=inet_addr(hostlist[hostid].hostname);
+  servaddr.sin_port=htons(port);
+
+  c=connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
+  if (verbosity>1)
+    printf("SCAN %d on %15s - %d\n", port, hostlist[hostid].hostname, c);
+  return (c==0)?port:99;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -264,12 +304,7 @@ void process_hostlist() {
 
   //printf("Firing max %d threads for %d hosts...\n",maxThreads, numHosts);
   for(a = 0; a < numHosts; a++) {
-
-    if (cmd == CMD_SCAN)
-      pthread_create(&tid[a], NULL,
-              scan_one_hostport, (void *)hostlist[a].hostname);
-    else
-      pthread_create(&tid[a], NULL,
+    pthread_create(&tid[a], NULL,
               amtquery_single_client, (void*)(intptr_t)a);
 
     sem_wait(&mutex);
@@ -296,11 +331,14 @@ void process_hostlist() {
 ///////////////////////////////////////////////////////////////////////////////
 void build_hostlist(int argc,char **argv) {
   int a;
+  // http://www.logix.cz/michal/devel/various/getaddrinfo.c.xp
+  // resolve IP/hosenames FIXME
   for(a = 0; a < MAX_HOSTS; a++) {
     hostlist[a].id = a;
     hostlist[a].http_result = -1;
     hostlist[a].amt_result = -1;
     hostlist[a].duration = -1;
+    hostlist[a].osport = -99;
   }
   int i,h=0;
   for (i=optind; i<argc; i++) {
@@ -319,15 +357,15 @@ void dump_hostlist() {
   if (produceJSON) {
     printf("{");
     for(a = 0; a < numHosts; a++) 
-      printf("%s\"%s\":{\"amt\":\"%d\",\"http\":\"%d\",\"msg\":\"%s\"}",
+      printf("%s\"%s\":{\"amt\":\"%d\",\"http\":\"%d\",\"oport\":\"%s\",\"msg\":\"%s\"}",
          a==0?"":",", hostlist[a].hostname, hostlist[a].amt_result,
-         hostlist[a].http_result, hostlist[a].usrmsg);
+         hostlist[a].http_result, portnames[hostlist[a].osport], hostlist[a].usrmsg);
     printf("}\n");
   } else {
     for(a = 0; a < numHosts; a++) {
-      printf("%s %15s AMT:%04d HTTP:%03d %s\n",
-        hcmds[cmd], hostlist[a].hostname, hostlist[a].amt_result,
-        hostlist[a].http_result, hostlist[a].usrmsg);
+      printf("%s %15s OS:%7s AMT:%04d HTTP:%03d %s\n",
+        hcmds[cmd], hostlist[a].hostname, portnames[hostlist[a].osport],
+         hostlist[a].amt_result, hostlist[a].http_result, hostlist[a].usrmsg);
     }
   }
 }
