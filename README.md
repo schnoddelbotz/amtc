@@ -11,9 +11,15 @@ features
 * allows mass-powerups/downs/... using a custom delay
 * lightweight C application, only depends on libcurl and pthreads
 * currently builds fine on linux and OSX (and windows via cygwin)
-* allows quick and comfortable mass-power control via shell and...
-* comes with a web interface for GUI-based powermanagement (work in progress...) and also...
-* provides flexible and robust scheduled power management (simply using cron)
+* allows quick and comfortable mass-power control via shell (works!) and...
+* comes with a web interface for GUI-based
+  * power-live-monitoring (works)
+  * including OS tcp port probing/detection (undone)
+  * power/OS-monitoring logging with graphing (undone)
+  * remote-management (working on it)
+* acts as a tool for flexible and robust scheduled remote power management
+
+The [amtc wiki](https://github.com/schnoddelbotz/amtc/wiki) features more details.
 
 usage
 =====
@@ -51,20 +57,16 @@ alpha. just for fun. against all odds. works for me.
 building
 ========
 + OSX: Install XCode including CommandLineTools; type make
-+ Linux: apt-get install libcurl3 libcurl4-openssl-dev build-essential; type make
++ Debianoid: apt-get install libcurl3 libcurl4-openssl-dev build-essential; type make
 + Windows: install cygwin's curl and pthreads (-dev) packages, make and gcc; type make
 
 todo
 ====
-+ add TLS support
 + finish port/OS scanner; apply operations only if a given port is open
-+ support control commands in amtc-web (info only atm)
++ support control commands in amtc-web (info/view only atm)
 + add quiet mode (error-only) (for cron / free scheduled remote power management)
++ add TLS support (for AMT hosts provisioned in enterprise mode)
 + support hosts with AMT < v6.0 ?
-
-amtc-web screenshot
-===================
-![amtc-web screenshot](/amtc-web/img/amtc-web-0.2.4.png "amtc-web as of 0.2.4")
 
 alternatives
 ============
