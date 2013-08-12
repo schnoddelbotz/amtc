@@ -14,7 +14,7 @@ features
 * allows quick and comfortable mass-power control via shell (works!) and...
 * comes with a web interface for GUI-based
   * power-live-monitoring (works)
-  * including OS tcp port probing/detection (undone)
+  * including OS tcp port probing/detection (works)
   * power/OS-monitoring logging with graphing (undone)
   * remote-management (working on it)
 * acts as a tool for flexible and robust scheduled remote power management
@@ -26,7 +26,7 @@ usage
 
 ```
 
- amtc v0.2.4 - Intel AMT(tm) mass management tool 
+ amtc v0.3.0 - Intel AMT(tm) mass management tool 
             https://github.com/schnoddelbotz/amtc
 
  usage:
@@ -46,6 +46,8 @@ usage
   -v(erbosity) increase it by adding more v's
   -j(son) produces JSON output of host states
   -T(LS)  [notyet]
+  -S(SH)-scan: probe TCP port 22   for OS detection
+  -W(IN)-scan: probe TCP port 3389 for OS detection
   -p(asswdfile) [notyet; export AMT_PASSWORD ]
 
 ```
