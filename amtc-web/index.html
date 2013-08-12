@@ -11,10 +11,7 @@
   #ctrl { display:none; clear:both; }
   #wheel { margin-left:20px;  }
   #noscript { color:red; }
-  #hostselect dl { float:left; margin-right:20px; }
-  #hostselect dt { font-weight:bold; }
-  #hostselect dd { margin-top:5px; }
-  #hostselect dd span { margin-right:5px; padding:5px; line-height:30px; border:1px solid #aaa;
+  #hselect span { margin-right:5px; padding:5px; line-height:30px; border:1px solid #aaa;
                         background-repeat:no-repeat; }
   #rooms,#hosts { clear:both; }
   .room{ width:80px; font-size:13px; float:left; 
@@ -35,6 +32,8 @@
   .S9  { background:#c99;   } /* no amt reply */
   .ssh { background-image:url(img/linux.png);   background-repeat:no-repeat; background-position:right top; }
   .rdp { background-image:url(img/windows.png); background-repeat:no-repeat; background-position:right top; } 
+  .none { background-image:url(img/no-os.png); background-repeat:no-repeat; background-position:right top; } 
+  .isActive { background:black; color:white; }
  </style>
  <script type="text/javascript">
   var currentRoom;
@@ -66,29 +65,29 @@
     $('#ctrlSubmit').click(function() {
       $(this).attr('disabled', 'disabled');
       $("#wheel").show();
-      // FIMXE post
+      $("#hosts").html("not yet - FIXME.");
     });
     
-    // FIXME should be: click 1st: select, click 2nd: deselect - show it has been selected (border...)
     $("#hselect").html("");
-    $("#hdselect").html("");
-    $.each(powerstates, function(key, value) { buildSelectLinks(key,value,'hselect',1); } );
-    $.each(powerstates, function(key, value) { buildSelectLinks(key,value,'hdselect',-1); } );
+    $.each(powerstates, function(key, value) {
+      $("#hselect").append('<span id="'+value+'" class="'+key+'">'+value+'</span>');
+      $("#"+value).click(function() { modifySelection(value,$(this).attr("class").split(' ')[0]); });
+    });
     $("#hselect span").css( 'cursor', 'pointer' );
-    $("#hdselect span").css( 'cursor', 'pointer' );
   });
 
-  function buildSelectLinks(statecss, statename, selector,action) {
-    $("#"+selector).append('<span id="'+statename+selector+'" class="'+statecss+'">'+statename+'</span>');
-    $("#"+statename+selector).click(function() { modifySelection($(this).attr("class"),action); });
-  }
-
-  function modifySelection(id,action) {
-    if (action==1) 
-      $("#hosts ."+id).addClass("ui-selected")
-    else
-      $("#hosts ."+id).removeClass("ui-selected");
-
+  function modifySelection(buttonid, pclass) {
+    if ($("#"+buttonid).hasClass("isActive")) {
+      $("#hosts ."+pclass).removeClass("ui-selected");
+      $("#"+buttonid).removeClass("isActive");
+      if (buttonid=="any") {
+        $("#hosts .pc").removeClass("ui-selected");
+        $("#hselect span").removeClass("isActive");
+      }
+    } else {
+      $("#hosts ."+pclass).addClass("ui-selected");
+      $("#"+buttonid).addClass("isActive");
+    }
     updatePowerController();
   }
 
@@ -152,16 +151,8 @@
   <a style="color:#aaa" href="https://github.com/schnoddelbotz/amtc">powered by amtc</a>
 </p>
 
-<div id="hostselect">
-<dl>
-  <dt>Select hosts in state</dt>
-  <dd id="hselect"></dd>
-</dl>
-<dl>
-  <dt>De-select hosts in state</dt>
-  <dd id="hdselect"></dd>
-</dl>
-</div>
+<h3>Select hosts above like files in Finder/Explorer or by state below</h3>
+<p id="hselect"></p>
 
 <div id="ctrl">
   <h3>Action for selected <span id="numselected"></span> hosts</h3>

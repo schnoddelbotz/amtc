@@ -25,8 +25,15 @@
 #define CMD_POWERDOWN 2
 #define CMD_POWERRESET 3
 #define CMD_POWERCYCLE 4
-#define CMD_SCAN 5
 #define MAX_HOSTS 255
+#define PORT_SSH 22
+#define PORT_RDP 3389
+#define SCANRESULT_NONE_OPEN 0
+#define SCANRESULT_NO_SCANS  1
+#define SCANRESULT_SSH_OPEN  22
+#define SCANRESULT_NONE_RUN  999
+#define SCANRESULT_RDP_OPEN  3389
+
 
 unsigned char *acmds[] = {
   /* SOAP/XML request bodies as included via amt.h */
@@ -60,7 +67,7 @@ void build_hostlist(int,char**);
 void dump_hostlist();
 void process_hostlist();
 int  get_amt_response_status(void*);
-int  probe_one_hostport(int,int);
+int  probe_one_hostport(int,int,int);
 static size_t write_memory_callback(void*,size_t,size_t,void*);
 
 sem_t mutex;
@@ -76,6 +83,8 @@ int   maxThreads = 40;
 int   produceJSON = 0;
 char  amtpasswd[32];
 char  *amtpasswdp;
+char  gre[64];
+char  *grep = (char*)&gre;
 
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc,char **argv,char **envp) {
@@ -118,11 +127,17 @@ int main(int argc,char **argv,char **envp) {
     exit(3);
   }
 
-  strcpy(portnames[0],   "none");
-  strcpy(portnames[22],  "ssh");
-  strcpy(portnames[99],  "noluck");
-  strcpy(portnames[999], "noscan");
-  strcpy(portnames[3389],"rdp");
+  strcpy(portnames[SCANRESULT_NONE_OPEN],"none"); /* no open ports found */
+  strcpy(portnames[SCANRESULT_NONE_RUN], "skipped"); /* skipped, eg. pwrd off */
+  strcpy(portnames[SCANRESULT_NO_SCANS], "noscan"); /* neither -S nor -W */
+  strcpy(portnames[SCANRESULT_SSH_OPEN], "ssh"); 
+  strcpy(portnames[SCANRESULT_RDP_OPEN], "rdp");
+
+  if (cmd==CMD_INFO) {
+    snprintf(grep,sizeof gre,"<b:Status>0</b:Status><b:SystemPowerState>");
+  } else {
+    snprintf(grep,sizeof gre,"<b:RemoteControlResponse><b:Status>");
+  }
 
   build_hostlist(argc,argv);
   sem_init(&mutex, 0, 1);
@@ -135,7 +150,7 @@ int main(int argc,char **argv,char **envp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-static void *amtquery_single_client(void* num) {
+static void *process_single_client(void* num) {
   int hostid = (int)(intptr_t)num;
   struct host *host = &hostlist[hostid];
   CURL *curl;
@@ -146,8 +161,7 @@ static void *amtquery_single_client(void* num) {
   int amt_result = -1;
   chunk.memory = malloc(1);
   chunk.size = 0; 
-  int os_port = 999; 
-
+  int os_port = SCANRESULT_NO_SCANS; 
 
   curl = curl_easy_init();
   // FIXME add TLS support...
@@ -200,10 +214,15 @@ static void *amtquery_single_client(void* num) {
                      (long)chunk.size,chunk.memory);
   }
 
-  if (!(cmd==CMD_INFO && amt_result==5/*pow-off*/) && (scan_ssh||scan_rdp))  {
-    os_port=99;
-    os_port=scan_rdp ? (probe_one_hostport(hostid,3389)==3389)?3389:os_port : os_port;
-    os_port=(os_port==99&&scan_ssh) ? (probe_one_hostport(hostid,22)==22)?22:os_port   : os_port;
+ // fixme: this needs to be duplicated in the function head to eg. reset only SSH boxes (CLI)
+  if ( (scan_ssh||scan_rdp) && (cmd==CMD_INFO && (amt_result & 0x0f)==0) ) {
+    os_port=SCANRESULT_NONE_OPEN;
+    if (scan_rdp)
+      os_port = probe_one_hostport(hostid,PORT_RDP,os_port);
+    if (scan_ssh)
+      os_port = probe_one_hostport(hostid,PORT_SSH,os_port);
+  } else if ((scan_ssh||scan_rdp) && (cmd==CMD_INFO && amt_result!=0)) {
+    os_port=SCANRESULT_NONE_RUN;
   }
 
   /* print results while processing, if verbose */
@@ -218,7 +237,7 @@ static void *amtquery_single_client(void* num) {
   hostlist[hostid].osport = os_port;
   snprintf(hostlist[hostid].usrmsg, 100, "%s", umsgp);
   if (verbosity>1) 
-    printf("amtquery(%11d=%04ldb|http%03d): tr decreased to %3d by %s\n",
+    printf("singleClient(%11d=%04ldb|http%03d): tr decreased to %3d by %s\n",
       (int)THREAD_ID,(long)chunk.size,(int)http_code,
       threadsRunning,(char*)host->url);
   sem_post(&mutex);
@@ -234,13 +253,6 @@ static void *amtquery_single_client(void* num) {
 int get_amt_response_status(void* chunk) {
   int response = -9;
   char *pos = NULL;
-  char gre[64]; // FIXME global
-  char *grep = (char*)&gre;
-  if (cmd==CMD_INFO) {
-    snprintf((char*)&gre,sizeof gre,"<b:Status>0</b:Status><b:SystemPowerState>");
-  } else {
-    snprintf((char*)&gre,sizeof gre,"<b:RemoteControlResponse><b:Status>");
-  }
   pos = strstr(chunk, grep);
   if (pos==NULL) {
     response = -99; // no match -- may be wrong amt version, too
@@ -272,12 +284,15 @@ static size_t write_memory_callback(void *contents, size_t size, size_t nmemb, v
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-int probe_one_hostport(int hostid, int port) {
+int probe_one_hostport(int hostid, int port, int alreadyFound) {
   int sockfd,c;
   struct sockaddr_in servaddr;
   struct timeval timeout;      
-  timeout.tv_sec = 1;
+  timeout.tv_sec = connectTimeout;
   timeout.tv_usec = 0;
+
+  if (alreadyFound)
+    return alreadyFound;
 
   sockfd=socket(AF_INET,SOCK_STREAM,0);
   if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
@@ -293,7 +308,8 @@ int probe_one_hostport(int hostid, int port) {
   c=connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
   if (verbosity>1)
     printf("SCAN %d on %15s - %d\n", port, hostlist[hostid].hostname, c);
-  return (c==0)?port:99;
+
+  return (c==0) ? port : SCANRESULT_NONE_OPEN;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -305,7 +321,7 @@ void process_hostlist() {
   //printf("Firing max %d threads for %d hosts...\n",maxThreads, numHosts);
   for(a = 0; a < numHosts; a++) {
     pthread_create(&tid[a], NULL,
-              amtquery_single_client, (void*)(intptr_t)a);
+              process_single_client, (void*)(intptr_t)a);
 
     sem_wait(&mutex);
     threadsRunning++;
@@ -332,7 +348,7 @@ void process_hostlist() {
 void build_hostlist(int argc,char **argv) {
   int a;
   // http://www.logix.cz/michal/devel/various/getaddrinfo.c.xp
-  // resolve IP/hosenames FIXME
+  // resolve IP/hostnames FIXME
   for(a = 0; a < MAX_HOSTS; a++) {
     hostlist[a].id = a;
     hostlist[a].http_result = -1;
@@ -363,7 +379,7 @@ void dump_hostlist() {
     printf("}\n");
   } else {
     for(a = 0; a < numHosts; a++) {
-      printf("%s %15s OS:%7s AMT:%04d HTTP:%03d %s\n",
+      printf("%s %-15s OS:%-7s AMT:%04d HTTP:%03d %s\n",
         hcmds[cmd], hostlist[a].hostname, portnames[hostlist[a].osport],
          hostlist[a].amt_result, hostlist[a].http_result, hostlist[a].usrmsg);
     }
