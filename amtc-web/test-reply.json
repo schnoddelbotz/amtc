@@ -13,5 +13,5 @@
 "192.168.99.111":{"amt":"9","oport":"rdp","http":"401","msg":"Authentication failed"},
 "192.168.99.112":{"amt":"5","http":"200","msg":"OK S5 (sotf-off)"},
 "192.168.99.113":{"amt":"5","http":"200","msg":"OK S5 (sotf-off)"},
-"192.168.99.114":{"amt":"5","http":"200","msg":"OK S5 (sotf-off)"}
+"192.168.99.114":{"amt":"0","oport":"none","http":"200","msg":"OK S0 (on)"}
 }

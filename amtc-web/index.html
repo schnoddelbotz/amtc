@@ -1,6 +1,7 @@
 <html>
 <head>
  <title>amtc - remote power management</title>
+ <link type="text/css" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css">
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
  <script src="amtc_config.js"></script>
@@ -11,8 +12,8 @@
   #ctrl { display:none; clear:both; }
   #wheel { margin-left:20px;  }
   #noscript { color:red; }
-  #hselect span { margin-right:5px; padding:5px; line-height:30px; border:1px solid #aaa;
-                        background-repeat:no-repeat; }
+  #hselect span { margin-right:5px; padding:5px; line-height:20px; border:1px solid #aaa;
+                  width:60px; display:block; float:left; background-repeat:no-repeat; }
   #rooms,#hosts { clear:both; }
   .room{ width:80px; font-size:13px; float:left; 
          background:#cca; margin:0px 5px 1px 0px; text-align:center;
@@ -32,7 +33,7 @@
   .S9  { background:#c99;   } /* no amt reply */
   .ssh { background-image:url(img/linux.png);   background-repeat:no-repeat; background-position:right top; }
   .rdp { background-image:url(img/windows.png); background-repeat:no-repeat; background-position:right top; } 
-  .none { background-image:url(img/no-os.png); background-repeat:no-repeat; background-position:right top; } 
+  .none { background-image:url(img/no-os.png);  background-repeat:no-repeat; background-position:right top; } 
   .isActive { background:black; color:white; }
  </style>
  <script type="text/javascript">
@@ -40,7 +41,7 @@
   var hostList;
   var showingHosts=0;
   var powerstates = {"pc":"any", "S0":"on", "S3":"sleep", "S4":"hibernate", "S5":"soft-off",
-                     "S9":"no-reply", "SSH":"SSH","RDP":"RDP"};
+                     "S9":"no-reply", "SSH":"SSH","RDP":"RDP","none":"No-OS"};
 
   $(document).ready(function() { 
     if (typeof amtc_rooms === 'undefined') {
@@ -50,7 +51,7 @@
     }
     $("#wheel").hide();
     $.each( amtc_rooms, function( key, value ) {
-      var room = '<div id="'+key+'" class="room">' +  value + '</div>';
+      var room = '<div id="'+key+'" class="room ui-corner-all">' +  value + '</div>';
       $("#rooms").append(room);
       $("#"+key).click(function() {
         setRoom($(this).attr("id"));
@@ -70,7 +71,7 @@
     
     $("#hselect").html("");
     $.each(powerstates, function(key, value) {
-      $("#hselect").append('<span id="'+value+'" class="'+key+'">'+value+'</span>');
+      $("#hselect").append('<span id="'+value+'" class="'+key+' ui-corner-all">'+value+'</span>');
       $("#"+value).click(function() { modifySelection(value,$(this).attr("class").split(' ')[0]); });
     });
     $("#hselect span").css( 'cursor', 'pointer' );
@@ -99,7 +100,8 @@
     $.each( hostList, function( key, value ) {
       var ps = value.amt & 0x0f;
       var host = '<div host="'+key+'" class="pc S' + ps + " "+value.oport+
-                 '"><p class="addr">' + key + "</p><span>" + value.msg + '</span></div>';
+                 ' ui-corner-all"><p class="addr">' + key + "</p><span>" +
+                 value.msg + '</span></div>';
       $("#hosts").append(host);
     });
     $("#hosts").append('<p style="clear:both;"></p>');
@@ -145,7 +147,7 @@
 <div id="rooms">
 </div>
 
-<div id="hosts">
+<div id="hosts" class="ui-corner-all">
 </div>
 <p style="margin:0;float:right;">
   <a style="color:#aaa" href="https://github.com/schnoddelbotz/amtc">powered by amtc</a>
