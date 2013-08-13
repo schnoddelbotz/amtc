@@ -1,5 +1,7 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+ <meta charset="utf-8">
  <title>amtc - remote power management</title>
  <link type="text/css" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css">
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -9,10 +11,10 @@
   body,a { font-family: arial; font-size:11px; text-decoration:none; color:#000; }
   hr { clear:both; }
   h2 { height:50px; line-height:50px; }
-  #ctrl { display:none; clear:both; }
+  #ctrl { display:none; clear:both; padding-top:10px; }
   #wheel { margin-left:20px;  }
   #noscript { color:red; }
-  #hselect span { margin-right:5px; padding:5px; line-height:20px; border:1px solid #aaa;
+  #hselect span { margin-right:5px; padding:5px; border:1px solid #aaa;
                   width:60px; display:block; float:left; background-repeat:no-repeat; }
   #rooms,#hosts { clear:both; }
   .room{ width:80px; font-size:13px; float:left; 
@@ -23,7 +25,7 @@
            border-bottom:1px solid #ccb; border-right:1px solid #aa9;} 
   #hosts .pc  { width:130px; float:left; margin:0px 5px 5px 0px; padding:2px; overflow:hidden; }
   #hosts .ui-selecting { background:black; color:gray; }
-  #hosts .ui-selected  { background:black; color:white; }
+  #hosts .ui-selected, .isActive  { background:black; color:white; }
   .addr{ font-weight:bold; margin:0;  }
   /* ACPI power states */
   .S0  { background:#9c9;   } /* on */
@@ -34,14 +36,13 @@
   .ssh { background-image:url(img/linux.png);   background-repeat:no-repeat; background-position:right top; }
   .rdp { background-image:url(img/windows.png); background-repeat:no-repeat; background-position:right top; } 
   .none { background-image:url(img/no-os.png);  background-repeat:no-repeat; background-position:right top; } 
-  .isActive { background:black; color:white; }
  </style>
  <script type="text/javascript">
   var currentRoom;
   var hostList;
   var showingHosts=0;
   var powerstates = {"pc":"any", "S0":"on", "S3":"sleep", "S4":"hibernate", "S5":"soft-off",
-                     "S9":"no-reply", "SSH":"SSH","RDP":"RDP","none":"No-OS"};
+                     "S9":"no-reply", "ssh":"SSH","rdp":"RDP","none":"No-OS"};
 
   $(document).ready(function() { 
     if (typeof amtc_rooms === 'undefined') {
@@ -50,6 +51,7 @@
       return;
     }
     $("#wheel").hide();
+    $("#ctrlSubmit").removeAttr('disabled');
     $.each( amtc_rooms, function( key, value ) {
       var room = '<div id="'+key+'" class="room ui-corner-all">' +  value + '</div>';
       $("#rooms").append(room);
@@ -64,9 +66,24 @@
       $("#hosts").html("Please select a room.");
 
     $('#ctrlSubmit').click(function() {
-      $(this).attr('disabled', 'disabled');
+      if (!$("form input[name='cmd']:checked").val())
+        return alert("Please select command (powerup, powerdown...) first!");
+      $('#ctrlSubmit').attr('disabled', 'disabled');
       $("#wheel").show();
-      $("#hosts").html("not yet - FIXME.");
+      var cmdhosts = [];
+      $("#hosts .ui-selected").each( function(i) { cmdhosts.push( $(this).attr("host") ); } );
+      $.post(ctrlURL, {
+            'hosts':cmdhosts.join(" "),
+            'cmd':$("form input[name='cmd']:checked").val()
+        },
+        function(data) {
+          $("#hosts").html("<strong>Refresh view to see progress. Command used:</strong><br>");
+          $("#hosts").append("amtc -"+data.cmd+" "+data.hosts);
+          $("#wheel").hide();
+          $("#ctrlSubmit").removeAttr('disabled');
+        }
+      );
+      $("#hosts").html("<strong>Data submitted, please wait ...</strong>");
     });
     
     $("#hselect").html("");
@@ -93,6 +110,7 @@
   }
 
   function initHosts() {
+    $("#hselect span").removeClass("isActive");
     if (showingHosts)
       $("#hosts").selectable("destroy");
 
@@ -107,7 +125,7 @@
     $("#hosts").append('<p style="clear:both;"></p>');
     $("#hosts").selectable({
       stop: updatePowerController,
-      filter: '.pc', 
+      filter: '.pc'
     });
     showingHosts=1;
   }
@@ -119,6 +137,7 @@
   }
 
   function setRoom(room) {
+    $("#ctrlSubmit").removeAttr('disabled');
     $("#rooms .selected-room").removeClass("selected-room");
     $("#"+room).addClass("selected-room");
     $("#ctrl").hide();
@@ -157,7 +176,7 @@
 <p id="hselect"></p>
 
 <div id="ctrl">
-  <h3>Action for selected <span id="numselected"></span> hosts</h3>
+  <h3>Action for selected <span id="numselected"></span>&nbsp;hosts</h3>
   <form>
    <input type="radio" name="cmd" id="powerdown" value="d"><label for="powerdown">powerdown</label>
    <input type="radio" name="cmd" id="powerup" value="u"><label for="powerup">powerup</label>
