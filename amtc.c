@@ -244,7 +244,6 @@ static void *process_single_client(void* num) {
 
   curl_easy_cleanup(curl);
   curl_slist_free_all(headers);
-  curl_global_cleanup();
   free(chunk.memory);
   return NULL;
 }
