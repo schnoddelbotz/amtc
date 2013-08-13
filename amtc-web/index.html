@@ -72,18 +72,22 @@
       $("#wheel").show();
       var cmdhosts = [];
       $("#hosts .ui-selected").each( function(i) { cmdhosts.push( $(this).attr("host") ); } );
+      $("#hosts").html("<strong>Submitting data, please wait ...</strong>");
       $.post(ctrlURL, {
             'hosts':cmdhosts.join(" "),
             'cmd':$("form input[name='cmd']:checked").val()
         },
         function(data) {
-          $("#hosts").html("<strong>Refresh view to see progress. Command used:</strong><br>");
+          $("#hosts").html("<strong>Job submitted. Re-select room to refresh view.<br>" +
+                           "amtc command line equivalent:</strong><br>");
           $("#hosts").append("amtc -"+data.cmd+" "+data.hosts);
           $("#wheel").hide();
           $("#ctrlSubmit").removeAttr('disabled');
+          $("#ctrl").hide();
+          updatePowerController();
+          //window.setTimeout(window.location.reload.bind(window.location), 1250);
         }
       );
-      $("#hosts").html("<strong>Data submitted, please wait ...</strong>");
     });
     
     $("#hselect").html("");
@@ -176,7 +180,7 @@
 <p id="hselect"></p>
 
 <div id="ctrl">
-  <h3>Action for selected <span id="numselected"></span>&nbsp;hosts</h3>
+<h3>Action for selected <span id="numselected"></span>&nbsp;hosts</h3>
   <form>
    <input type="radio" name="cmd" id="powerdown" value="d"><label for="powerdown">powerdown</label>
    <input type="radio" name="cmd" id="powerup" value="u"><label for="powerup">powerup</label>
