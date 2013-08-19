@@ -2,7 +2,7 @@
 <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd" xmlns:n1="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_PowerManagementService">
 <s:Header>
  <wsa:Action s:mustUnderstand="true">http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_PowerManagementService/RequestPowerStateChange</wsa:Action>
- <wsa:To s:mustUnderstand="true">http://129.132.27.252:16992/wsman</wsa:To>
+ <wsa:To s:mustUnderstand="true">http://192.168.0.100:16992/wsman</wsa:To>
  <wsman:ResourceURI s:mustUnderstand="true">http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_PowerManagementService</wsman:ResourceURI>
  <wsa:MessageID s:mustUnderstand="true">uuid:fc6f2bc3-498e-45f6-84e0-5f7b2665903e</wsa:MessageID>
  <wsa:ReplyTo><wsa:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</wsa:Address></wsa:ReplyTo>
