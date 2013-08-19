@@ -1,25 +1,28 @@
 
- amtc v0.3.1 - Intel AMT(tm) mass management tool 
-            https://github.com/schnoddelbotz/amtc
+ amtc v0.4.0 - Intel AMT & DASH OOB mass management tool 
+                   https://github.com/schnoddelbotz/amtc
+ usage
+  amtc [-actions] [-options] host [host ...]
 
- usage:
-  amtc [actions] [options] host [host ...]
+ actions
+  -I(nfo)  query powerstate via AMT (default)
+  -U(p)    powerup given host(s) 
+  -D(own)  powerdown
+  -C(ycle) powercycle
+  -R(eset) reset
 
- actions:
-  -i(nfo) query powerstate via AMT (default)
-  -u(p)   powerup given host(s) 
-  -d(own) powerdown
-  -r      powercycle
-  -R      powerreset
-  -s(can) [port] - TCP port scan [notyet]
- options:
-  -t(imeout) in seconds, for curl and tcp scans [ 5]
-  -w(ait)    seconds after each thread created  [ 0]
-  -m(aximum) number of parallel workers to use  [40]
-  -v(erbosity) increase it by adding more v's
-  -j(son) produces JSON output of host states
-  -T(LS)  [notyet]
-  -S(SH)-scan: probe TCP port 22   for OS detection
-  -W(IN)-scan: probe TCP port 3389 for OS detection
-  -p(asswdfile) [notyet; export AMT_PASSWORD ]
+ options
+  -d         for AMT 9.0+ hosts - use WS-Man/DASH
+  -b(oot)    specify boot device ('pxe' or 'hdd')
+  -m(aximum) number of parallel workers to use [40]
+  -p(asswdfile) specify file containing AMT password
+  -j(son)    produces JSON output of host states
+  -q(uiet)   only report unsuccessful operations
+  -r(DP)-scan: probe TCP port 3389 for OS detection
+  -s(SH)-scan: probe TCP port 22   for OS detection
+  -t(imeout) in seconds, for amt and tcp scans [5s]
+  -T(LS)     [notyet]
+  -v(erbose) detailed progress, debug by using -vvv
+  -w(ait)    in seconds, after each pc. one thread.
+  -x(clude)  skips hosts matching pattern provided
 
