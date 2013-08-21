@@ -1,5 +1,5 @@
 /*
-  amtc v0.3 - Intel vPro(tm)/AMT(tm) mass management tool.
+  amtc v0.4 - Intel AMT & DASH OOB mass management tool
 
   written by jan@hacker.ch, 2013 
   http://jan.hacker.ch/projects/amtc/
@@ -76,7 +76,7 @@ void process_hostlist();
 void get_amt_pw();
 int  get_amt_response_status(void*);
 int  probe_one_hostport(int,int,int);
-int  get_enum_context(void*,void*);
+int  get_enum_context(void*,char*);
 
 static size_t write_memory_callback(void*,size_t,size_t,void*);
 
@@ -148,9 +148,13 @@ int main(int argc,char **argv,char **envp) {
   strcpy(portnames[SCANRESULT_RDP_OPEN], "rdp");
 
   if (cmd==CMD_INFO) {
-    snprintf(grep,sizeof gre,"<b:Status>0</b:Status><b:SystemPowerState>");
+    snprintf(grep,sizeof gre, useWsmanShift ?
+      "<h:PowerState>" : 
+      "<b:Status>0</b:Status><b:SystemPowerState>");
   } else {
-    snprintf(grep,sizeof gre,"<b:RemoteControlResponse><b:Status>");
+    snprintf(grep,sizeof gre, useWsmanShift ? 
+      "<g:RequestPowerStateChange_OUTPUT><g:ReturnValue>" : 
+      "<b:RemoteControlResponse><b:Status>");
   }
 
   get_amt_pw();
@@ -216,8 +220,8 @@ static void *process_single_client(void* num) {
   // a enumeration context needs to be requested and pulled
   char enumCtx[8192];
   char enumTxt[8192];
-  if (http_code==200 && useWsmanShift!=0) {
-    if (get_enum_context(chunk.memory,&enumCtx)) {
+  if (cmd==CMD_INFO && http_code==200 && useWsmanShift!=0) {
+    if (get_enum_context(chunk.memory,(char*)&enumCtx)) {
       sprintf(enumTxt, (char*)wsman_info_step2, enumCtx);
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS , enumTxt);
       res = curl_easy_perform(curl);
@@ -230,25 +234,22 @@ static void *process_single_client(void* num) {
   char umsg[100];
   const char* umsgp = (char*)&umsg;
 
-  /*if (useWsmanShift) {
-    printf("ws success.\n");
-  }
-  else */if(res != CURLE_OK || http_code!=200) {
+  if(res != CURLE_OK || http_code!=200) {
     amt_result = -999;
     umsgp = curl_easy_strerror(res);
   }
   else {
     amt_result = get_amt_response_status(chunk.memory);
     if(useWsmanShift)
-    snprintf((char*)&umsg, sizeof umsg, "OK %s%s", 
-      (cmd==CMD_INFO) ? wspowerstate[amt_result] : "",
-      (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
-    );
+      snprintf((char*)&umsg, sizeof umsg, "OK %s%s", 
+        (cmd==CMD_INFO) ? wspowerstate[amt_result] : "",
+        (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
+      );
     else
-    snprintf((char*)&umsg, sizeof umsg, "OK %s%s", 
-      (cmd==CMD_INFO) ? powerstate[amt_result & 0x0f] : "",
-      (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
-    );
+      snprintf((char*)&umsg, sizeof umsg, "OK %s%s", 
+        (cmd==CMD_INFO) ? powerstate[amt_result & 0x0f] : "",
+        (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
+      );
 
     if (verbosity>1)
        printf("body (size:%4ld b) received: '%s'\n",
@@ -293,15 +294,6 @@ static void *process_single_client(void* num) {
 int get_amt_response_status(void* chunk) {
   int response = -9;
   char *pos = NULL;
-  if (useWsmanShift) {
-    //<h:PowerState>8 ... only info 4 now
-    pos = strstr(chunk, "<h:PowerState>");
-    if (pos==NULL) {
-    } else {
-      pos = pos + strlen("<h:PowerState>");
-      response = atoi(pos);
-    }
-  } else {
     pos = strstr(chunk, grep);
     if (pos==NULL) {
       response = -99; // no match -- may be wrong amt version, too
@@ -309,11 +301,11 @@ int get_amt_response_status(void* chunk) {
       pos = pos + strlen(grep);
       response = atoi(pos);
     }
-  }
   return response;
 }
 
-int get_enum_context(void* chunk,void* result) {
+///////////////////////////////////////////////////////////////////////////////
+int get_enum_context(void* chunk,char* result) {
   char *pos = NULL;
   pos = strstr(chunk, "<g:EnumerateResponse><g:EnumerationContext>"/*len=44*/);
   if (pos==NULL) 
