@@ -1,5 +1,5 @@
 /*
-  amtc v0.4 - Intel AMT & DASH OOB mass management tool
+  amtc v0.4 - Intel AMT & WS-MAN OOB mass management tool
 
   written by jan@hacker.ch, 2013 
   http://jan.hacker.ch/projects/amtc/
@@ -36,23 +36,20 @@
 
 
 unsigned char *acmds[] = {
-  /* SOAP/XML request bodies as included via amt.h */
+  /* SOAP/XML request bodies as included via amt.h, AMT6-8 */
   cmd_info,cmd_powerup,cmd_powerdown,cmd_powerreset,cmd_powercycle,
-  /* WS-MAN / DASH / AMT9.0 versions */
-  wsman_info, wsman_up,wsman_down,wsman_reset,wsman_reset, wsman_info_step2
+  /* WS-MAN / DASH / AMT6-9+ versions */
+  wsman_info, wsman_up,wsman_down,wsman_reset,wsman_reset
 }; 
 const char *hcmds[] = {
   "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE"
 }; 
-const char *powerstate[] = { /* AMT */
+const char *powerstate[] = { /* AMT/ACPI */
  "S0 (on)", "S1 (cpu stop)", "S2 (cpu off)", "S3 (sleep)",
- "S4 (hibernate)", "S5 (sotf-off)", "S4/S5", "MechOff"
+ "S4 (hibernate)", "S5 (sotf-off)", "S4/S5", "MechOff",
+ "amtcnoclue", "u","v","w","x","y","z", "amtreply_no_match"
 };
-const char *wspowerstate[] = { /* WS-MAN */
- "1", "2", "S0 (on)", "4",
- "5", "6", "7", "8",
- "S5 (soft-off)"
-};
+int wsman2acpi[] = { 8,8,0,8,8,8,8,4,5,8,8,8,8,8,8,8,9 };
 char portnames[3390][8];
 struct host {
   int id;
@@ -226,38 +223,36 @@ static void *process_single_client(void* num) {
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS , enumTxt);
       res = curl_easy_perform(curl);
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-    } else {
-      printf("YIKES. fixme wsman\n");
-    }
+    } else { printf("YIKES. fixme wsman\n"); }
   } 
 
   char umsg[100];
   const char* umsgp = (char*)&umsg;
 
   if(res != CURLE_OK || http_code!=200) {
-    amt_result = -999;
+    amt_result = 16; /* as there is no such acpi/wsman state...  */
     umsgp = curl_easy_strerror(res);
   }
   else {
     amt_result = get_amt_response_status(chunk.memory);
-    if(useWsmanShift)
-      snprintf((char*)&umsg, sizeof umsg, "OK %s%s", 
-        (cmd==CMD_INFO) ? wspowerstate[amt_result] : "",
-        (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
-      );
-    else
-      snprintf((char*)&umsg, sizeof umsg, "OK %s%s", 
-        (cmd==CMD_INFO) ? powerstate[amt_result & 0x0f] : "",
-        (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
-      );
+
+    if(useWsmanShift) 
+      amt_result = wsman2acpi[amt_result];
+    else 
+      amt_result = amt_result & 0x0f;
+
+    snprintf((char*)&umsg, sizeof umsg, "OK %s%s", 
+      (cmd==CMD_INFO) ? powerstate[amt_result] : "",
+      (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
+    );
 
     if (verbosity>1)
        printf("body (size:%4ld b) received: '%s'\n",
                      (long)chunk.size,chunk.memory);
   }
 
- // fixme: this needs to be duplicated in the function head to eg. reset only SSH boxes (CLI)
-  if ( (scan_ssh||scan_rdp) && (cmd==CMD_INFO && (amt_result & 0x0f)==0) ) {
+  // fixme: this needs to be duplicated in the function head to eg. reset only SSH boxes (CLI)
+  if ( (scan_ssh||scan_rdp) && (cmd==CMD_INFO && amt_result==0) ) {
     os_port=SCANRESULT_NONE_OPEN;
     if (scan_rdp)
       os_port = probe_one_hostport(hostid,PORT_RDP,os_port);
@@ -296,7 +291,7 @@ int get_amt_response_status(void* chunk) {
   char *pos = NULL;
     pos = strstr(chunk, grep);
     if (pos==NULL) {
-      response = -99; // no match -- may be wrong amt version, too
+      response = 15; // no match -- may be wrong amt version
     } else {
       pos = pos + strlen(grep);
       response = atoi(pos);
@@ -437,9 +432,9 @@ void dump_hostlist() {
   } else {
     for(a = 0; a < numHosts; a++) {
       if (!quiet || (quiet && hostlist[a].http_result!=200))
-      printf("%s %-15s OS:%-7s AMT:%04d HTTP:%03d %s\n",
-        hcmds[cmd], hostlist[a].hostname, portnames[hostlist[a].osport],
-         hostlist[a].amt_result, hostlist[a].http_result, hostlist[a].usrmsg);
+      printf("%s %-15s OS:%-7s AMT:%02d HTTP:%03d %s\n", hcmds[cmd], 
+        hostlist[a].hostname, portnames[hostlist[a].osport] ,
+        hostlist[a].amt_result, hostlist[a].http_result, hostlist[a].usrmsg);
     }
   }
 }
