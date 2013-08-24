@@ -1,7 +1,7 @@
 amtc
 ====
 
-`amtc` - Intel [vPro](http://de.wikipedia.org/wiki/Intel_vPro)/[AMT](http://en.wikipedia.org/wiki/Intel_Active_Management_Technology) mass remote power management tool
+`amtc` - Intel [vPro](http://de.wikipedia.org/wiki/Intel_vPro) [AMT](http://en.wikipedia.org/wiki/Intel_Active_Management_Technology) / [WS-Management](http://en.wikipedia.org/wiki/WS-Management) mass remote power management tool
 
 features
 ========
@@ -15,8 +15,8 @@ features
 * comes with a web interface for GUI-based
   * power-live-monitoring (works)
   * including OS tcp port probing/detection (works)
-  * power/OS-monitoring logging with graphing (undone)
-  * remote-management (working on it)
+  * power/OS-monitoring logging with graphing (logging works, graph undone)
+  * remote-management (works, needs cleanup before upload)
 * acts as a tool for flexible and robust scheduled remote power management
 
 The [amtc wiki](https://github.com/schnoddelbotz/amtc/wiki) features more details.
@@ -26,29 +26,32 @@ usage
 
 ```
 
- amtc v0.3.0 - Intel AMT(tm) mass management tool 
-            https://github.com/schnoddelbotz/amtc
+ amtc v0.5.0 - Intel AMT & WS-Man OOB mass management tool
+                     https://github.com/schnoddelbotz/amtc
+ usage
+  amtc [-actions] [-options] host [host ...]
 
- usage:
-  amtc [actions] [options] host [host ...]
+ actions
+  -I(nfo)  query powerstate via AMT (default)
+  -U(p)    powerup given host(s)
+  -D(own)  powerdown
+  -C(ycle) powercycle
+  -R(eset) reset
 
- actions:
-  -i(nfo) query powerstate via AMT (default)
-  -u(p)   powerup given host(s) 
-  -d(own) powerdown
-  -r      powercycle
-  -R      powerreset
-  -s(can) [port] - TCP port scan [notyet]
- options:
-  -t(imeout) in seconds, for curl and tcp scans [ 5]
-  -w(ait)    seconds after each thread created  [ 0]
-  -m(aximum) number of parallel workers to use  [40]
-  -v(erbosity) increase it by adding more v's
-  -j(son) produces JSON output of host states
-  -T(LS)  [notyet]
-  -S(SH)-scan: probe TCP port 22   for OS detection
-  -W(IN)-scan: probe TCP port 3389 for OS detection
-  -p(asswdfile) [notyet; export AMT_PASSWORD ]
+ options
+  -d          for AMT 9.0+ hosts - use WS-Man/DASH
+  -b(oot)     specify boot device ('pxe' or 'hdd') [notyet]
+  -m(aximum)  number of parallel workers to use [40]
+  -p(asswdfile) specify file containing AMT password
+  -j(son)     produces JSON output of host states
+  -q(uiet)    only report unsuccessful operations
+  -r(DP)-scan probe TCP port 3389 for OS detection
+  -s(SH)-scan probe TCP port 22   for OS detection
+  -t(imeout)  in seconds, for amt and tcp scans [5]
+  -g(nutls)   will use TLS and port 16993 [notls/16992]
+  -n(oVerify) will skip cert verification for TLS
+  -v(erbose)  detailed progress, debug by using -vvv
+  -w(ait)     in seconds, after each pc. one thread.
 
 ```
 
@@ -59,15 +62,13 @@ alpha. just for fun. against all odds. works for me.
 building
 ========
 + OSX: Install XCode including CommandLineTools; type make
-+ Debianoid: apt-get install libcurl3 libcurl4-openssl-dev build-essential; type make
++ Debianoid: apt-get install libcurl3 libcurl4-gnutls-dev libgnutls-dev build-essential; type make
 + Windows: install cygwin's curl and pthreads (-dev) packages, make and gcc; type make
 
 todo
 ====
-+ finish port/OS scanner; apply operations only if a given port is open
-+ support control commands in amtc-web (info/view only atm)
 + add quiet mode (error-only) (for cron / free scheduled remote power management)
-+ add TLS support (for AMT hosts provisioned in enterprise mode)
++ allow cert verification for TLS
 + support hosts with AMT < v6.0 ?
 
 alternatives
