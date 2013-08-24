@@ -1,5 +1,5 @@
 
- amtc v0.4.0 - Intel AMT & WS-Man OOB mass management tool 
+ amtc v0.5.0 - Intel AMT & WS-Man OOB mass management tool 
                      https://github.com/schnoddelbotz/amtc
  usage
   amtc [-actions] [-options] host [host ...]

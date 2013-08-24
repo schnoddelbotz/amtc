@@ -107,7 +107,7 @@ char  *grep = (char*)&gre;
 int main(int argc,char **argv,char **envp) {
   int c;
     
-  while ((c = getopt(argc, argv, "IUDRCdqvjsrp:t:w:m:")) != -1)
+  while ((c = getopt(argc, argv, "IUDRCgndqvjsrp:t:w:m:")) != -1)
   switch (c) {
     case 'I': cmd = CMD_INFO;                break; 
     case 'U': cmd = CMD_POWERUP;             break; 
