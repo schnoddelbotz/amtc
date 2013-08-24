@@ -12,16 +12,17 @@
   -R(eset) reset
 
  options
-  -d         for AMT 9.0+ hosts - use WS-Man/DASH
-  -b(oot)    specify boot device ('pxe' or 'hdd')
-  -m(aximum) number of parallel workers to use [40]
+  -d          for AMT 9.0+ hosts - use WS-Man/DASH
+  -b(oot)     specify boot device ('pxe' or 'hdd')
+  -m(aximum)  number of parallel workers to use [40]
   -p(asswdfile) specify file containing AMT password
-  -j(son)    produces JSON output of host states
-  -q(uiet)   only report unsuccessful operations
-  -r(DP)-scan: probe TCP port 3389 for OS detection
-  -s(SH)-scan: probe TCP port 22   for OS detection
-  -t(imeout) in seconds, for amt and tcp scans [5s]
-  -T(LS)     [notyet]
-  -v(erbose) detailed progress, debug by using -vvv
-  -w(ait)    in seconds, after each pc. one thread.
+  -j(son)     produces JSON output of host states
+  -q(uiet)    only report unsuccessful operations
+  -r(DP)-scan probe TCP port 3389 for OS detection
+  -s(SH)-scan probe TCP port 22   for OS detection
+  -t(imeout)  in seconds, for amt and tcp scans [5s]
+  -g(nutls)   will use TLS and port 16993 [notls/16992]
+  -n(oVerify) will skip cert verification for TLS
+  -v(erbose)  detailed progress, debug by using -vvv
+  -w(ait)     in seconds, after each pc. one thread.
 

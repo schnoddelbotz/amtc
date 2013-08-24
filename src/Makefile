@@ -1,5 +1,5 @@
 #LFLAGS=-lcurl -lssl -lcrypto -lpthread
-LFLAGS=-lcurl -lpthread
+LFLAGS=-lcurl -lpthread -lgnutls
 CFLAGS=-I. -Wall
 AMTCV=$(shell cat ../version)
 

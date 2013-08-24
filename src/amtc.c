@@ -1,5 +1,5 @@
 /*
-  amtc v0.4 - Intel AMT & WS-MAN OOB mass management tool
+  amtc v0.5 - Intel AMT & WS-MAN OOB mass management tool
 
   written by jan@hacker.ch, 2013 
   http://jan.hacker.ch/projects/amtc/
@@ -17,6 +17,8 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <curl/curl.h>
+#include <gcrypt.h>
+#include <errno.h>
 #include "amt.h"
 
 #define THREAD_ID        pthread_self(  )
@@ -34,6 +36,7 @@
 #define SCANRESULT_NONE_RUN  999
 #define SCANRESULT_RDP_OPEN  3389
 
+GCRY_THREAD_OPTION_PTHREAD_IMPL;
 
 unsigned char *acmds[] = {
   /* SOAP/XML request bodies as included via amt.h, AMT6-8 */
@@ -74,17 +77,19 @@ void get_amt_pw();
 int  get_amt_response_status(void*);
 int  probe_one_hostport(int,int,int);
 int  get_enum_context(void*,char*);
-
 static size_t write_memory_callback(void*,size_t,size_t,void*);
 
+sem_t  mutex;
 FILE  *pwfile;
-sem_t mutex;
 int   verbosity = 0;
 int   scan_ssh = 0;
 int   scan_rdp = 0;
 int   cmd = 0;
 int   numHosts = 0;
 int   quiet = 0;
+int   noVerifyCert = 0;
+int   amtPort = 16992;
+int   useTLS = 0;
 int   threadsRunning = 0;
 int   connectTimeout = 5;
 int   waitDelay = -1;
@@ -97,7 +102,6 @@ char  gre[64];
 char  *amtpasswdfilep = NULL;
 char  *amtpasswdp = (char*)&amtpasswd;
 char  *grep = (char*)&gre;
-// FIXME xclude
 
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc,char **argv,char **envp) {
@@ -114,6 +118,8 @@ int main(int argc,char **argv,char **envp) {
     case 'r': scan_rdp = 1;                  break; 
     case 'j': produceJSON = 1;               break;
     case 'q': quiet = 1;                     break;
+    case 'g': useTLS = 1; amtPort = 16993;   break;
+    case 'n': noVerifyCert = 1;              break;
     case 'm': maxThreads = atoi(optarg);     break; 
     case 'p': amtpasswdfilep = optarg;       break; 
     case 't': connectTimeout = atoi(optarg); break; 
@@ -154,10 +160,15 @@ int main(int argc,char **argv,char **envp) {
       "<b:RemoteControlResponse><b:Status>");
   }
 
+
   get_amt_pw();
   build_hostlist(argc,argv);
   sem_init(&mutex, 0, 1);
   curl_global_init(CURL_GLOBAL_ALL);
+
+  if (useTLS)
+    gcry_control (GCRYCTL_SET_THREAD_CBS, &gcry_threads_pthread);
+
   process_hostlist();
   sem_destroy(&mutex);
   curl_global_cleanup();
@@ -180,9 +191,6 @@ static void *process_single_client(void* num) {
   int os_port = SCANRESULT_NO_SCANS; 
 
   curl = curl_easy_init();
-  // FIXME add TLS support...
-  // http://curl.haxx.se/libcurl/c/threaded-ssl.html
-  // --> produces lots of openssl deprecation warnings...
 
   if (useWsmanShift!=0) {
 
@@ -194,6 +202,7 @@ static void *process_single_client(void* num) {
                  ".com/platform/client/RemoteControl/2004/01#RemoteControl\"");
 
   headers = curl_slist_append(headers, "Content-Type: text/xml; charset=utf-8");
+                          // Content-Type: application/soap+xml;charset=UTF-8
 
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
@@ -207,6 +216,10 @@ static void *process_single_client(void* num) {
   curl_easy_setopt(curl, CURLOPT_POST , 1);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS , acmds[cmd+useWsmanShift]);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER , headers);
+  if (noVerifyCert) {
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  }
   // http://stackoverflow.com/questions/9191668/error-longjmp-causes-uninitialized-stack-frame
   curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); 
   
@@ -409,9 +422,11 @@ void build_hostlist(int argc,char **argv) {
   for (i=optind; i<argc; i++) {
     hostlist[h].http_result = -2;
     if (useWsmanShift)
-      sprintf(hostlist[h].url,"http://%s:16992/wsman",argv[i]);
+      sprintf(hostlist[h].url,"http://%s:%d/wsman",
+              argv[i],amtPort);
     else 
-      sprintf(hostlist[h].url,"http://%s:16992/RemoteControlService",argv[i]);
+      sprintf(hostlist[h].url,"http://%s:%d/RemoteControlService",
+              argv[i],amtPort);
     sprintf(hostlist[h].hostname,"%s",argv[i]);
     // FIXME should create ip here for scan
     h++;
