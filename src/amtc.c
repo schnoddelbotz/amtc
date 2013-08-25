@@ -410,7 +410,7 @@ void process_hostlist() {
 void build_hostlist(int argc,char **argv) {
   int a;
   // http://www.logix.cz/michal/devel/various/getaddrinfo.c.xp
-  // resolve IP/hostnames FIXME
+  // resolve IP/hostnames (for/if OS probing) FIXME
   for(a = 0; a < MAX_HOSTS; a++) {
     hostlist[a].id = a;
     hostlist[a].http_result = -1;
@@ -421,14 +421,10 @@ void build_hostlist(int argc,char **argv) {
   int i,h=0;
   for (i=optind; i<argc; i++) {
     hostlist[h].http_result = -2;
-    if (useWsmanShift)
-      sprintf(hostlist[h].url,"http://%s:%d/wsman",
-              argv[i],amtPort);
-    else 
-      sprintf(hostlist[h].url,"http://%s:%d/RemoteControlService",
-              argv[i],amtPort);
     sprintf(hostlist[h].hostname,"%s",argv[i]);
-    // FIXME should create ip here for scan
+    sprintf(hostlist[h].url,"http%s://%s:%d/%s",
+              useTLS ? "s" : "", argv[i], amtPort,
+              useWsmanShift ? "wsman" : "RemoteControlService");
     h++;
   }
   numHosts = h;

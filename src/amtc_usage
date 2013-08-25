@@ -5,7 +5,7 @@
   amtc [-actions] [-options] host [host ...]
 
  actions
-  -I(nfo)  query powerstate via AMT (default)
+  -I(nfo)  query powerstate via AMT [default]
   -U(p)    powerup given host(s) 
   -D(own)  powerdown
   -C(ycle) powercycle
@@ -20,7 +20,7 @@
   -q(uiet)    only report unsuccessful operations
   -r(DP)-scan probe TCP port 3389 for OS detection
   -s(SH)-scan probe TCP port 22   for OS detection
-  -t(imeout)  in seconds, for amt and tcp scans [5s]
+  -t(imeout)  in seconds, for amt and tcp scans [5]
   -g(nutls)   will use TLS and port 16993 [notls/16992]
   -n(oVerify) will skip cert verification for TLS
   -v(erbose)  detailed progress, debug by using -vvv
