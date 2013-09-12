@@ -5,8 +5,7 @@
  *
  * a frontend controller class that does request sanitizing,
  * parsing and routing to static class methods. quick, dirty.
- * still includes ugly GUI code that should get out of here
- * and be put in much nicer jquery code...
+ * still includes ugly GUI code that should get out of here.
  */
 
 namespace amtcweb;
@@ -179,7 +178,7 @@ class FrontendCtrl {
   *  functions (only) used for config screens below (fixme: wrong in here).
   */
 
-  /* site local settings screen */
+  /* site local settings screen, holy mess FIXME cleanup */
   static function config_site($that) {
     preg_match('/^([^:]+):(.*)$/',$that->sitecfg['db_dsn'],$dsn);
     $dmeta = Array(
@@ -193,6 +192,7 @@ class FrontendCtrl {
     );
     $submitUrl = 'admin/admin.php?action=config&mode=site&do=submit';
     $sitefile = APP_ROOT."/var/siteconfig.php";
+    $cfgdir = APP_ROOT."/var";
     $saved = '';
     if (@$_REQUEST['do']=='submit') {
       $res = self::writeSiteConfig($_POST,$sitefile,$that->sitecfg);
@@ -201,6 +201,36 @@ class FrontendCtrl {
     }
     $title = "<h2>Local configuration settings</h2>\n$saved";
     $foot  = "<p>";
+    $foot .= "Configuration file used for local settings:<br/>&raquo; <code>$sitefile</code><br/>";
+    // first install: try to create APP_ROOT/var if non-existant
+    clearstatcache();
+    if(file_exists($cfgdir) && is_dir($cfgdir)) {
+      $foot .= 'Config directory <code>'.$cfgdir.'</code> <span class="success">exists</span>.<br/>';
+    } else {
+      if (@mkdir($cfgdir)) {
+        $foot .= '<b>Config directory <code>'.$cfgdir.'</code> created <span class="success">successfully</span>.</b><br/>';
+      } else {
+        $U = posix_getpwuid(posix_geteuid());
+        $G = posix_getgrgid(posix_getgid()); // i just decided amtc-web doesn's support windows 
+        $u = $U['name'];
+        $g = $G['name'];
+        $foot .= '<strong>Can <span class="warning">NOT</span> create config directory '.
+              "<code>$cfgdir</code> !</strong><br/>".
+              'The directory is <span class="warning"><strong>required</strong></span> to use amtc-web!<br/> '.
+              "It must be writable for your webserver's user or group (user $u, group $g).<br/>".
+              'As the directory could not be created by this script, you have to manually ... '.
+              '<ul>'.
+              "<li>create the directory and make it owned by user $u:<br>".
+              " <code>mkdir $cfgdir<br/>chown $u $cfgdir</code> <br/>(to be run as root)  <span class=\"success\"><b>OR</b><span> </li>".
+              "<li>create the directory and make it group writable:<br>".
+              " <code>mkdir $cfgdir<br/> chgrp $g $cfgdir<br/> chmod g+w $cfgdir</code><br/>(to be run as root, too) <span class=\"success\"><b>OR</b><span> </li>".
+              "<li>create a symlink (possibly as regular user):<br/> <code>ln -s /tmp ".APP_ROOT."/var</code><br/>(where <code>/tmp</code> should be replaced with your data directory of choice) </li>".
+              '</ul>'
+              ;
+      }
+    }
+
+    // chk sitefile
     if (!file_exists($sitefile))
       @touch($sitefile); // fix me? 
     $foot .= sprintf('The config directory is currently <span class="%s">%swritable'.
@@ -209,16 +239,20 @@ class FrontendCtrl {
                       is_writable(dirname($sitefile)) ? '' : 'NOT ',
                       is_writable($sitefile) ? 'success' : 'warning',
                       is_writable($sitefile) ? '' : 'NOT ');
+
+    // check DB params
     if ($dsn[1]=='sqlite') {
-      $foot .= sprintf('The sqlite DB directory is currently <span class="%s">%swritable</span>.<br/>',
+      $foot .= sprintf('The sqlite DB directory %s is <span class="%s">%swritable</span>.<br/>',
+                       '<code>'.$dsn[2].'</code>',
                       is_writable(dirname($dsn[2])) ? 'success' : 'warning',
                       is_writable(dirname($dsn[2])) ? '' : 'NOT ' );
       $foot .= sprintf('The sqlite DB file (created during initial DB setup) does <span class="%s">%sexist</span>.<br/>',
                       file_exists($dsn[2]) ? 'success' : 'warning',
                       file_exists($dsn[2]) ? '' : 'NOT ');
     }
-    $foot .= "If either is unwritable, configure via shell (or make them writable).<br/>";
-    $foot .= "Configuration file used for local settings:<br/>&raquo; <code>$sitefile</code><br/>";
+    $foot .= "For successful amtc-web configuration, all warnings must vanish.<br/>";
+    $foot .= "For production use, you may make the configuration file read-only.<br/>";
+    $foot .= "To refresh this report, reload this page or switch tabs.";
     $foot .= "</p>";
     $that->outputMode = 'raw'; /* tell calling FEcontroller to produce html page */
     return $title.self::renderForm('sitecfg',$that->sitecfg,'Save settings',$dmeta,$submitUrl).$foot;

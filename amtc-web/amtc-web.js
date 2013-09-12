@@ -46,8 +46,6 @@ $(document).ready(function() {
   initViewModeButtons();
   initConfigScreens();
   initPowerController();
-  //window.setTimeout(goHashUrl, 500); // fixme: rooms must be loaded before...
-  //goHashUrl();
 });
 
 
@@ -97,6 +95,7 @@ function loadRooms() {
         });
         $(".roomSelector").css( 'cursor', 'pointer' );
      } else {
+      if (!window.location.hash)
           $("#admin").trigger('click');
      }
      goHashUrl();

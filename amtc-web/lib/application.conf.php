@@ -77,7 +77,7 @@ $requestRouterConfig = Array(
  * tab in amtc-web's configuration frontend.
  */
 $siteconfigDefaults = Array(
-  'db_dsn'      => 'sqlite:/var/log/httpd/amtc-web.db',
+  'db_dsn'      => 'sqlite:'.APP_ROOT.'/var/amtc-web.db',
   'db_user'     => '',
   'db_pass'     => '',
   'amtc_exe'    => '/usr/bin/amtc',
