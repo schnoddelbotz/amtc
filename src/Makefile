@@ -27,7 +27,7 @@ clean:
 # create a tagged release and push it
 # fixme: should update README.md usage
 tag-rel-push:
-	( cd .. ; git commit . ; git tag -a "amtc-$(AMTCV)" -m "Created release $(AMTCV)" )
+	( cd .. ; git commit . ; git tag -a "v$(AMTCV)" -m "Created release $(AMTCV)" )
 	( cd .. ; git push ; git push --tags )
 
 # build from github tagged release
