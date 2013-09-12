@@ -34,6 +34,7 @@ var showLive=1; /* alternative: showLog, FIXME showConfig */
 var zoom=1;
 var configTabs;
 var amtc_rooms;
+var currentViewMode;
 var powerstates = {"pc":"any", "S0":"on", "S3":"sleep", "S4":"hibernate", "S5":"soft-off",
                    "S16":"no-reply", "ssh":"SSH","rdp":"RDP","none":"No-OS"};
 
@@ -45,7 +46,8 @@ $(document).ready(function() {
   initViewModeButtons();
   initConfigScreens();
   initPowerController();
-  goHashUrl();
+  //window.setTimeout(goHashUrl, 500); // fixme: rooms must be loaded before...
+  //goHashUrl();
 });
 
 
@@ -96,6 +98,7 @@ function loadRooms() {
      } else {
           $("#admin").trigger('click');
      }
+     goHashUrl();
   });
 }
 
@@ -128,6 +131,7 @@ function goHashUrl() {
     if (args[0]=='config') {
       /* admin config mode */
       $("#admin").trigger('click');
+      currentViewMode = 'config';
       if (args[1]) {
         var modes = {'overview':0, 'site':1, 'db':2, 'rooms':3, 'scheduler':4};
         configTabs.tabs('option', 'active', modes[args[1]]);
@@ -137,7 +141,13 @@ function goHashUrl() {
     } else {
       /* user live/log mode */
       $("#hosts").html(msg_LoadingLive);
-      showLive = args[0]=='log' ? 0 : 1;
+      if (args[0]=='log') {
+        showLive = 0;
+        currentViewMode = 'log';
+      } else {
+        currentViewMode = 'live';
+        showLive = 1;
+      }
       if (args[2]) {
         var e = args[2].split('-');
         var d = new Date(e[0], e[1]-1, e[2], 12, 0, 0, 0);
@@ -314,36 +324,39 @@ function initViewModeButtons() {
   // create buttons for live and log view mode (upper right)
   $("#live").css( 'cursor', 'pointer' );
   $("#live").click(function() {
-    if (!window.location.hash) window.location.hash = '#live';
+    if (currentViewMode!='live') window.location.hash = '#live';
     $("#vm div.viewmodebutton").removeClass("selected-viewmode");
     $("#live").addClass("selected-viewmode");
     $("#config").hide();
     $("#hosts").show();
     $("#rooms").show();
     showLive = 1;
+    currentViewMode = 'live';
     setRoom(currentRoom,0);
   });
   //
   $("#log").css( 'cursor', 'pointer' );
   $("#log").click(function() {
-    if (!window.location.hash) window.location.hash = '#log';
+    if (currentViewMode!='log') window.location.hash = '#log';
     $("#vm div.viewmodebutton").removeClass("selected-viewmode");
     $("#log").addClass("selected-viewmode");
     $("#config").hide();
     $("#hosts").show();
     $("#rooms").show(); 
     showLive = 0;
+    currentViewMode = 'log';
     setRoom(currentRoom,new Date());
   });
   //
   $("#admin").css( 'cursor', 'pointer' );
   $("#admin").click(function() {
-    if (!window.location.hash) window.location.hash = '#config';
+    if (currentViewMode!='config') window.location.hash = '#config';
     $("#vm div.viewmodebutton").removeClass("selected-viewmode");
     $("#admin").addClass("selected-viewmode");
     $("#livectrl").hide();
     $("#hosts").hide();
     $("#rooms").hide();
+    currentViewMode = 'config';
     $("#config").show(); // 'static' config screens from index.html
   });
 }
@@ -447,7 +460,6 @@ function initPowerController() {
         $("#ctrlSubmit").removeAttr('disabled');
         $("#ctrl").hide();
         updatePowerController();
-        //window.setTimeout(window.location.reload.bind(window.location), 1250);
       }
     ).error(function() { 
       $("#wheel").hide();
