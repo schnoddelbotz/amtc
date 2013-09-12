@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <title>amtc - remote power management</title>
+ <link type="text/css" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css">
+ <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+ <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+ <link type="text/css" rel="stylesheet" href="amtc-web.css">
+ <script src="amtc-web.js"></script>
+</head>
+<body>
+
+<h2 id="pageheader">AMT remote power management<img id="wheel" src="img/wheel.gif"></h2>
+
+<noscript>
+  <div id="noscript">... will not work without JavaScript being enabled in your browser</div>
+</noscript>
+
+<div class="roomSelector" id="rooms">
+</div>
+
+<div id="vm" style="margin:0;float:right;">
+  <div class="viewmodebutton small ui-corner-top" id="admin" title="configure amtc">&#x1F680;</div> 
+  <div class="viewmodebutton small ui-corner-top" id="nd" title="log: next day">&raquo;</div> 
+  <div class="viewmodebutton ui-corner-top" id="log" title="view logged power & OS state">log</div> 
+  <div class="viewmodebutton small ui-corner-top" id="pd" title="log: previous day">&laquo;</div> 
+  <div class="viewmodebutton ui-corner-top selected-viewmode" id="live" title="view live power & OS state">live</div> 
+</div>
+
+
+<div id="canvas" class="ui-corner-bottom">
+  <div id="hosts" class="">
+  </div>
+  <div id="config" class="">
+    <ul>
+      <li><a href="#tabs-1">Overview</a></li>
+      <li><a href="admin/admin.php?action=config&mode=site">Site settings</a></li>
+      <li><a href="admin/admin.php?action=config&mode=db">Database</a></li>
+      <li><a href="#roomcfg">Manage rooms</a></li>
+      <li><a href="admin/admin.php?action=config&mode=scheduler">Scheduler</a></li>
+    </ul>
+    <div id="tabs-1">
+      <h2>Welcome to amtc-web</h2>
+      <h3>What is amtc-web?</h3>
+      <p>amtc-web is a web front-end for remote power management using intel vPro/<a style="color:blue;" href="http://en.wikipedia.org/wiki/Intel_Active_Management_Technology">AMT</a> technology (including the older (and faster)
+         EOI protocol as supported by AMT up to version 8, as well as the newer <a style="color:blue;" href="http://en.wikipedia.org/wiki/WS-Management">WS-Management</a>
+         as supported by AMT version 3 and greater; 
+         <a style="color:blue;" href="http://en.wikipedia.org/wiki/Intel_AMT_versions">see also</a>).
+         It uses <a style="color:blue;" href="https://github.com/schnoddelbotz/amtc">amtc</a> in the background for power
+         state live gathering and control. Once set up, amtc-web not only allows comfortable
+         monitoring and control, but also can create graphs of logged power states.
+         See <a style="color:blue;" href="https://github.com/schnoddelbotz/amtc/wiki">amtc wiki</a> for
+         information on how to enable logging (triggered via cron).
+      </p>
+
+      <h3>How to configure</h3>
+      <p>amtc-web will keep you redirected to this setup
+         page until you have configured your first room containing some vPro capable hosts.
+         Start by choosing your DB that is supported by your PHP's PDO module and specify
+         the corresponding DSN on the 'Site settings' tab. Afterwards, you can switch
+         to the 'Database' tab to import table structures into your new database.
+         Use the 'Manage rooms' tab to create/delete/edit rooms and PCs to control.
+         The 'Scheduler' displays queued power control commands.
+      </p>
+
+      <h3>Important notes</h3>
+      <p>amtc-web is, as amtc, open source software that you can do with what you want.
+        But still, this is just a fun project and no gurantees of any kind are given.
+        Please feel free to improve - and share!
+      </p>
+      <p>
+        Ensure to <span class="warning">lock down admin access</span> by placing an .htaccess
+        file in the /admin subfolder of your amtc-web installation. The password store defined
+        in there will be responsible for authentication popups you will see when clicking
+        one of the tabs above...
+      </p>
+   </div>
+   <div id="roomcfg">
+      <h2>Manage rooms and PCs</h2>
+     <div class="roomSelector" id="roomcfg_rooms">
+     </div> 
+     <div class="clearfix"></div>
+     <div id="cfghosts" class="">
+     </div>
+     <div class="clearfix"></div>
+     <div id="editRoom">
+        <form id="editRoomForm">
+        <dl>
+          <dt>Room name (only allowed: a-zA-Z0-9_-, no whitespace)</dt>
+          <dd><input id="roomName" type="text" size="50" name="roomname" value=""></dd>
+        
+          <dt>AMT version of PCs in room (5-9 supported, 0 disables)</dt>
+          <dd><input id="amtVersion" type="text" size="50" name="amtVersion" value="8"></dd>
+        
+          <dt>PC idle power rating (Watt)</dt>
+          <dd><input id="idlePower" type="text" size="50" name="idle_power" value="43.21"></dd>
+        </dl>
+        <input type="button" id="addRoom_submit" value="Create new room">
+        <div id="existingRoom">
+          <input type="button" id="editRoom_submit" value="Update room">
+          <input type="button" id="deleteRoom_submit" value="Delete room">
+          <dl>
+            <dt id="newHostDt">Hostname of new PC</dt>
+            <dd><input id="createPc" type="text" size="50" name="createPc" value=""></dd>
+          </dl>
+          <input type="button" id="createPc_submit" value="Create new PC in room">
+          <br/>
+          <br/>
+          <input type="checkbox" id="enableConfirmations" checked="checked">
+          <label for="enableConfirmations">Enable confirmations for delete operations</label>
+          <input type="hidden" id="roomid" value="">
+        </div>
+        </form>
+        <p id="modRoom_msg" class="umsg"></p>
+     </div>
+   </div>
+  </div>
+</div>
+<p style="margin:0;float:right;">
+  <a style="color:#aaa" href="https://github.com/schnoddelbotz/amtc">powered by amtc</a>
+</p>
+
+
+<div id="livectrl">
+  <h3>Select hosts above like files in Finder/Explorer or by state below</h3>
+  <p id="hselect"></p>
+    <div id="ctrl">
+    <h3>Action for selected <span id="numselected"></span>&nbsp;hosts</h3>
+      <form>
+       <input type="radio" name="cmd" id="powerdown" value="D"><label for="powerdown">powerdown</label>
+       <input type="radio" name="cmd" id="powerup" value="U"><label for="powerup">powerup</label>
+       <input type="radio" name="cmd" id="powercycle" value="C"><label for="powercycle">powercycle</label>
+       <input type="radio" name="cmd" id="reset" value="R"><label for="reset">reset</label>
+       ... using a inter-command-delay of <input id="delay" type="text"  name="delay" value="5" size=3> seconds
+       <input type="button" id="ctrlSubmit" value="Do it" name="bar">
+      </form>
+</div>
+</div>
+
+</body>
+</html>
