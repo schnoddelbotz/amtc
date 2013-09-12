@@ -71,6 +71,7 @@ function cfgRoom(room/*name*/) {
         $("#idlePower").val(data.data.roomMeta.avg_pwr_on);
         $("#roomid").val(data.data.roomMeta.id);
         $("#createPc_submit").val('Create new PC in room '+room);
+        $("#modRoom_msg").html("");
       } else {
         $("#cfghosts").html('<h2 class="warning">'+data.usermsg+'</h2>');
       }
@@ -503,6 +504,7 @@ function deleteRoom(r/*oomname*/) {
         $("#cfgr_"+r).remove();
         $("#cfghosts").html("");
         $("dd input").val("");
+        $("#existingRoom").hide();
       } else
         alert("Failed to remove room: "+data.usermsg);
     }).error(function() {
