@@ -128,7 +128,15 @@ int main(int argc,char **argv,char **envp) {
     case 'w': waitDelay = atoi(optarg);      break; 
   }
 
-  if (waitDelay==-1 && cmd == CMD_POWERUP) {
+  strcpy(portnames[SCANRESULT_NONE_OPEN],"none"); /* no open ports found */
+  strcpy(portnames[SCANRESULT_NONE_RUN], "skipped"); /* skipped, eg. pwrd off */
+  strcpy(portnames[SCANRESULT_NO_SCANS], "noscan"); /* neither -S nor -W */
+  strcpy(portnames[SCANRESULT_SSH_OPEN], "ssh"); 
+  strcpy(portnames[SCANRESULT_RDP_OPEN], "rdp");
+
+  build_hostlist(argc,argv);
+
+  if (waitDelay==-1 && cmd == CMD_POWERUP && numHosts>1) {
     printf("#Info: No -w(wait) delay specified for powerup.\n" \
            "#Info: Using default delay of 5 seconds to prevent spikes.\n");
     waitDelay=5;
@@ -143,13 +151,6 @@ int main(int argc,char **argv,char **envp) {
     printf("%s", amtc_usage);
     exit(2);
   }
-
-  strcpy(portnames[SCANRESULT_NONE_OPEN],"none"); /* no open ports found */
-  strcpy(portnames[SCANRESULT_NONE_RUN], "skipped"); /* skipped, eg. pwrd off */
-  strcpy(portnames[SCANRESULT_NO_SCANS], "noscan"); /* neither -S nor -W */
-  strcpy(portnames[SCANRESULT_SSH_OPEN], "ssh"); 
-  strcpy(portnames[SCANRESULT_RDP_OPEN], "rdp");
-
   if (cmd==CMD_INFO) {
     snprintf(grep,sizeof gre, useWsmanShift ?
       "<h:PowerState>" : 
@@ -160,16 +161,14 @@ int main(int argc,char **argv,char **envp) {
       "<b:RemoteControlResponse><b:Status>");
   }
 
-
   get_amt_pw();
-  build_hostlist(argc,argv);
+
   sem_init(&mutex, 0, 1);
   curl_global_init(CURL_GLOBAL_ALL);
-
-  if (useTLS)
-    gcry_control (GCRYCTL_SET_THREAD_CBS, &gcry_threads_pthread);
+  gcry_control (GCRYCTL_SET_THREAD_CBS, &gcry_threads_pthread);
 
   process_hostlist();
+
   sem_destroy(&mutex);
   curl_global_cleanup();
   dump_hostlist();

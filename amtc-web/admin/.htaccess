@@ -1,0 +1,5 @@
+
+AuthName "amtc AMT Power commands"
+AuthType "Basic"
+AuthUserFile "/scratch/amtc-web.htpasswd"
+require valid-user
