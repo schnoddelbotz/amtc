@@ -2,6 +2,7 @@
 LFLAGS=-lcurl -lpthread -lgnutls -lgcrypt
 CFLAGS=-I. -Wall
 AMTCV=$(shell cat ../version)
+APP=amtc-$(AMTCV)
 
 RPMBUILD ?= $(HOME)/rpmbuild
 RPMSRC ?= "$(RPMBUILD)/SOURCES/amtc-$(AMTCV).tar.gz"
@@ -27,29 +28,23 @@ clean:
 # create a tagged release and push it
 # fixme: should update README.md usage
 tag-rel-push:
-	( cd .. ; git commit . ; git tag -a "v$(AMTCV)" -m "Created release $(AMTCV)" )
+	perl -pi -e 's/^Version:.*/Version:\t $(AMTCV)/' ../amtc.spec
+	perl -pi -e 's@archive/\S+.tar.gz@archive/$(APP).tar.gz@' ../amtc.spec
+	( cd .. ; git commit . ; git tag -a "v$(AMTCV)" -m "Created release $(APP)" )
 	( cd .. ; git push ; git push --tags )
 
-# build from github tagged release
-rpm-rel:
+# build from github tagged release (from version defined in ../version)
+rpm-rel: 
 	@echo Building release RPM of amtc $(AMTCV) 
-	wget -P $(RPMBUILD)/SOURCES https://github.com/schnoddelbotz/amtc/archive/v$(AMTCV).tar.gz
-	cp ../amtc.spec $(RPMBUILD)/SPECS
-	perl -pi -e 's/^Version:.*/Version:\t $(AMTCV)/' $(RPMBUILD)/SPECS/amtc.spec
-	perl -pi -e 's@archive/\S+.tar.gz@archive/amtc-$(AMTCV).tar.gz@' $(RPMBUILD)/SPECS/amtc.spec
-	rpmbuild -ba $(RPMBUILD)/SPECS/amtc.spec
+	wget -O $(RPMSRC) https://github.com/schnoddelbotz/amtc/archive/v$(AMTCV).tar.gz
+	rpmbuild -ba ../amtc.spec
 
-install:
-	
 # build from local src
 rpm: rpm-snap
-rpm-snap:
+rpm-snap: 
 	@echo Building snapshot RPM of amtc $(AMTCV) 
-	(cd ../..; tar -cvzf $(RPMSRC) amtc)
-	cp ../amtc.spec $(RPMBUILD)/SPECS
-	perl -pi -e 's/^Version:.*/Version:\t $(AMTCV)/' $(RPMBUILD)/SPECS/amtc.spec
-	perl -pi -e 's@archive/\S+.tar.gz@archive/amtc-$(AMTCV).tar.gz@' $(RPMBUILD)/SPECS/amtc.spec
-	rpmbuild -ba $(RPMBUILD)/SPECS/amtc.spec
+	(cd ../..; mv amtc $(APP); tar -cvzf $(RPMSRC) $(APP); mv $(APP) amtc )
+	rpmbuild -ba ../amtc.spec
 
 install:
 	mkdir -p $(DESTDIR)/$(BINDIR) $(DESTDIR)/$(WWWDIR)

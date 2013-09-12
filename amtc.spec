@@ -1,12 +1,12 @@
 Name:		amtc
-Version:	0.6.0
+Version:	 0.6.2
 Release:	1%{?dist}
 Summary:	Threaded remote power management commandline tool for intel vPro/AMT&DASH hosts
 
 Group:		Applications/System
 License:	CC BY 3.0
 URL:		https://github.com/schnoddelbotz/amtc
-Source0:	https://github.com/schnoddelbotz/amtc/archive/v0.6.0.tar.gz
+Source0:	https://github.com/schnoddelbotz/amtc/archive/amtc-0.6.2.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires:  libcurl-devel,gnutls-devel
@@ -26,7 +26,7 @@ for power management tasks and power state logging/graphing.
 Combining amtc (or amtc-web) with cron makes scheduled power management.
 
 %prep
-%setup -qn amtc
+%setup -q
 
 %build
 cd src
