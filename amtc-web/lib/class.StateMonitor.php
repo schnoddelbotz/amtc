@@ -49,6 +49,7 @@ class StateMonitor {
   }
 
   static function logState($roomname) {
+    $num_updates = 0;
     $room = Room::getRoom($roomname);
     $rportmap = array('ssh'=>22, 'rdp'=>'3389', 'none'=>'0', 'skipped'=>'0');
     if ($room) {
@@ -56,7 +57,7 @@ class StateMonitor {
       $now = amtc::getRoomState($roomname);
       $db = new \PDO(DB_DSN,DB_USER,DB_PASS);
       $qry = $db->prepare('INSERT INTO logdata VALUES (?,?,?,?,?,?)');
-      foreach ($now as $host=>$state) {
+      foreach ($now['data'] as $host=>$state) {
         if ( !(
           (@$past[$host]['amt'] == $state->amt) &&
           (@$past[$host]['http'] == $state->http) &&
@@ -65,10 +66,11 @@ class StateMonitor {
           $qry->execute(array($room['ip2idmap'][$host], date("Y-m-d H:i:s"),
                               $rportmap[$state->oport], date('G')*60+date('i'),
                               $state->amt, $state->http));
+          $num_updates++;
         }
       }
     }
-    return Array();
+    return FrontendCtrl::createResponse(true,Array(),"Log updated, $num_updates updates.");
   }
           
 }

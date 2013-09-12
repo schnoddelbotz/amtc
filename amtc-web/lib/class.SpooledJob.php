@@ -36,7 +36,7 @@ class SpooledJob {
       $db->exec('UPDATE jobs SET cmd_state=2,doneat="'.date("Y-m-d H:i:s").'" WHERE id='.$row['id']);
     }
     unlink(SPOOL_LOCK);
-    return Array('');
+    return FrontendCtrl::createResponse(true,Array(),"Queue processed.");
   }
 
   static function submitJob($room,$cmd,$hosts,$delay) {
