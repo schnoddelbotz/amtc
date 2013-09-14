@@ -210,14 +210,18 @@ class FrontendCtrl {
       if (@mkdir($cfgdir)) {
         $foot .= '<b>Config directory <code>'.$cfgdir.'</code> created <span class="success">successfully</span>.</b><br/>';
       } else {
-        $U = posix_getpwuid(posix_geteuid());
-        $G = posix_getgrgid(posix_getgid()); // i just decided amtc-web doesn's support windows 
-        $u = $U['name'];
-        $g = $G['name'];
+        $ug=''; // user and group
+        if (function_exists(posix_getpwuid)) {
+          $U = posix_getpwuid(posix_geteuid());
+          $G = posix_getgrgid(posix_getgid()); // i just decided amtc-web doesn's support windows 
+          $u = $U['name'];
+          $g = $G['name'];
+          $ug = " (user $u, group $g)";
+        }
         $foot .= '<strong>Can <span class="warning">NOT</span> create config directory '.
               "<code>$cfgdir</code> !</strong><br/>".
               'The directory is <span class="warning"><strong>required</strong></span> to use amtc-web!<br/> '.
-              "It must be writable for your webserver's user or group (user $u, group $g).<br/>".
+              "It must be writable for your webserver's user or group$ug.<br/>".
               'As the directory could not be created by this script, you have to manually ... '.
               '<ul>'.
               "<li>create the directory and make it owned by user $u:<br>".
