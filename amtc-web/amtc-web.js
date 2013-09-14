@@ -99,7 +99,12 @@ function loadRooms() {
           $("#admin").trigger('click');
      }
      goHashUrl();
-  });
+  }).error(function(e) {
+      if (e.responseText.substring(0,5)==='<?php') {
+        $("#hosts").html('<h2 class="warning">ERROR: Seems your webserver has no PHP support enabled?</h2>');
+      } else 
+        $("#hosts").html('<h2 class="warning">ERROR: '+e.statusText+'</h2>');
+  });;
 }
 
 /* called upon page admin tab switch and after modifications to rooms.
