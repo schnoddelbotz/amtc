@@ -279,14 +279,24 @@ class FrontendCtrl {
     $submitUrl = 'admin/admin.php?action=config&mode=db&do=submit';
     $c = "<h2>Database setup</h2>\n<dl>\n";
     $_fmt  = '<dt>%s</dt><dd>%s</dd>';
-    $supported = Array();
-    if (method_exists('PDO','getAvailableDrivers')){
-      $supported = \PDO::getAvailableDrivers();
+    // check PHP db support
+    $has_PDO = class_exists('\\PDO');
+    $supported = '<span class="warning">No PHP PDO support!</span>';
+    if ($has_PDO) {
+      $drivers = \PDO::getAvailableDrivers();
+      $supported = implode(", ",$drivers);
+      
+      if (count($drivers)<1)
+        $supported = '<span class="warning">No PHP PDO drivers installed!</span>';
     }
-    $c .= sprintf($_fmt, 'PHP supported PDO drivers', implode(", ", $supported));
+    $c .= sprintf($_fmt, 'PHP supported PDO drivers', $supported);
     $c .= sprintf($_fmt, 'Selected PDO driver', $dsn[1]);
-    $c .= self::testDb();
-    $c .= self::renderForm('dbsetup',Array(),'First install: Create required tables',Array(),$submitUrl);
+    if ($dsn[1] && $has_PDO) {
+      $c .= self::testDb();
+      $c .= self::renderForm('dbsetup',Array(),
+                             'First install: Create required tables',
+                             Array(),$submitUrl);
+    }
     $c .= '</dl>';
     return $c;
     // RFE: Add DB stats (#rooms, #pcs, #logdata...); add DB refcheck/garbage collect; optimize/compact
