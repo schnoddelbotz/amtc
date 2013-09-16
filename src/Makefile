@@ -51,3 +51,8 @@ install:
 	cp amtc $(DESTDIR)/$(BINDIR)
 	cp -R ../amtc-web $(DESTDIR)/var/www/html
 
+# build q&_d_ debian package (uses debian's equivs)
+deb: amtc
+	( cp amtc ..; cd .. ; equivs-build amtc.equivs )
+	( cd .. ; perl -e 'foreach (glob("amtc-web/*/*")) {push @F, "$$_ /var/www/$$_"}; $$f=join("\n ",@F); while (<>) {s#^Files:.*#Files: $$f#;print;}' amtc-web.equivs>amtc-web.equivs.build;  equivs-build amtc-web.equivs.build )
+
