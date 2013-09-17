@@ -150,8 +150,10 @@ class FrontendCtrl {
   
   /* verify sufficient access perms for action. to be called after getAction() */
   function verifyPermission() {
+    if (PHP_SAPI!=='cli' && in_array($this->actionMethod,$this->cfg['action_deny_web']))
+      throw new \Exception("Insufficient permissions (only CLI access allowed).");
     if (!$this->isAdmin && in_array($this->actionMethod,$this->cfg['action_requires_admin']))
-      throw new \Exception("Insufficient permissions.");
+      throw new \Exception("Insufficient permissions (requires valid-user privileges).");
   }
 
   /* default action method */
@@ -346,8 +348,8 @@ class FrontendCtrl {
   }
 
   static function config_scheduler($that) {
-    return "<h2>Scheduler status and logs</h2>";
-    // scheduler last run:
+    $jobs = SpooledJob::getQueue(false,false);
+    
     // mutex locked?
     // pending jobs (x) delete
     // past jobs

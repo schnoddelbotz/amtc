@@ -312,7 +312,6 @@ function setRoom(room,showdate) {
     } else {
       showdate = selectedDate;
     }
-
     $.getJSON(logURL+room+sdate, function(data) {
       hostLog=data;
       selectedDate = showdate;
@@ -382,6 +381,8 @@ function initConfigScreens() {
       window.location.hash = '#config;'+modes[modeid];
       if (modeid==3)
         loadCfgRooms();
+      if (modeid==4)
+        displayJobQueue();
     }
   });
   // fixme...ff.: repetetive
@@ -441,6 +442,10 @@ function initConfigScreens() {
   });
   $('#deleteRoom_submit').click(function() {
     deleteRoom(currentRoom);
+  });
+  $("#jobsheader").css( 'cursor', 'pointer' );
+  $('#jobsheader').click(function() {
+    displayJobQueue();
   });
 }
 
@@ -516,6 +521,49 @@ function deleteRoom(r/*oomname*/) {
     }).error(function() {
         alert("Failed to remove room: "+e.statusText);
     });
-
   }
 }
+
+function displayJobQueue() {
+  var t='';
+  $.getJSON(adminScript+'?action=getQueue', function(data) {
+    if (data.success) { 
+      // reply should include status of queue, too!!!!
+      $("#jobtable tbody").html("");
+      $.each( data.data.queue, function( key, value ) {
+        var job = '<tr id="j_'+value.id+'"><td>'+value.id+'</td> <td>'+value.username+
+                  '</td> <td>'+value.cmd_state+'</td>  <td>'+value.createdat+'</td> <td>'+
+                  value.doneat+'</td> <td>'+value.amtc_cmd+'</td><td>'+value.amtc_delay+
+                  '</td><td>'+value.room+'</td><td>'+value.amtc_hosts+'</td>'+
+                  '<td><a href="javascript:deleteJob('+value.id+');">delete job</a></td></tr>';
+        $("#jobtable").append(job);
+        $("#job_"+key).click(function() { deleteJob(key); });
+      });
+      if (data.data.queue.length==0) {
+        $("#jobtable").append('<tr><td colspan=10>No jobs found.<td></tr>');
+      }
+      $("#schedulerstate").html('<p>'+data.data.state+'</p>');
+      var t = $("#jobtable")[0];
+      // thanks to http://www.kryogenix.org/code/browser/sorttable/
+      sorttable.makeSortable(t); 
+    } else
+      alert("Failed to remove room: "+data.usermsg);
+  }).error(function() {
+      alert("Failed to remove room: "+e.statusText);
+  });
+}
+
+function deleteJob(jobid) {
+  var enableConfirmations = $("#enableConfirmations").is(':checked');
+  if (!enableConfirmations || (enableConfirmations && confirm("Really delete job "+jobid+" ?"))) {
+    $.getJSON(adminScript+'?action=deleteJob&jobId='+jobid, function(data) {
+      if (data.success) { 
+        $("#j_"+jobid).remove();
+      } else
+        alert("Failed to remove job: "+data.usermsg);
+    }).error(function() {
+        alert("Failed to remove job: "+e.statusText);
+    });
+  }
+}
+

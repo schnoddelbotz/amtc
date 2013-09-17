@@ -19,6 +19,8 @@ $requestRouterConfig = Array(
     'config'      => 'FrontendCtrl',
     'processQueue'=> 'SpooledJob',
     'submitJob'   => 'SpooledJob',
+    'getQueue'    => 'SpooledJob',
+    'deleteJob'   => 'SpooledJob',
     'getState'    => 'StateMonitor',
     'logState'    => 'StateMonitor',
   ),
@@ -29,7 +31,9 @@ $requestRouterConfig = Array(
   'args' => Array(
     'usage'       => Array(),
     'getRooms'    => Array(),
+    'getQueue'    => Array(),
     'processQueue'=> Array(),
+    'deleteJob'   => Array('jobId'   =>'/^(\d+)$/'),
     'logState'    => Array('roomname'=>$regex_roomname),
     'getRoom'     => Array('roomname'=>$regex_roomname, 
                            'fullResponse'=>'/^(yes|no)$/'),
@@ -66,7 +70,7 @@ $requestRouterConfig = Array(
   // restrictions per action
   'action_deny_cli' => Array(),
   'action_deny_web' => Array('logState','processQueue'),
-  'action_requires_admin'=> Array('config','submitJob','logState'),
+  'action_requires_admin'=> Array('config','submitJob','getQueue'),
 );
 
 /*

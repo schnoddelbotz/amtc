@@ -6,6 +6,7 @@
  <link type="text/css" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css">
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+ <script src="sorttable.js"></script>
  <link type="text/css" rel="stylesheet" href="amtc-web.css">
  <script src="amtc-web.js"></script>
 </head>
@@ -34,13 +35,14 @@
   </div>
   <div id="config" class="">
     <ul>
-      <li><a href="#tabs-1">Overview</a></li>
+      <li><a href="#overview">Overview</a></li>
       <li><a href="admin/admin.php?action=config&mode=site">Site settings</a></li>
       <li><a href="admin/admin.php?action=config&mode=db">Database</a></li>
       <li><a href="#roomcfg">Manage rooms</a></li>
-      <li><a href="admin/admin.php?action=config&mode=scheduler">Scheduler</a></li>
+      <li><a href="#scheduler">Scheduler</a></li>
     </ul>
-    <div id="tabs-1">
+
+    <div id="overview">
       <h2>Welcome to amtc-web</h2>
       <h3>What is amtc-web?</h3>
       <p>amtc-web is a web front-end for remote power management using intel vPro/<a style="color:blue;" href="http://en.wikipedia.org/wiki/Intel_Active_Management_Technology">AMT</a> technology (including the older (and faster)
@@ -76,12 +78,14 @@
         one of the tabs above...
       </p>
    </div>
+
    <div id="roomcfg">
       <h2>Manage rooms and PCs</h2>
      <div class="roomSelector" id="roomcfg_rooms">
      </div> 
      <div class="clearfix"></div>
      <div id="cfghosts" class="">
+      <p>Please create or select a room.</p>
      </div>
      <div class="clearfix"></div>
      <div id="editRoom">
@@ -115,8 +119,36 @@
         <p id="modRoom_msg" class="umsg"></p>
      </div>
    </div>
+
+  <div id="scheduler">
+    <h2 id="jobsheader">Job scheduler management</h2>
+    <div id="schedulerstate">
+      <p>Unknown scheduler state (yet).</p>
+    </div>
+    <table class="sortable" id="jobtable">
+      <thead>
+        <tr> 
+          <th>JobId</th> 
+          <th>SubmitUser</th> 
+          <th>Status</th>
+          <th>Submitted</th> 
+          <th>Done</th> 
+          <th>Action</th> 
+          <th>delay</th>
+          <th>Room</th> 
+          <th>Hosts</th> 
+          <th>delete?</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
   </div>
-</div>
+
+  </div> <!-- /config -->
+</div> <!-- /canvas -->
+
+    <div class="clearfix"></div>
 <p style="margin:0;float:right;">
   <a style="color:#aaa" href="https://github.com/schnoddelbotz/amtc">powered by amtc</a>
 </p>

@@ -43,6 +43,8 @@ rpm-rel:
 rpm: rpm-snap
 rpm-snap: 
 	@echo Building snapshot RPM of amtc $(AMTCV) 
+	perl -pi -e 's/^Version:.*/Version:\t $(AMTCV)/' ../amtc.spec
+	perl -pi -e 's@archive/\S+.tar.gz@archive/$(APP).tar.gz@' ../amtc.spec
 	(cd ../..; mv amtc $(APP); tar -cvzf $(RPMSRC) $(APP); mv $(APP) amtc )
 	rpmbuild -ba ../amtc.spec
 

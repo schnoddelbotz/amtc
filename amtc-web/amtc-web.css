@@ -78,6 +78,12 @@ h2 {
 #config p.umsg {
   height:30px;
 }
+table.sortable thead {
+    background-color:#eee;
+    color:#666666;
+    font-weight: bold;
+    cursor: default;
+}
 
 /* hosts in live viewmode */
 #hosts {
