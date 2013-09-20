@@ -19,6 +19,7 @@ date_default_timezone_set(@$siteconfig['timezone'] ?
 
 require('lib/application.conf.php');
 require('lib/class.FrontendCtrl.php');
+require('lib/class.AmtcWebSetup.php');
 require('lib/class.StateMonitor.php');
 require('lib/class.SpooledJob.php');
 require('lib/class.Room.php');
