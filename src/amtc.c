@@ -1,5 +1,5 @@
 /*
-  amtc v0.5 - Intel AMT & WS-MAN OOB mass management tool
+  amtc v0.7 - Intel AMT & WS-MAN OOB mass management tool
 
   written by jan@hacker.ch, 2013 
   http://jan.hacker.ch/projects/amtc/
@@ -100,6 +100,7 @@ char  amtpasswdfile[255];
 char  amtpasswd[32];
 char  gre[64];
 char  *amtpasswdfilep = NULL;
+char  *cacertfilep = NULL;
 char  *amtpasswdp = (char*)&amtpasswd;
 char  *grep = (char*)&gre;
 
@@ -107,7 +108,7 @@ char  *grep = (char*)&gre;
 int main(int argc,char **argv,char **envp) {
   int c;
     
-  while ((c = getopt(argc, argv, "IUDRCgndqvjsrp:t:w:m:")) != -1)
+  while ((c = getopt(argc, argv, "IUDRCgndqvjsrp:t:w:m:c:")) != -1)
   switch (c) {
     case 'I': cmd = CMD_INFO;                break; 
     case 'U': cmd = CMD_POWERUP;             break; 
@@ -122,6 +123,7 @@ int main(int argc,char **argv,char **envp) {
     case 'n': noVerifyCert = 1;              break;
     case 'm': maxThreads = atoi(optarg);     break; 
     case 'p': amtpasswdfilep = optarg;       break; 
+    case 'c': cacertfilep = optarg;          break; 
     case 't': connectTimeout = atoi(optarg); break; 
     case 'v': verbosity += 1;                break;
     case 'd': useWsmanShift = 5;             break;
@@ -218,6 +220,10 @@ static void *process_single_client(void* num) {
   if (noVerifyCert) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  } else if (useTLS) {
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
+    curl_easy_setopt(curl, CURLOPT_CAINFO, cacertfilep ? 
+                           cacertfilep : "/etc/amt-ca.crt"); 
   }
   // http://stackoverflow.com/questions/9191668/error-longjmp-causes-uninitialized-stack-frame
   curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); 

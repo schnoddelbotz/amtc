@@ -27,6 +27,7 @@ h2 {
   display:block; 
   float:left; 
   background-repeat:no-repeat;
+  box-shadow: 3px 3px 4px #aaa;
 }
 #canvas, #rooms, #hosts {
   clear:both; 
@@ -91,6 +92,8 @@ table.sortable thead {
 }
 .pc  {
   width:130px; float:left; margin:0px 5px 5px 0px; padding:2px; overflow:hidden;
+  box-shadow: 2px 2px 3px #ccc;
+  cursor:pointer;
 }
 #hosts .ui-selecting {
   background:black; color:gray;

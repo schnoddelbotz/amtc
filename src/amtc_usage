@@ -1,5 +1,5 @@
 
- amtc v0.5.1 - Intel AMT & WS-Man OOB mass management tool 
+ amtc v0.7.0 - Intel AMT & WS-Man OOB mass management tool 
                      https://github.com/schnoddelbotz/amtc
  usage
   amtc [-actions] [-options] host [host ...]
@@ -22,6 +22,7 @@
   -s(SH)-scan probe TCP port 22   for OS detection
   -t(imeout)  in seconds, for amt and tcp scans [5]
   -g(nutls)   will use TLS and port 16993 [notls/16992]
+  -c(acert)   specify TLS CA cert file [/etc/amt-ca.crt]
   -n(oVerify) will skip cert verification for TLS
   -v(erbose)  detailed progress, debug by using -vvv
   -w(ait)     in seconds, after each pc. one thread.
