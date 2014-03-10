@@ -7,7 +7,7 @@ features
 ========
 
 * performs vital AMT operations (info, powerup, powerdown, reset...)
-* threaded, thus fast (queries 180 Core i5 PCs in a quarter of a second (using EOI))
+* threaded, thus fast (queries 180 Core i5 PCs in a quarter of a second (using EOI and no TLS))
 * allows mass-powerups/downs/... using a custom delay
 * lightweight C application, only depends on libcurl, gnutls and pthreads
 * currently builds fine on linux and OSX (and windows via cygwin; unverified since 0.4.0)
@@ -29,21 +29,23 @@ usage
 
 ```
 
- amtc v0.6.0 - Intel AMT & WS-Man OOB mass management tool
+ amtc v0.8.0 - Intel AMT & WS-Man OOB mass management tool
                      https://github.com/schnoddelbotz/amtc
  usage
   amtc [-actions] [-options] host [host ...]
 
  actions
-  -I(nfo)  query powerstate via AMT (default)
+  -I(nfo)  query powerstate via AMT [default]
   -U(p)    powerup given host(s)
   -D(own)  powerdown
   -C(ycle) powercycle
   -R(eset) reset
+  -L(ist)  valid wsman <classname>s for -E(numeration)
+  -E(numerate) <classname> -- enumerate/list settings
 
  options
   -d          for AMT 9.0+ hosts - use WS-Man/DASH
-  -b(oot)     specify boot device ('pxe' or 'hdd') [notyet]
+  -b(oot)     specify boot device ('pxe' or 'hdd')
   -m(aximum)  number of parallel workers to use [40]
   -p(asswdfile) specify file containing AMT password
   -j(son)     produces JSON output of host states
@@ -52,6 +54,7 @@ usage
   -s(SH)-scan probe TCP port 22   for OS detection
   -t(imeout)  in seconds, for amt and tcp scans [5]
   -g(nutls)   will use TLS and port 16993 [notls/16992]
+  -c(acert)   specify TLS CA cert file [/etc/amt-ca.crt]
   -n(oVerify) will skip cert verification for TLS
   -v(erbose)  detailed progress, debug by using -vvv
   -w(ait)     in seconds, after each pc. one thread.
@@ -61,6 +64,12 @@ usage
 status
 ======
 ever-pre-1.0. just for fun. against all odds. works for me.
+
+amtc 0.8.0 introduced the -E option, which serves for retreiving system
+configuration and asset management data. Currently, amtc will not parse
+those replies and just dump the raw SOAP reply. amtc-web currently
+offers no way yet to retreive/display those values. This will improve,
+sooner or later... stay tuned.
 
 Honestly, in some aspects, `amtc` [still] is a hack. The most obvious
 one is: amtc has no clue of SOAP. It dumbly replays control commands
@@ -85,6 +94,7 @@ test amtc-web not only by clicking around but by turning your own home
 PC on or off using that demo website, you have to set your AMT password 
 to the one stated above. Also note that every full hour, a sane default 
 test database will be restored.
+
 
 building
 ========
@@ -118,7 +128,7 @@ me - in case you really intend to recycle some of these bits ...
 alternatives
 ============
 - [amttool](http://www.kraxel.org/cgit/amtterm/tree/amttool):
-  Without amttool, there would be no amtc. Thanks! Also supports configuration, which amtc doesn't.
+  Without amttool, there would be no amtc. Thanks! 
   amttool is implemented in perl and intended for interactive, verbose single-host operation.
   amtc is implemented in C, and by using threads optimized for quick, succinct (non-)interactive mass-operation.
 - [amttool_tng](http://sourceforge.net/projects/amttool-tng):

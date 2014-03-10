@@ -73,7 +73,7 @@ struct MemoryStruct {
   size_t size;
 };
 char xenumTxt[8192];
-
+char wsman_class_uri[100];
 
 void build_hostlist(int,char**);
 void dump_hostlist();
@@ -124,7 +124,7 @@ int main(int argc,char **argv,char **envp) {
     case 'D': cmd = CMD_POWERDOWN;           break; 
     case 'C': cmd = CMD_POWERCYCLE;          break; 
     case 'R': cmd = CMD_POWERRESET;          break; 
-    case 'E': cmd = CMD_ENUMERATE; useWsmanShift=5; do_enumerate=get_enum_class(optarg); break; 
+    case 'E': cmd = CMD_ENUMERATE; quiet=1; useWsmanShift=5; do_enumerate=get_enum_class(optarg); break; 
     case 'L': list_wsman_cmds();             break; 
     case 's': scan_ssh = 1;                  break; 
     case 'r': scan_rdp = 1;                  break; 
@@ -174,7 +174,22 @@ int main(int argc,char **argv,char **envp) {
       "<b:RemoteControlResponse><b:Status>");
   }
   if (cmd==CMD_ENUMERATE) {
-      sprintf(xenumTxt, (char*)wsman_xenum, wsman_uris[do_enumerate]);
+      // construct uri and request body for enum request
+      int classnum=-1;
+      const char *wsmuris[] = {
+        "http://intel.com/wbem/wscim/1/amt-schema/1/%s",
+        "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/%s",
+        "http://intel.com/wbem/wscim/1/ips-schema/1/%s"
+      };
+      if (strncmp(wsman_classes[do_enumerate], "AMT_", 4) == 0)
+        classnum=0;
+      else if (strncmp(wsman_classes[do_enumerate], "CIM_", 4) == 0)
+        classnum=1;
+      else if (strncmp(wsman_classes[do_enumerate], "IPS_", 4) == 0)
+        classnum=2;
+      
+      sprintf(wsman_class_uri, wsmuris[classnum], wsman_classes[do_enumerate]);
+      sprintf(xenumTxt, (char*)wsman_xenum, wsman_class_uri);
   }
 
   get_amt_pw();
@@ -206,9 +221,9 @@ int get_enum_class(char* aname) {
 void list_wsman_cmds() {
   int x;
   if (verbosity)
-    printf("WS-MAN classes and their URIs:\n");
+    printf("WS-MAN classes as listed in Intel SDK / docs:\n");
   for (x=0; x<num_wsman_cmds; x++) {
-      printf("%-42s %s\n",wsman_classes[x], wsman_uris[x]);
+      printf("%s\n",wsman_classes[x]);
   }
   exit(0);
 }
@@ -253,10 +268,12 @@ static void *process_single_client(void* num) {
   curl_easy_setopt(curl, CURLOPT_PASSWORD, amtpasswdp);
   curl_easy_setopt(curl, CURLOPT_POST , 1);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER , headers);
+
   if (cmd==CMD_ENUMERATE) 
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS , xenumTxt);
   else
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS , acmds[cmd+useWsmanShift]);
+
   if (noVerifyCert) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -285,7 +302,7 @@ static void *process_single_client(void* num) {
     } else { printf("YIKES. fixme wsman\n"); }
   } else if (cmd==CMD_ENUMERATE && http_code==200 && useWsmanShift!=0) {
     if (get_enum_context(chunk.memory,(char*)&enumCtx)) {
-      sprintf(enumTxt, (char*)wsman_xenum_step2, wsman_uris[do_enumerate], enumCtx);
+      sprintf(enumTxt, (char*)wsman_xenum_step2, wsman_class_uri, enumCtx);
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS , enumTxt);
       res = curl_easy_perform(curl);
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
@@ -312,9 +329,14 @@ static void *process_single_client(void* num) {
       (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
     );
 
-    if (verbosity>1 || cmd==CMD_ENUMERATE)
+    if (verbosity>1)
        printf("body (size:%4ld b) received: '%s'\n",
                      (long)chunk.size,chunk.memory);
+
+    // threads will not store these results... (yet?). so print 'parseable' msg.
+    if (cmd==CMD_ENUMERATE)
+       printf("%s %s '%s'\n", (char*)host->hostname,
+                                 wsman_classes[do_enumerate], chunk.memory);
   }
 
   // fixme: this needs to be duplicated in the function head to eg. reset only SSH boxes (CLI)
