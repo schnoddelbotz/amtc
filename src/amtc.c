@@ -1,5 +1,5 @@
 /*
-  amtc v0.7 - Intel AMT & WS-MAN OOB mass management tool
+  amtc v0.8 - Intel AMT & WS-MAN OOB mass management tool
 
   written by jan@hacker.ch, 2013 
   http://jan.hacker.ch/projects/amtc/
@@ -27,6 +27,7 @@
 #define CMD_POWERDOWN 2
 #define CMD_POWERRESET 3
 #define CMD_POWERCYCLE 4
+#define CMD_ENUMERATE  5
 #define MAX_HOSTS 255
 #define PORT_SSH 22
 #define PORT_RDP 3389
@@ -42,7 +43,9 @@ unsigned char *acmds[] = {
   /* SOAP/XML request bodies as included via amt.h, AMT6-8 */
   cmd_info,cmd_powerup,cmd_powerdown,cmd_powerreset,cmd_powercycle,
   /* WS-MAN / DASH / AMT6-9+ versions */
-  wsman_info, wsman_up,wsman_down,wsman_reset,wsman_reset
+  wsman_info, wsman_up,wsman_down,wsman_reset,wsman_reset,
+  /* generic wsman enumerations using -E <classname> */
+  wsman_xenum
 }; 
 const char *hcmds[] = {
   "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE"
@@ -69,6 +72,8 @@ struct MemoryStruct {
   char *memory;
   size_t size;
 };
+char xenumTxt[8192];
+
 
 void build_hostlist(int,char**);
 void dump_hostlist();
@@ -77,6 +82,8 @@ void get_amt_pw();
 int  get_amt_response_status(void*);
 int  probe_one_hostport(int,int,int);
 int  get_enum_context(void*,char*);
+int  get_enum_class(char*);
+void list_wsman_cmds();
 static size_t write_memory_callback(void*,size_t,size_t,void*);
 
 sem_t  mutex;
@@ -85,6 +92,8 @@ int   verbosity = 0;
 int   scan_ssh = 0;
 int   scan_rdp = 0;
 int   cmd = 0;
+int   do_enumerate = 0;
+int   num_wsman_cmds = 261;
 int   numHosts = 0;
 int   quiet = 0;
 int   noVerifyCert = 0;
@@ -108,13 +117,15 @@ char  *grep = (char*)&gre;
 int main(int argc,char **argv,char **envp) {
   int c;
     
-  while ((c = getopt(argc, argv, "IUDRCgndqvjsrp:t:w:m:c:")) != -1)
+  while ((c = getopt(argc, argv, "IUDRCLE:gndqvjsrp:t:w:m:c:")) != -1)
   switch (c) {
     case 'I': cmd = CMD_INFO;                break; 
     case 'U': cmd = CMD_POWERUP;             break; 
     case 'D': cmd = CMD_POWERDOWN;           break; 
     case 'C': cmd = CMD_POWERCYCLE;          break; 
     case 'R': cmd = CMD_POWERRESET;          break; 
+    case 'E': cmd = CMD_ENUMERATE; useWsmanShift=5; do_enumerate=get_enum_class(optarg); break; 
+    case 'L': list_wsman_cmds();             break; 
     case 's': scan_ssh = 1;                  break; 
     case 'r': scan_rdp = 1;                  break; 
     case 'j': produceJSON = 1;               break;
@@ -162,6 +173,9 @@ int main(int argc,char **argv,char **envp) {
       "<g:RequestPowerStateChange_OUTPUT><g:ReturnValue>" : 
       "<b:RemoteControlResponse><b:Status>");
   }
+  if (cmd==CMD_ENUMERATE) {
+      sprintf(xenumTxt, (char*)wsman_xenum, wsman_uris[do_enumerate]);
+  }
 
   get_amt_pw();
 
@@ -176,6 +190,29 @@ int main(int argc,char **argv,char **envp) {
   dump_hostlist();
   return 0;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// returns array index in wsman_classes of given class
+int get_enum_class(char* aname) {
+  int x;
+  for (x=0; x<num_wsman_cmds; x++)
+    if (strcmp(aname,wsman_classes[x])==0)
+      return x;
+  printf("Invalid wsman command. Use -L to list them.\n");
+  exit(1);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void list_wsman_cmds() {
+  int x;
+  if (verbosity)
+    printf("WS-MAN classes and their URIs:\n");
+  for (x=0; x<num_wsman_cmds; x++) {
+      printf("%-42s %s\n",wsman_classes[x], wsman_uris[x]);
+  }
+  exit(0);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 static void *process_single_client(void* num) {
@@ -215,8 +252,11 @@ static void *process_single_client(void* num) {
   curl_easy_setopt(curl, CURLOPT_USERNAME, "admin"  );
   curl_easy_setopt(curl, CURLOPT_PASSWORD, amtpasswdp);
   curl_easy_setopt(curl, CURLOPT_POST , 1);
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS , acmds[cmd+useWsmanShift]);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER , headers);
+  if (cmd==CMD_ENUMERATE) 
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS , xenumTxt);
+  else
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS , acmds[cmd+useWsmanShift]);
   if (noVerifyCert) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -232,7 +272,8 @@ static void *process_single_client(void* num) {
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
   // (just another) hack for ws-man
-  // a enumeration context needs to be requested and pulled
+  // a enumeration context needs to be requested and pulled. see section 8 of
+  // http://software.intel.com/sites/manageability/AMT_Implementation_and_Reference_Guide/default.htm?turl=WordDocuments%2Fdsp0226webservicesformanagementwsmanagementspecification.htm
   char enumCtx[8192];
   char enumTxt[8192];
   if (cmd==CMD_INFO && http_code==200 && useWsmanShift!=0) {
@@ -242,7 +283,14 @@ static void *process_single_client(void* num) {
       res = curl_easy_perform(curl);
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
     } else { printf("YIKES. fixme wsman\n"); }
-  } 
+  } else if (cmd==CMD_ENUMERATE && http_code==200 && useWsmanShift!=0) {
+    if (get_enum_context(chunk.memory,(char*)&enumCtx)) {
+      sprintf(enumTxt, (char*)wsman_xenum_step2, wsman_uris[do_enumerate], enumCtx);
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDS , enumTxt);
+      res = curl_easy_perform(curl);
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+    } else { printf("YUKES. fixme wsman-enum\n"); }
+  }
 
   char umsg[100];
   const char* umsgp = (char*)&umsg;
@@ -264,7 +312,7 @@ static void *process_single_client(void* num) {
       (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
     );
 
-    if (verbosity>1)
+    if (verbosity>1 || cmd==CMD_ENUMERATE)
        printf("body (size:%4ld b) received: '%s'\n",
                      (long)chunk.size,chunk.memory);
   }

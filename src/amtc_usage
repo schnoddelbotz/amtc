@@ -10,6 +10,8 @@
   -D(own)  powerdown
   -C(ycle) powercycle
   -R(eset) reset
+  -L(ist)  valid wsman <classname>s for -E(numeration)
+  -E(numerate) <classname> -- enumerate/list settings
 
  options
   -d          for AMT 9.0+ hosts - use WS-Man/DASH

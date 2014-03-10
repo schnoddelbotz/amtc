@@ -10,7 +10,7 @@ DESTDIR ?= /
 BINDIR ?= usr/bin
 WWWDIR ?= var/www/html
 
-HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset cmd_powercycle wsman_info wsman_info_step2 wsman_up wsman_down wsman_reset
+HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset cmd_powercycle wsman_info wsman_info_step2 wsman_up wsman_down wsman_reset wsman_xenum wsman_xenum_step2
 
 amtc: amt.h 
 	$(CC) -o amtc amtc.c $(CFLAGS) $(LFLAGS)
@@ -18,7 +18,7 @@ amtc: amt.h
 amt.h:
 	perl -pi -e 's/v(\d\.\d\.\d)/v$(AMTCV)/' amtc_usage
 	for H in $(HEADERS); do xxd -i $$H $$H.h; done
-	cat amtc_usage.h cmd_*.h wsman_*.h > amt.h
+	cat amtc_usage.h cmd_*.h wsman_*.h wsman.h > amt.h
 	perl -pi -e 's/(0x\S\S)$$/$$1, 0x00/' amt.h
 	perl -pi -e 's/(\d+);$$/$$1 + 1 .";"/e' amt.h
 
