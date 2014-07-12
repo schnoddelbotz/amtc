@@ -20,7 +20,7 @@ class amtc {
   );
 
   static function run($cmd, $opts, $hostlist) {
-    $cmd = sprintf("%s -p %s %s %s %s",
+    $cmd = sprintf("%s -vv -p %s %s %s %s >>/tmp/amtc.log",
              AMTC_EXE, AMT_PW_FILE, "-".$cmd, $opts, $hostlist);
     return `$cmd`;
   }
@@ -29,7 +29,11 @@ class amtc {
     $r = Room::getRoom($roomName);
     if (!$r)
       return;
-    $amtc_opts = $r['amt_version'] > 8 ? '-d' : '';
+    $amtc_opts = $r['amt_version'] >= 8 ? '-d' : '';
+    if ($r['amt_version'] == 5)
+      $amtc_opts = '-5';
+    if ($r['amt_version'] > 9)
+      $amtc_opts = '-dgn';
     $cmd = sprintf("%s %s %s -p %s %s",
              AMTC_EXE,$amtc_opts, AMTC_OPTS, AMT_PW_FILE, implode(' ',$r['hosts']));
     $retval = 0;

@@ -130,7 +130,7 @@ class FrontendCtrl {
     }
     // check for mandatory args
     foreach ($myargs as $argname=>$regex) {
-      if (@!$safeargs[$argname] && 
+      if (@!isset($safeargs[$argname]) && 
           !@in_array($argname,@array_keys(@$this->cfg['optional_args'][$this->actionMethod]))) {
         throw new \Exception("Missing mandatory argument $argname for method $this->actionMethod");
       }

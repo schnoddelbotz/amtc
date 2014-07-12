@@ -112,12 +112,14 @@ char  *amtpasswdfilep = NULL;
 char  *cacertfilep = NULL;
 char  *amtpasswdp = (char*)&amtpasswd;
 char  *grep = (char*)&gre;
+typedef enum { false, true } bool;
+bool  amtv5 = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc,char **argv,char **envp) {
   int c;
     
-  while ((c = getopt(argc, argv, "IUDRCLE:gndqvjsrp:t:w:m:c:")) != -1)
+  while ((c = getopt(argc, argv, "IUDRCLE:5gndqvjsrp:t:w:m:c:")) != -1)
   switch (c) {
     case 'I': cmd = CMD_INFO;                break; 
     case 'U': cmd = CMD_POWERUP;             break; 
@@ -139,6 +141,7 @@ int main(int argc,char **argv,char **envp) {
     case 'v': verbosity += 1;                break;
     case 'd': useWsmanShift = 5;             break;
     case 'w': waitDelay = atoi(optarg);      break; 
+    case '5': amtv5 = true;                  break;
   }
 
   strcpy(portnames[SCANRESULT_NONE_OPEN],"none"); /* no open ports found */
@@ -168,6 +171,8 @@ int main(int argc,char **argv,char **envp) {
     snprintf(grep,sizeof gre, useWsmanShift ?
       "<h:PowerState>" : 
       "<b:Status>0</b:Status><b:SystemPowerState>");
+    if (amtv5)
+     snprintf(grep,sizeof gre, "<s0:Status>0</s0:Status><s0:SystemPowerState>");
   } else {
     snprintf(grep,sizeof gre, useWsmanShift ? 
       "<g:RequestPowerStateChange_OUTPUT><g:ReturnValue>" : 

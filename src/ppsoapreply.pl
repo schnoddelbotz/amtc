@@ -13,7 +13,7 @@ my @args = @ARGV;
 @ARGV=();
 
 while (<>) {
-  next if !m#^(\S+)\s+(\S+) .*<a:Body><g:PullResponse><g:Items>(.*)</g:Items><g:EndOfSequence></g:EndOfSequence></g:PullResponse></a:Body>#;
+  next if !m#^(\S+)\s+(\S+) .*<g:Items>(.*)</g:Items>#;
   my $host = $1;
   my $wsmclass = $2;
   my $body = $3;

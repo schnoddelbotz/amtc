@@ -467,7 +467,7 @@ function initPowerController() {
       function(data) {
         $("#hosts").html("<strong>Job submitted. Re-select room to refresh view.<br>" +
                          "amtc command line equivalent:</strong><br>");
-        $("#hosts").append("amtc -"+data.cmd+" "+data.hosts);
+        $("#hosts").append("amtc -w "+data.delay+" -"+data.cmd+" "+data.hosts);
         $("#wheel").hide();
         $("#ctrlSubmit").removeAttr('disabled');
         $("#ctrl").hide();

@@ -27,6 +27,8 @@ class SpooledJob {
         continue;
       }
       $amtc_opts = $rinfo['amt_version'] > 8 ? '-dw ' : '-w ';
+      if ($rinfo['amt_version'] > 9)
+        $amtc_opts = '-dgnw ';
       $db->exec('UPDATE jobs SET cmd_state=1,startedat="'.date("Y-m-d H:i:s").'" WHERE id='.$row['id']);
       amtc::run($row['amtc_cmd'], $amtc_opts.$row['amtc_delay'], $row['amtc_hosts']);
       $db->exec('UPDATE jobs SET cmd_state=2,doneat="'.date("Y-m-d H:i:s").'" WHERE id='.$row['id']);
