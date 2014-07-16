@@ -101,7 +101,7 @@ int   amtPort = 16992;
 int   useTLS = 0;
 int   threadsRunning = 0;
 int   connectTimeout = 5;
-int   waitDelay = -1;
+float waitDelay = -1;
 int   maxThreads = 40;
 int   produceJSON = 0;
 int   useWsmanShift = 0;
@@ -140,7 +140,7 @@ int main(int argc,char **argv,char **envp) {
     case 't': connectTimeout = atoi(optarg); break; 
     case 'v': verbosity += 1;                break;
     case 'd': useWsmanShift = 5;             break;
-    case 'w': waitDelay = atoi(optarg);      break; 
+    case 'w': waitDelay = atof(optarg);      break; 
     case '5': amtv5 = true;                  break;
   }
 
@@ -478,7 +478,7 @@ void process_hostlist() {
     }
      
     if (waitDelay)
-      sleep(waitDelay);
+      usleep(waitDelay * 1000000);
   }
 
   for(b = 0; b < numHosts; b++) {
