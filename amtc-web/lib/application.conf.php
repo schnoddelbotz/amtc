@@ -45,7 +45,7 @@ $requestRouterConfig = Array(
     'submitJob'   => Array('roomname'=>$regex_roomname,
                            'cmd'     =>'/^([IUDCR])$/',
                            'hosts'   =>'/^([a-zA-Z0-9-\.\s]+)$/',
-                           'delay'   =>'/^(\d+)$/',
+                           'delay'   =>'/^([\d\.]+)$/',
     ),
     'config'      => Array('mode'    =>'/^(site|db|rooms|scheduler)$/',
                            'do'      =>'/^(submit)$/', 

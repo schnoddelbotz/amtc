@@ -29,7 +29,7 @@ usage
 
 ```
 
- amtc v0.8.0 - Intel AMT & WS-Man OOB mass management tool
+ amtc v0.8.2 - Intel AMT & WS-Man OOB mass management tool
                      https://github.com/schnoddelbotz/amtc
  usage
   amtc [-actions] [-options] host [host ...]
@@ -57,7 +57,7 @@ usage
   -c(acert)   specify TLS CA cert file [/etc/amt-ca.crt]
   -n(oVerify) will skip cert verification for TLS
   -v(erbose)  detailed progress, debug by using -vvv
-  -w(ait)     in seconds, after each pc. one thread.
+  -w(ait)     in seconds / float, after each pc. one thread.
 
 ```
 
