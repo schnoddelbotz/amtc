@@ -161,6 +161,9 @@ div.viewmodebutton.small {
 .p22    { background:#66b;   } /* port 22 SSH */
 .p3389  { background:#d66;   } /* port 3389 window$ */
 .p16992,.p16993 { background:#6a6;   } /* AMT open */
+.whitebox { border:1px solid #aaa; background:#eee; padding:15px; min-height:30px /* fixme */ }
+.logdemo { width:180px; height:30px; float:left; }
+.demobar { width:100px; height:4px; margin-bottom:3px; }
 
 /* background image for log view */
 #hosts.logged {

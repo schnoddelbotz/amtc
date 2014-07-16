@@ -264,6 +264,19 @@ function drawLogHosts() {
     bars += '<div class="bar p'+value.open_port+' a'+value.state_amt+'" style="left:'+barleft+'px; width:'+barwidth+'px;"> </div>';
     lastip=ip;
   });
+
+  // "Legende"
+  var sm = { 
+    'p0 a16':'AMT unreachable', 'p0 a5':'powered down (S5)',  'p0 a4':'hibernate (S4)',
+    'p0 a3':'sleep (S3)',       'p0 a0':'On, no SSH/RDP', 
+    'p22'  :'On, SSH open',     'p3389':'On, RDP open'
+  };
+  var w='';
+  for (key in sm) {
+   w += '<div class="logdemo"><div class="demobar '+key+'" style=""> </div> '+sm[key]+'</div>';
+  }
+  $("#hosts").append('<p class="whitebox"></p>');
+  $("p.whitebox").append(w);
 }
 
 function updatePowerController() {
@@ -543,6 +556,7 @@ function displayJobQueue() {
         $("#jobtable").append('<tr><td colspan=10>No jobs found.<td></tr>');
       }
       $("#schedulerstate").html('<p>'+data.data.state+'</p>');
+      $("#schedulerstate").append('<p>You may try to delete a stale lock file by <a href="'+adminScript+'?action=deleteLock">clicking here</a></p>');
       var t = $("#jobtable")[0];
       // thanks to http://www.kryogenix.org/code/browser/sorttable/
       sorttable.makeSortable(t); 

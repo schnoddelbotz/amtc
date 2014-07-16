@@ -21,6 +21,7 @@ $requestRouterConfig = Array(
     'submitJob'   => 'SpooledJob',
     'getQueue'    => 'SpooledJob',
     'deleteJob'   => 'SpooledJob',
+    'deleteLock'  => 'SpooledJob',
     'getState'    => 'StateMonitor',
     'logState'    => 'StateMonitor',
   ),

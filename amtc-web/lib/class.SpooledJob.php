@@ -18,6 +18,7 @@ class SpooledJob {
     if (file_exists(SPOOL_LOCK))
       return;
     touch(SPOOL_LOCK);
+    chmod(SPOOL_LOCK, 666); // allow LOCK removal by apache user
     $queue = self::getQueue(true,false);
     $db = new \PDO(DB_DSN,DB_USER,DB_PASS);
     if (count($queue)>0)
@@ -68,6 +69,11 @@ class SpooledJob {
     $qry = $db->prepare('INSERT INTO jobs VALUES (?,?,?,?,?,?,?,?,?,?)');
     $qry->execute(array(NULL,0,date("Y-m-d H:i:s"),$user,$cmd,$hosts,NULL,NULL,$delay,$room));
     return Array('room'=>$room,'cmd'=>$cmd,'hosts'=>$hosts,'delay'=>$delay);
+  }
+
+  static function deleteLock($jobid) {
+    if (file_exists(SPOOL_LOCK))
+      unlink(SPOOL_LOCK);
   }
 
   static function deleteJob($jobid) {
