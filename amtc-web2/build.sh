@@ -52,3 +52,11 @@ if [ ! -f "js/sb-admin-2.js" ]; then
   cd ..
   rm -rf tmp2_$$ sb.zip
 fi
+
+if [ ! -d "font-awesome-4.2.0" ]; then
+  echo "Retreiving FontAwesome"
+  curl --insecure -Lso fa.zip http://fortawesome.github.io/Font-Awesome/assets/font-awesome-4.2.0.zip
+  unzip fa.zip
+  rm -rf fa.zip
+fi
+
