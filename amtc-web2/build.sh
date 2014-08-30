@@ -12,7 +12,7 @@ function FetchIfNotExists {
   FileURL=$2
   if [ ! -f "$CheckFile" ]; then 
     echo "Retreiving $FileURL ..."
-    curl --insecure -Lo "$CheckFile" "$FileURL"
+    curl --insecure -Lso "$CheckFile" "$FileURL"
   fi
 }
 
