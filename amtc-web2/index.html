@@ -15,6 +15,7 @@
     <link href="css/sb-admin-2.css" rel="stylesheet">
     <link href="css/plugins/morris.css" rel="stylesheet">
     <link href="font-awesome-4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="css/amtc-web.css" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -26,19 +27,17 @@
 <!-- <div id="wrapper"> -->
 
 <script type="text/x-handlebars" data-template-name="loading">
-<div class="container" style="width:100%;">
   <div class="row">
     <div class="col-lg-6">
       <h1>Loading</h1>
       <p><i>please wait...</i></p>
     </div>
   </div>
-</div>
 </script>
 
 
 <script type="text/x-handlebars">
-<div id="wrapper">
+  <div id="wrapper">
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -47,7 +46,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="index.html">amtc-web :: remote power management</a>
+            <a class="navbar-brand" href="index.html">amtc-web <i class="fa fa-bolt fa-fw black"></i>  <i>remote power management</i></a>
         </div>
         <!-- /.navbar-header -->
 
@@ -345,9 +344,9 @@
                     <li>
                         <a href="#"><i class="fa fa-ambulance fa-fw"></i> Documentation<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
-                            <li> <a href="blank.html"><i class="fa fa-wrench fa-fw"></i> Configuring AMT</a> </li>
-                            <li> <a href="blank.html"><i class="fa fa-child fa-fw"></i> amtc-web first steps</a> </li>
-                            <li> <a href="blank.html"><i class="fa fa-github fa-fw"></i> About, Feedback &amp; more...</a> </li>
+                            <li> <a href="#/pages/1"><i class="fa fa-wrench fa-fw"></i> Configuring AMT</a> </li>
+                            <li> <a href="#/pages/2"><i class="fa fa-child fa-fw"></i> amtc-web first steps</a> </li>
+                            <li> <a href="#/pages/3"><i class="fa fa-github fa-fw"></i> About, Feedback &amp; more...</a> </li>
                         </ul>
                         <!-- /.nav-second-level -->
                     </li>
@@ -361,12 +360,10 @@
     <div id="page-wrapper">
         {{outlet}}
     </div>
-</div>
+  </div>
 </script>
 
-
 <script type="text/x-handlebars" id="index">
-
    <div class="row">
         <div class="col-lg-12">
             <h1 class="page-header">Dashboard</h1>
@@ -804,12 +801,10 @@
         <!-- /.col-lg-4 -->
     </div>
     <!-- /.row -->
-
 </script>
 
 <script type="text/x-handlebars" id="schedule">
   <div class="row">
-
     <div class="col-lg-12">
         <h1 class="page-header">Scheduled power management</h1>
     </div>
@@ -818,8 +813,17 @@
         <p>Hello world</p>
     </div>
   </div>
-
 </script>
+
+<script type="text/x-handlebars" id="page">
+      <div class="row">
+        <div class="col-lg-12">
+          {{! Display a single markdown page from DB }}
+          {{format-markdown page_content}}
+        </div>
+      </div>
+</script>
+
 
 
 <!-- </div> -->

@@ -1,0 +1,6 @@
+RewriteEngine on
+RewriteBase /~jan/amtc-web2/pages
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-l
+RewriteRule .* get_md_page.php [L]

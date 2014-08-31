@@ -16,7 +16,7 @@ function FetchIfNotExists {
   fi
 }
 
-mkdir -p js css
+mkdir -p js css lib
 FetchIfNotExists js/jquery.min.js http://code.jquery.com/jquery-${JQUERY}.min.js
 FetchIfNotExists js/jquery.min.map http://code.jquery.com/jquery-${JQUERY}.min.map
 FetchIfNotExists js/handlebars.js http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v${HANDLEBARS}.js
@@ -31,7 +31,7 @@ if [ ! -f "js/bootstrap.js" ]; then
   echo "Retreiving Twitter bootstrap ..."
   mkdir tmp_$$ && cd tmp_$$
   curl --insecure -Lso bs.zip https://github.com/twbs/bootstrap/releases/download/v${BOOTSTRAP}/bootstrap-${BOOTSTRAP}-dist.zip
-  unzip bs.zip
+  unzip -q bs.zip
   cd bootstrap-${BOOTSTRAP}-dist
   mv fonts ../..
   mv css/* ../../css
@@ -44,7 +44,7 @@ if [ ! -f "js/sb-admin-2.js" ]; then
   echo "Retreiving SB Admin 2"
   mkdir tmp2_$$ && cd tmp2_$$ 
   curl --insecure -Lso sb.zip http://startbootstrap.com/downloads/sb-admin-2.zip
-  unzip sb.zip
+  unzip -q sb.zip
   cp sb-admin-2/css/sb-admin-2.css ../css
   cp -R sb-admin-2/css/plugins ../css
   cp -R sb-admin-2/js/plugins ../js
@@ -56,7 +56,31 @@ fi
 if [ ! -d "font-awesome-4.2.0" ]; then
   echo "Retreiving FontAwesome"
   curl --insecure -Lso fa.zip http://fortawesome.github.io/Font-Awesome/assets/font-awesome-4.2.0.zip
-  unzip fa.zip
+  unzip -q fa.zip
   rm -rf fa.zip
+fi
+
+# concat + gzip js and css for production ...
+
+# tbd...
+
+### PHP libraries
+
+if [ ! -d "lib/Slim" ]; then
+  echo "Retreiving PHP slim"
+  curl --insecure -Lso slim.zip https://github.com/codeguy/Slim/zipball/master
+  unzip -q slim.zip
+  mv codeguy-Slim-*/Slim lib
+  rm -rf codeguy-Slim-* slim.zip 
+fi
+
+if [ ! -d "lib/php-activerecord" ]; then
+  echo "Retreiving PHP activerecord"
+  mkdir -p lib/php-activerecord
+  curl --insecure -Lso ar.tgz http://www.phpactiverecord.org/builds/php-activerecord-20140720.tgz
+  tar -xzf ar.tgz
+  mv php-activerecord/ActiveRecord.php lib/php-activerecord
+  mv php-activerecord/lib lib/php-activerecord
+  rm -rf php-activerecord
 fi
 

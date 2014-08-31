@@ -1,5 +1,11 @@
 
 var App = Ember.Application.create({});
+var attr = DS.attr;
+var hasMany = DS.hasMany;
+
+DS.RESTAdapter.reopen({
+  namespace: '~jan/amtc-web2'
+});
 
 App.Router.map(function() {
   this.resource('about');
@@ -87,7 +93,6 @@ App.IndexView = Ember.View.extend({
     }   
 });
 
-
 App.IndexRoute = Ember.Route.extend({
   enter: function() {
   	console.log("Entered App.IndexRoute");
@@ -111,3 +116,31 @@ App.IndexRoute = Ember.Route.extend({
 	})
 	}
  });
+
+
+/// Markdown help / documentation pages
+App.Page = DS.Model.extend({
+  page_name: attr('string'),
+  page_title: attr('string'),
+  page_content: attr('string'),
+});
+
+App.PageRoute = Ember.Route.extend({
+  enter: function() { window.scrollTo(0, 0); },
+  model: function(params) {
+    console.log("Page route");
+    return this.store.find('page', params.id);
+  }
+});
+
+
+/// Handlebars helpers
+var showdown = new Showdown.converter();
+Ember.Handlebars.helper('format-markdown', function(input) {
+  if (input)
+    return new Handlebars.SafeString(showdown.makeHtml(input));
+  else {
+    console.log("Warning: empty input on showdown call.");
+    return input;
+  }
+});
