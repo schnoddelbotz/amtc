@@ -1,11 +1,15 @@
+// ----------------------------------------------------------------------------
+// amtc-web EmberJS app
 
 var App = Ember.Application.create({});
 var attr = DS.attr;
 var hasMany = DS.hasMany;
 
+// Move to external file, to be written by installer?
 DS.RESTAdapter.reopen({
   namespace: '~jan/amtc-web2'
 });
+
 
 App.Router.map(function() {
   this.resource('about');
@@ -26,10 +30,16 @@ App.Router.map(function() {
 App.IndexView = Ember.View.extend({
     templateName: 'index',
     didInsertElement: function() {
-    	// broken, should be done by ember:
+    	// broken, should be done by ember (was done by sb-admin-2.js before):
     	$('#side-menu').metisMenu();
-    	// just for demo...
 
+    	// just for demo... we have a flashing bolt as progress indicator :-)
+      window.setTimeout( function(){
+        $('#bolt').removeClass('flash');
+      }, 1500);
+
+      // in sb-admin-2 demo, this came in via morris-data.js
+      // should be retreived via REST in real life...
 	    Morris.Area({
 	        element: 'morris-area-chart',
 	        data: [{
@@ -96,26 +106,26 @@ App.IndexView = Ember.View.extend({
 App.IndexRoute = Ember.Route.extend({
   enter: function() {
   	console.log("Entered App.IndexRoute");
+    // originally done in sb-admin-2.js ... ok here??? :-/
+    $(window).bind("load resize", function() {
+      topOffset = 50;
+      width = (this.window.innerWidth > 0) ? this.window.innerWidth : this.screen.width;
+      if (width < 768) {
+          $('div.navbar-collapse').addClass('collapse')
+          topOffset = 100; // 2-row-menu
+      } else {
+          $('div.navbar-collapse').removeClass('collapse')
+      }
 
-	$(window).bind("load resize", function() {
-	topOffset = 50;
-	width = (this.window.innerWidth > 0) ? this.window.innerWidth : this.screen.width;
-	if (width < 768) {
-	    $('div.navbar-collapse').addClass('collapse')
-	    topOffset = 100; // 2-row-menu
-	} else {
-	    $('div.navbar-collapse').removeClass('collapse')
-	}
-
-	height = (this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height;
-	height = height - topOffset;
-	if (height < 1) height = 1;
-	if (height > topOffset) {
-	    $("#page-wrapper").css("min-height", (height) + "px");
-	}
-	})
-	}
- });
+      height = (this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height;
+      height = height - topOffset;
+      if (height < 1) height = 1;
+      if (height > topOffset) {
+          $("#page-wrapper").css("min-height", (height) + "px");
+      }
+    })
+  }
+});
 
 
 /// Markdown help / documentation pages
@@ -124,7 +134,6 @@ App.Page = DS.Model.extend({
   page_title: attr('string'),
   page_content: attr('string'),
 });
-
 App.PageRoute = Ember.Route.extend({
   enter: function() { window.scrollTo(0, 0); },
   model: function(params) {
@@ -132,7 +141,6 @@ App.PageRoute = Ember.Route.extend({
     return this.store.find('page', params.id);
   }
 });
-
 
 /// Handlebars helpers
 var showdown = new Showdown.converter();

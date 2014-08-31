@@ -46,7 +46,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="index.html">amtc-web <i class="fa fa-bolt fa-fw black"></i>  <i>remote power management</i></a>
+            <a class="navbar-brand" href="index.html">amtc-web <i id="bolt" class="fa fa-bolt fa-fw grey flash"></i> <i>remote power management</i></a>
         </div>
         <!-- /.navbar-header -->
 
@@ -278,7 +278,7 @@
                         <a class="active" href="index.html"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                     </li>
                     <li>
-                        <a href="#"><i class="fa fa-sitemap fa-fw"></i> Control hosts<span class="fa arrow"></span></a>
+                        <a href="#"><i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
                             <li>
                                 <a href="#">Second Level Item</a>
@@ -308,35 +308,26 @@
                         <!-- /.nav-second-level -->
                     </li>
                     <li>
-                        <a href="#"><i class="fa fa-area-chart fa-fw"></i> Power consumption charts<span class="fa arrow"></span></a>
-                        <ul class="nav nav-second-level">
-                            <li>
-                                <a href="flot.html">Flot Charts</a>
-                            </li>
-                            <li>
-                                <a href="morris.html">Morris.js Charts</a>
-                            </li>
-                        </ul>
-                        <!-- /.nav-second-level -->
+                        <a href="forms.html"><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>
                     </li>
                     <li>
-                        <a href="forms.html"><i class="fa fa-align-left fa-fw"></i> OS and power state logs</a>
+                        <a href="#"><i class="fa fa-area-chart fa-fw"></i> Engery Consumption Charts</a>
                     </li>
-                    {{#linkTo 'schedule' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Scheduled power management</a>{{/linkTo}}
+                    {{#linkTo 'schedule' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Scheduled Power Management</a>{{/linkTo}}
                     <li>
                         <a href="#"><i class="fa fa-wrench fa-fw"></i> Administration<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
                             <li>
+                                <a href="notifications.html"><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>
+                            </li>
+                            <li>
                                 <a href="buttons.html"><i class="fa fa-users fa-fw"></i> Users and Groups</a>
                             </li>
                             <li>
-                                <a href="notifications.html"><i class="fa fa-university fa-fw"></i> Rooms</a>
+                                <a href="grid.html"><i class="fa fa-plug fa-fw"></i> Scheduler Log and Status</a>
                             </li>
                             <li>
-                                <a href="grid.html"><i class="fa fa-plug fa-fw"></i> Spooler log and status</a>
-                            </li>
-                            <li>
-                                <a href="panels-wells.html"><i class="fa fa-terminal fa-fw"></i> Basic configuration</a>
+                                <a href="panels-wells.html"><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>
                             </li>
                         </ul>
                         <!-- /.nav-second-level -->
@@ -345,8 +336,8 @@
                         <a href="#"><i class="fa fa-ambulance fa-fw"></i> Documentation<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
                             <li> <a href="#/pages/1"><i class="fa fa-wrench fa-fw"></i> Configuring AMT</a> </li>
-                            <li> <a href="#/pages/2"><i class="fa fa-child fa-fw"></i> amtc-web first steps</a> </li>
-                            <li> <a href="#/pages/3"><i class="fa fa-github fa-fw"></i> About, Feedback &amp; more...</a> </li>
+                            <li> <a href="#/pages/2"><i class="fa fa-child fa-fw"></i> amtc-web First Steps</a> </li>
+                            <li> <a href="#/pages/3"><i class="fa fa-github fa-fw"></i> About, Feedback, ...</a> </li>
                         </ul>
                         <!-- /.nav-second-level -->
                     </li>
@@ -838,8 +829,6 @@
 <script src="js/plugins/metisMenu/metisMenu.min.js"></script>
 <script src="js/plugins/morris/raphael.min.js"></script>
 <script src="js/plugins/morris/morris.min.js"></script>
-<!-- <script src="js/plugins/morris/morris-data.js"></script> -->
-
 
 <script src="js/app/app.js"></script>
 

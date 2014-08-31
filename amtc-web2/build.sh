@@ -81,6 +81,6 @@ if [ ! -d "lib/php-activerecord" ]; then
   tar -xzf ar.tgz
   mv php-activerecord/ActiveRecord.php lib/php-activerecord
   mv php-activerecord/lib lib/php-activerecord
-  rm -rf php-activerecord
+  rm -rf php-activerecord ar.tgz
 fi
 

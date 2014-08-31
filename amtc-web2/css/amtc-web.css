@@ -1,1 +1,78 @@
-.black { color:black; }
+
+/* 
+ *  Implements the flashing bolt
+ */
+
+.grey { color:#444; }
+
+/* http://stackoverflow.com/questions/275931/how-do-you-make-an-element-flash-in-jquery */
+
+.flash {
+  -moz-animation: flash 1s ease-out;
+  -moz-animation-iteration-count: 10;
+
+  -webkit-animation: flash 1s ease-out;
+  -webkit-animation-iteration-count: 100;
+
+  -ms-animation: flash 1s ease-out;
+  -ms-animation-iteration-count: 10;
+}
+@-webkit-keyframes flash {
+    0% { color:black;}
+    1% { color:yellow;}
+    5% { color:black;}
+    20% { color:yellow;}
+    22% { color:black;}
+    50% { color:yellow;}
+    55% { color:black;}
+    85% { color:yellow;}
+    90% { color:black;}
+    91% { color:yellow;}
+    92% { color:black;}
+    93% { color:yellow;}
+    94% { color:black;}
+    95% { color:yellow;}
+    96% { color:black;}
+    97% { color:yellow;}
+    100% {color:black;}
+}
+
+@-moz-keyframes flash {
+    0% { color:black;}
+    1% { color:yellow;}
+    5% { color:black;}
+    20% { color:yellow;}
+    22% { color:black;}
+    50% { color:yellow;}
+    55% { color:black;}
+    85% { color:yellow;}
+    90% { color:black;}
+    91% { color:yellow;}
+    92% { color:black;}
+    93% { color:yellow;}
+    94% { color:black;}
+    95% { color:yellow;}
+    96% { color:black;}
+    97% { color:yellow;}
+    100% {color:black;}
+}
+
+@-ms-keyframes flash {
+    0% { color:black;}
+    1% { color:yellow;}
+    5% { color:black;}
+    20% { color:yellow;}
+    22% { color:black;}
+    50% { color:yellow;}
+    55% { color:black;}
+    85% { color:yellow;}
+    90% { color:black;}
+    91% { color:yellow;}
+    92% { color:black;}
+    93% { color:yellow;}
+    94% { color:black;}
+    95% { color:yellow;}
+    96% { color:black;}
+    97% { color:yellow;}
+    100% {color:black;}
+}
