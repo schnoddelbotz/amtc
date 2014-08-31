@@ -1,21 +1,30 @@
+/*
+ * amtc-web.css - part of amtc-web
+ *
+ * included as the last .css, overrides templates used.
+ *
+ */
+
+/* EmberJS-generated navbar menu items would use hair otherwise */
+div.sidebar-nav ul li a { cursor: pointer; }
+
 
 /* 
  *  Implements the flashing bolt
+ *  http://stackoverflow.com/questions/275931/how-do-you-make-an-element-flash-in-jquery
+ *  Any server request should time out after a minute, so don't flash longer than that
  */
-
 .grey { color:#444; }
-
-/* http://stackoverflow.com/questions/275931/how-do-you-make-an-element-flash-in-jquery */
 
 .flash {
   -moz-animation: flash 1s ease-out;
-  -moz-animation-iteration-count: 10;
+  -moz-animation-iteration-count: 60;
 
   -webkit-animation: flash 1s ease-out;
-  -webkit-animation-iteration-count: 100;
+  -webkit-animation-iteration-count: 60;
 
   -ms-animation: flash 1s ease-out;
-  -ms-animation-iteration-count: 10;
+  -ms-animation-iteration-count: 60;
 }
 @-webkit-keyframes flash {
     0% { color:black;}
@@ -36,7 +45,6 @@
     97% { color:yellow;}
     100% {color:black;}
 }
-
 @-moz-keyframes flash {
     0% { color:black;}
     1% { color:yellow;}
@@ -56,7 +64,6 @@
     97% { color:yellow;}
     100% {color:black;}
 }
-
 @-ms-keyframes flash {
     0% { color:black;}
     1% { color:yellow;}
@@ -76,3 +83,4 @@
     97% { color:yellow;}
     100% {color:black;}
 }
+/* /bolt */

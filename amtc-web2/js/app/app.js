@@ -1,7 +1,41 @@
+
+function screenInit() {
+    $(window).bind("load resize", function() {
+      topOffset = 50;
+      width = (this.window.innerWidth > 0) ? this.window.innerWidth : this.screen.width;
+      if (width < 768) {
+          $('div.navbar-collapse').addClass('collapse')
+          topOffset = 100; // 2-row-menu
+      } else {
+          $('div.navbar-collapse').removeClass('collapse')
+      }
+
+      height = (this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height;
+      height = height - topOffset;
+      if (height < 1) height = 1;
+      if (height > topOffset) {
+          $("#page-wrapper").css("min-height", (height) + "px");
+      }
+    });
+}
+
 // ----------------------------------------------------------------------------
 // amtc-web EmberJS app
 
-var App = Ember.Application.create({});
+var App = Ember.Application.create({
+	// http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
+	ready: function() {
+
+		// actual sb-admin-2.js page/template initialization
+        screenInit();
+
+    	// just for demo... we have a flashing bolt as progress indicator :-)
+		window.setTimeout( function(){
+			$('#bolt').removeClass('flash');
+		}, 1500);
+
+    }
+});
 var attr = DS.attr;
 var hasMany = DS.hasMany;
 
@@ -13,6 +47,9 @@ DS.RESTAdapter.reopen({
 
 App.Router.map(function() {
   this.resource('about');
+  this.resource('control');
+  this.resource('logs');
+  this.resource('charts');
   this.resource('schedule');
   this.resource('setup');
   this.resource('ous', function() {
@@ -27,19 +64,26 @@ App.Router.map(function() {
   });
 });
 
+App.PageView = Ember.View.extend({
+    didInsertElement: function() {
+		// broken, should be done by ember (was done by sb-admin-2.js before):
+	    $('#side-menu').metisMenu();
+	}   
+});
+App.ScheduleView = Ember.View.extend({
+    didInsertElement: function() {
+		// broken, should be done by ember (was done by sb-admin-2.js before):
+	    $('#side-menu').metisMenu();
+	}   
+});
 App.IndexView = Ember.View.extend({
     templateName: 'index',
     didInsertElement: function() {
-    	// broken, should be done by ember (was done by sb-admin-2.js before):
-    	$('#side-menu').metisMenu();
+	    // broken, should be done by ember (was done by sb-admin-2.js before):
+	    $('#side-menu').metisMenu();
 
-    	// just for demo... we have a flashing bolt as progress indicator :-)
-      window.setTimeout( function(){
-        $('#bolt').removeClass('flash');
-      }, 1500);
-
-      // in sb-admin-2 demo, this came in via morris-data.js
-      // should be retreived via REST in real life...
+		// in sb-admin-2 demo, this came in via morris-data.js
+		// should be retreived via REST in real life...
 	    Morris.Area({
 	        element: 'morris-area-chart',
 	        data: [{
@@ -106,24 +150,6 @@ App.IndexView = Ember.View.extend({
 App.IndexRoute = Ember.Route.extend({
   enter: function() {
   	console.log("Entered App.IndexRoute");
-    // originally done in sb-admin-2.js ... ok here??? :-/
-    $(window).bind("load resize", function() {
-      topOffset = 50;
-      width = (this.window.innerWidth > 0) ? this.window.innerWidth : this.screen.width;
-      if (width < 768) {
-          $('div.navbar-collapse').addClass('collapse')
-          topOffset = 100; // 2-row-menu
-      } else {
-          $('div.navbar-collapse').removeClass('collapse')
-      }
-
-      height = (this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height;
-      height = height - topOffset;
-      if (height < 1) height = 1;
-      if (height > topOffset) {
-          $("#page-wrapper").css("min-height", (height) + "px");
-      }
-    })
   }
 });
 
@@ -145,9 +171,12 @@ App.PageRoute = Ember.Route.extend({
 /// Handlebars helpers
 var showdown = new Showdown.converter();
 Ember.Handlebars.helper('format-markdown', function(input) {
-  if (input)
-    return new Handlebars.SafeString(showdown.makeHtml(input));
-  else {
+  if (input) {
+  	var md = showdown.makeHtml(input);
+  	md = md.replace("<h1 id=",'<h1 class="page-header" id=');
+    var html = new Handlebars.SafeString(md);    
+    return html;
+  } else {
     console.log("Warning: empty input on showdown call.");
     return input;
   }

@@ -30,7 +30,7 @@
   <div class="row">
     <div class="col-lg-6">
       <h1>Loading</h1>
-      <p><i>please wait...</i></p>
+      <p><i>please wait... (should flash bolt...)</i></p>
     </div>
   </div>
 </script>
@@ -278,7 +278,7 @@
                         <a class="active" href="index.html"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                     </li>
                     <li>
-                        <a href="#"><i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts<span class="fa arrow"></span></a>
+                        {{#linkTo 'control' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts<span class="fa arrow"></span></a>{{/linkTo}}
                         <ul class="nav nav-second-level">
                             <li>
                                 <a href="#">Second Level Item</a>
@@ -307,12 +307,8 @@
                         </ul>
                         <!-- /.nav-second-level -->
                     </li>
-                    <li>
-                        <a href="forms.html"><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>
-                    </li>
-                    <li>
-                        <a href="#"><i class="fa fa-area-chart fa-fw"></i> Engery Consumption Charts</a>
-                    </li>
+                    {{#linkTo 'logs' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>{{/linkTo}}
+                    {{#linkTo 'charts' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-area-chart fa-fw"></i> Energy Consumption Charts</a>{{/linkTo}}
                     {{#linkTo 'schedule' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Scheduled Power Management</a>{{/linkTo}}
                     <li>
                         <a href="#"><i class="fa fa-wrench fa-fw"></i> Administration<span class="fa arrow"></span></a>
@@ -326,9 +322,7 @@
                             <li>
                                 <a href="grid.html"><i class="fa fa-plug fa-fw"></i> Scheduler Log and Status</a>
                             </li>
-                            <li>
-                                <a href="panels-wells.html"><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>
-                            </li>
+                            {{#linkTo 'setup' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>{{/linkTo}}
                         </ul>
                         <!-- /.nav-second-level -->
                     </li>
@@ -794,12 +788,55 @@
     <!-- /.row -->
 </script>
 
+<script type="text/x-handlebars" id="control">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Monitor and Control</h1>
+    </div>
+    <div class="col-lg-12">
+        <p>Hello world</p>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="logs">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">OS / availability logs</h1>
+    </div>
+    <div class="col-lg-12">
+        <p>Hello world</p>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="charts">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Charts</h1>
+    </div>
+    <div class="col-lg-12">
+        <p>Hello world</p>
+    </div>
+  </div>
+</script>
+
 <script type="text/x-handlebars" id="schedule">
   <div class="row">
     <div class="col-lg-12">
         <h1 class="page-header">Scheduled power management</h1>
     </div>
+    <div class="col-lg-12">
+        <p>Hello world</p>
+    </div>
+  </div>
+</script>
 
+<script type="text/x-handlebars" id="setup">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Basic amtc-web setup</h1>
+    </div>
     <div class="col-lg-12">
         <p>Hello world</p>
     </div>
@@ -814,6 +851,7 @@
         </div>
       </div>
 </script>
+
 
 
 
