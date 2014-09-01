@@ -1,7 +1,7 @@
 <?php
 // this might to be split into /display/api.php, /admin/api.php ...?
 // do this to trigger async REST issues...:
-//sleep(2);
+// sleep(2);
 
 date_default_timezone_set('Europe/Berlin');
 
@@ -59,6 +59,7 @@ $app->get('/pages/:id', function ($id) {
 
 // Notifications / Short user messages for dashboard
 $app->get('/notifications', function () {
+  sleep(2); // just to test the spinner ...
   $result = array('notifications'=>array());
   foreach (Notification::all() as $record) { $result['notifications'][] = $record->to_array(); }
   echo json_encode( $result );

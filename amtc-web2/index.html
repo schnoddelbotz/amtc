@@ -250,7 +250,7 @@
                     <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
                     </li>
                     <li class="divider"></li>
-                    <li><a href="login.html"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                    <li><a href="#"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                     </li>
                 </ul>
                 <!-- /.dropdown-user -->
@@ -274,7 +274,7 @@
                         <!-- /input-group -->
                     </li>
                     <li>
-                        <a class="active" href="index.html"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                        <a class="active" href="#"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                     </li>
                     <li>
                         {{#linkTo 'control' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts<span class="fa arrow"></span></a>{{/linkTo}}
@@ -313,13 +313,13 @@
                         <a href="#"><i class="fa fa-wrench fa-fw"></i> Administration<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
                             <li>
-                                <a href="notifications.html"><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>
+                                <a href="#/notifications"><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>
                             </li>
                             <li>
-                                <a href="buttons.html"><i class="fa fa-users fa-fw"></i> Users and Groups</a>
+                                <a href="#/usermanagement"><i class="fa fa-users fa-fw"></i> Users and Groups</a>
                             </li>
                             <li>
-                                <a href="grid.html"><i class="fa fa-plug fa-fw"></i> Scheduler Log and Status</a>
+                                <a href="#/systemhealth"><i class="fa fa-plug fa-fw"></i> Scheduler Log and Status</a>
                             </li>
                             {{#linkTo 'setup' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>{{/linkTo}}
                         </ul>
@@ -608,6 +608,8 @@
                              <span class="pull-right text-muted small"><em>{{format-from-now msg.tstamp}}</em></span>
                             </a>
                           {{/each}}
+                        {{else}}
+                          <i class="fa fa-spinner fa-spin"></i> Loading latest notifications ...
                         {{/if}}
                     </div>
                     <!-- /.list-group -->
