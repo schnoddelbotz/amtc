@@ -19,8 +19,15 @@ function screenInit() {
     });
 }
 
-// ----------------------------------------------------------------------------
-// amtc-web EmberJS app
+
+
+/*
+ *
+ *
+ * amtc-web EmberJS app
+ *
+ *
+ */ 
 
 var App = Ember.Application.create({
 	// http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
@@ -39,11 +46,9 @@ var App = Ember.Application.create({
 var attr = DS.attr;
 var hasMany = DS.hasMany;
 
-// Move to external file, to be written by installer?
-DS.RESTAdapter.reopen({
-  namespace: '~jan/amtc-web2'
-});
-
+/*
+ * Routes 
+ */
 
 App.Router.map(function() {
   this.resource('about');
@@ -51,6 +56,7 @@ App.Router.map(function() {
   this.resource('logs');
   this.resource('charts');
   this.resource('schedule');
+//  this.resource('notifications');
   this.resource('setup');
   this.resource('ous', function() {
     this.resource('ou', { path: ':id' });
@@ -63,6 +69,30 @@ App.Router.map(function() {
     this.resource('page', { path: ':id' });
   });
 });
+
+App.IndexRoute = Ember.Route.extend({
+  enter: function() {
+  	console.log("Entered App.IndexRoute");
+  	window.scrollTo(0, 0);
+  }
+});
+App.NotificationsRoute = Ember.Route.extend({
+  model: function() {
+    console.log("NOTTIIISS route");
+    return this.store.find('notification');
+  }
+});
+App.PageRoute = Ember.Route.extend({
+  enter: function() { window.scrollTo(0, 0); },
+  model: function(params) {
+    console.log("Page route");
+    return this.store.find('page', params.id);
+  }
+});
+
+/*
+ * Views
+ */
 
 App.PageView = Ember.View.extend({
     didInsertElement: function() {
@@ -147,28 +177,47 @@ App.IndexView = Ember.View.extend({
     }   
 });
 
-App.IndexRoute = Ember.Route.extend({
-  enter: function() {
-  	console.log("Entered App.IndexRoute");
-  }
+/*
+ * Controller
+ */
+
+App.IndexController = Ember.ObjectController.extend({
+	needs: ["Notifications"],
+	notifications: function() {
+        return this.get('store').find('notification');
+	}.property(),
+});
+App.NotificationsController = Ember.ObjectController.extend({
 });
 
+/*
+ * DS Models
+ */
 
-/// Markdown help / documentation pages
+// Markdown help / documentation pages
 App.Page = DS.Model.extend({
   page_name: attr('string'),
   page_title: attr('string'),
   page_content: attr('string'),
 });
-App.PageRoute = Ember.Route.extend({
-  enter: function() { window.scrollTo(0, 0); },
-  model: function(params) {
-    console.log("Page route");
-    return this.store.find('page', params.id);
-  }
+// Notification center messages
+App.Notification = DS.Model.extend({
+  ntype: attr('string'),
+  tstamp: attr('string'),
+  message: attr('string'),
+  cssClass: function(key,value) {
+	if (!value) {
+	  var cc = "fa fa-"+this.get('ntype')+" fa-fw";
+	  return cc;
+	}
+  }.property()
 });
 
-/// Handlebars helpers
+/*
+ * Handlebars helpers
+ */
+
+ // markdown to html conversion
 var showdown = new Showdown.converter();
 Ember.Handlebars.helper('format-markdown', function(input) {
   if (input) {
@@ -180,4 +229,9 @@ Ember.Handlebars.helper('format-markdown', function(input) {
     console.log("Warning: empty input on showdown call.");
     return input;
   }
+});
+
+// moment.js PRETTY timestamps
+Ember.Handlebars.helper('format-from-now', function(date) {
+  return moment(date).fromNow();
 });
