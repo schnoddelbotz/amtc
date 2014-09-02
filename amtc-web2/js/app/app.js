@@ -74,6 +74,20 @@ App.IndexRoute = Ember.Route.extend({
   enter: function() {
   	console.log("Entered App.IndexRoute");
   	window.scrollTo(0, 0);
+  },
+  setupController: function(controller,model) {
+    console.log('setup controller ouS');
+    this._super(controller,model);
+        var p=this;
+        $.ajax({
+            url: "rest-api.php/ou-tree",
+            type: "GET"//,
+        }).then(function(response) {
+          controller.set('ouTree', response.ous);
+          console.log('ouTree is now ...:');
+          console.log(controller);
+          console.log(controller.get('ouTree'));
+		});
   }
 });
 App.NotificationsRoute = Ember.Route.extend({
@@ -186,14 +200,21 @@ App.IndexController = Ember.ObjectController.extend({
 	notifications: function() {
         return this.get('store').find('notification');
 	}.property(),
+	ouTree: null,
 });
 App.NotificationsController = Ember.ObjectController.extend({
 });
+
 
 /*
  * DS Models
  */
 
+// Organizational Unit
+App.Ou = DS.Model.extend({
+  name: attr('string'),
+  description: attr('string')
+});
 // Markdown help / documentation pages
 App.Page = DS.Model.extend({
   page_name: attr('string'),
@@ -211,6 +232,27 @@ App.Notification = DS.Model.extend({
 	  return cc;
 	}
   }.property()
+});
+
+/*
+ * Components (used by OU atm)
+ */
+App.TreeBranchComponent = Ember.Component.extend({
+  tagName: 'ul',
+  classNames: ['tree-branch']
+});
+App.TreeNodeComponent = Ember.Component.extend({
+  tagName: 'li',
+  classNames: ['tree-node'],
+  isExpanded: false,
+  toggle: function() {
+    this.toggleProperty('isExpanded');
+  },
+  didClick: function() {
+    console.log('You clicked: '+this.get('node.text'));
+    //this.transitionTo('ous' ); // FIXME does nothing?
+
+  }
 });
 
 /*

@@ -64,6 +64,17 @@ $app->get('/notifications', function () {
   foreach (Notification::all() as $record) { $result['notifications'][] = $record->to_array(); }
   echo json_encode( $result );
 });
+$app->get('/ous/:id', function ($ouid) use ($app) {
+    if ($ou = OU::find($ouid)) {
+      echo json_encode( array('ou'=> $ou->to_array()) );
+    }
+});
+$app->get('/ou-tree', function () use ($app) {
+  echo json_encode( array('ous'=>OU::getTree(
+      /* arg 1 is start PID 1 and defaults to one (/). */
+      /* should be set to current user's 'home ou' */
+  )));
+});
 
 
 

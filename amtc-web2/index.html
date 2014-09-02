@@ -6,26 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Intel AMT/vPro remote power Management">
     <meta name="author" content="jan@hacker.ch">
-
-    <title>amtc-web - AMT/vPro remote power management</title>
-
-<!--
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/plugins/metisMenu/metisMenu.min.css" rel="stylesheet">
-    <link href="css/plugins/timeline.css" rel="stylesheet">
-    <link href="css/sb-admin-2.css" rel="stylesheet">
-    <link href="css/plugins/morris.css" rel="stylesheet">
-    <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css">
-    <link href="css/amtc-web.css" rel="stylesheet">
--->
+    <title>amtc-web - AMT/DASH remote power management</title>
     <link href="css/styles.css" rel="stylesheet">
     <link href="css/amtc-web.css" rel="stylesheet">
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
 </head>
 <body>
 
@@ -38,6 +21,21 @@
     </div>
   </div>
 </script>
+
+<!--
+{
+{ # if ouTree}
+}
+
+{ 
+{ else}}
+            Loading OUs...
+         {
+         {
+         /if}
+         }
+
+-->
 
 <script type="text/x-handlebars">
   <div id="wrapper">
@@ -53,6 +51,14 @@
         </div>
         <!-- /.navbar-header -->
 
+        <!-- FIXME FIXME does not work here ... but only in index ...-->
+         {{#if ouTree}}
+            {{tree-branch node=ouTree}}
+         {{else}}
+            
+         {{/if}}
+
+         
         <ul class="nav navbar-top-links navbar-right">
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
@@ -311,8 +317,8 @@
                         <!-- /.nav-second-level -->
                     </li>
                     {{#linkTo 'logs' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>{{/linkTo}}
-                    {{#linkTo 'charts' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-area-chart fa-fw"></i> Energy Consumption Charts</a>{{/linkTo}}
-                    {{#linkTo 'schedule' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Scheduled Power Management</a>{{/linkTo}}
+                    {{#linkTo 'charts' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-area-chart fa-fw"></i> Energy Consumption</a>{{/linkTo}}
+                    {{#linkTo 'schedule' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Power Schedule</a>{{/linkTo}}
                     <li>
                         <a href="#"><i class="fa fa-wrench fa-fw"></i> Administration<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
@@ -691,20 +697,26 @@
       </div>
 </script>
 
+<script data-template-name="components/tree-branch" type="text/x-handlebars">
+	{{#each child in node.children}}
+	  {{tree-node node=child}}
+	{{/each}}
+</script>
 
-<!--
-<script src="js/jquery.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/handlebars.js"></script>
-<script src="js/emberjs.min.js"></script>
-<script src="js/ember-data.min.js"></script>
-<script src="js/showdown.js"></script>
-<script src="js/moment.js"></script>
-<script src="js/humane.min.js"></script>
-<script src="js/plugins/metisMenu/metisMenu.min.js"></script>
-<script src="js/plugins/morris/raphael.min.js"></script>
-<script src="js/plugins/morris/morris.min.js"></script>
--->
+<script data-template-name="components/tree-node" type="text/x-handlebars">
+	<span {{bindAttr class=":toggle-icon node.children.length::leaf"}} {{action toggle}}>
+	  {{#if isExpanded}}
+	    &#x25BC;
+	  {{else}}
+	    &#x25B6;
+	  {{/if}}
+	</span>
+	{{#link-to 'ou' node.id}}{{node.name}}{{/link-to}}
+	{{#if isExpanded}}
+	  {{tree-branch node=node}}
+	{{/if}}
+</script>
+
 <script src="js/jslibs.js"></script>
 <script src="js/app/app.js"></script>
 <script src="rest-api.php/rest-config.js"></script>
