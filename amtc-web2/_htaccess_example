@@ -1,0 +1,23 @@
+
+<FilesMatch "\.html\.gz$">
+  ForceType text/html
+  Header set Content-Encoding: gzip
+</FilesMatch>
+ 
+<FilesMatch "\.js\.gz$">
+  ForceType text/javascript
+  Header set Content-Encoding: gzip
+</FilesMatch>
+ 
+<FilesMatch "\.css\.gz$">
+  ForceType text/css
+  Header set Content-Encoding: gzip
+</FilesMatch>
+ 
+RewriteEngine On
+#RewriteBase /~jan/amtc-web2
+RewriteCond %{HTTP:accept-encoding} gzip
+RewriteCond %{REQUEST_FILENAME} !\.gz$
+ReWriteCond %{REQUEST_FILENAME}.gz -f
+RewriteRule ^(.*)(.+\.js|.+\.css|.+\.html)$ $1$2.gz [L]
+

@@ -6,6 +6,7 @@ BOOTSTRAP=3.2.0
 HANDLEBARS=1.3.0
 EMBERJS=1.7.0
 EMBERDATA=1.0.0-beta.9
+FONTAWESOME=4.2.0
 
 function FetchIfNotExists {
   CheckFile=$1
@@ -53,16 +54,29 @@ if [ ! -f "js/sb-admin-2.js" ]; then
   rm -rf tmp2_$$ sb.zip
 fi
 
-if [ ! -d "font-awesome-4.2.0" ]; then
-  echo "Retreiving FontAwesome"
-  curl --insecure -Lso fa.zip http://fortawesome.github.io/Font-Awesome/assets/font-awesome-4.2.0.zip
+# ./fonts directory has been created by bootstrap already
+if [ ! -f "fonts/fontawesome-webfont.woff" ]; then
+  echo "Retreiving fonts/icons: FontAwesome"
+  FA=font-awesome-${FONTAWESOME}
+  curl --insecure -Lso fa.zip http://fortawesome.github.io/Font-Awesome/assets/${FA}.zip
   unzip -q fa.zip
-  rm -rf fa.zip
+  mv $FA/css/font-awesome.min.css css
+  mv $FA/fonts/* fonts
+  rm -rf fa.zip ${FA}
 fi
 
-# concat + gzip js and css for production ...
-
-# tbd...
+# concat + gzip js and css for production ... 
+# (might want to add app.js... + amtc-web.css ... not yet / dev)
+cat css/bootstrap.min.css css/plugins/metisMenu/metisMenu.min.css      \
+    css/plugins/timeline.css css/sb-admin-2.css css/plugins/morris.css \
+    css/font-awesome.min.css > css/styles.css
+cat js/jquery.min.js js/bootstrap.min.js js/handlebars.js js/emberjs.min.js \
+    js/ember-data.min.js js/showdown.js js/moment.js js/humane.min.js       \
+    js/plugins/metisMenu/metisMenu.min.js js/plugins/morris/raphael.min.js  \
+    js/plugins/morris/morris.min.js > js/jslibs.js
+for src in css/styles.css js/jslibs.js index.html; do
+  gzip -c --best $src > $src.gz
+done
 
 ### PHP libraries
 
