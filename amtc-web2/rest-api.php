@@ -29,7 +29,7 @@ $app->response()->header('Content-Type', 'application/json;charset=utf-8');
  *  Non-DB-Model requests 
  */
  
- // provide URI for ember-data REST adapter, based on this php script's location
+// provide URI for ember-data REST adapter, based on this php script's location
 $app->get('/rest-config.js', function () use ($app) {    
     $app->response->header('Content-Type', 'application/javascript;charset=utf-8');
     $path = substr($_SERVER['SCRIPT_NAME'],1);
@@ -83,4 +83,3 @@ $app->get('/ou-tree', function () use ($app) {
  * ... run, forrest, run!
  */
 $app->run();
-

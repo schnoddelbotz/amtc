@@ -1,26 +1,3 @@
-
-function screenInit() {
-    $(window).bind("load resize", function() {
-      topOffset = 50;
-      width = (this.window.innerWidth > 0) ? this.window.innerWidth : this.screen.width;
-      if (width < 768) {
-          $('div.navbar-collapse').addClass('collapse')
-          topOffset = 100; // 2-row-menu
-      } else {
-          $('div.navbar-collapse').removeClass('collapse')
-      }
-
-      height = (this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height;
-      height = height - topOffset;
-      if (height < 1) height = 1;
-      if (height > topOffset) {
-          $("#page-wrapper").css("min-height", (height) + "px");
-      }
-    });
-}
-
-
-
 /*
  *
  *
@@ -30,21 +7,45 @@ function screenInit() {
  */ 
 
 var App = Ember.Application.create({
+
 	// http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
 	ready: function() {
 
 		// actual sb-admin-2.js page/template initialization
-        screenInit();
+    $(window).bind("load resize", function() {
+      topOffset = 50;
+      width = (this.window.innerWidth > 0) ? this.window.innerWidth : this.screen.width;
+      if (width < 768) {
+        $('div.navbar-collapse').addClass('collapse')
+        topOffset = 100; // 2-row-menu
+      } else {
+        $('div.navbar-collapse').removeClass('collapse')
+      }
 
-    	// just for demo... we have a flashing bolt as progress indicator :-)
+      height = (this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height;
+      height = height - topOffset;
+      if (height < 1) height = 1;
+      if (height > topOffset) {
+        $("#page-wrapper").css("min-height", (height) + "px");
+      }
+    });
+
+  	// just for demo... we have a flashing bolt as progress indicator :-)
 		window.setTimeout( function(){
 			$('#bolt').removeClass('flash');
 		}, 1500);
+		// to trigger flash on ajax activity
+		$(document).ajaxStart(function () {
+      $('#bolt').addClass('flash');
+    });
+		// and to calm it down again when done
+    $(document).ajaxStop(function () {
+      $('#bolt').removeClass('flash');
+    });
+  }
 
-    }
 });
-var attr = DS.attr;
-var hasMany = DS.hasMany;
+
 
 /*
  * Routes 
@@ -56,13 +57,9 @@ App.Router.map(function() {
   this.resource('logs');
   this.resource('charts');
   this.resource('schedule');
-//  this.resource('notifications');
   this.resource('setup');
   this.resource('ous', function() {
     this.resource('ou', { path: ':id' });
-  });
-  this.resource('devices', function() {
-    this.resource('device', { path: ':id' });
     this.route('new');
   });
   this.resource('pages', function() {
@@ -78,22 +75,16 @@ App.IndexRoute = Ember.Route.extend({
   setupController: function(controller,model) {
     console.log('setup controller ouS');
     this._super(controller,model);
-        var p=this;
-        $.ajax({
-            url: "rest-api.php/ou-tree",
-            type: "GET"//,
-        }).then(function(response) {
-          controller.set('ouTree', response.ous);
-          console.log('ouTree is now ...:');
-          console.log(controller);
-          console.log(controller.get('ouTree'));
+      var p=this;
+      $.ajax({
+        url: "rest-api.php/ou-tree",
+        type: "GET"//,
+      }).then(function(response) {
+        controller.set('ouTree', response.ous);
+        console.log('ouTree is now ...:');
+        console.log(controller);
+        console.log(controller.get('ouTree'));
 		});
-  }
-});
-App.NotificationsRoute = Ember.Route.extend({
-  model: function() {
-    console.log("NOTTIIISS route");
-    return this.store.find('notification');
   }
 });
 App.PageRoute = Ember.Route.extend({
@@ -110,13 +101,13 @@ App.PageRoute = Ember.Route.extend({
 
 App.PageView = Ember.View.extend({
     didInsertElement: function() {
-		// broken, should be done by ember (was done by sb-admin-2.js before):
-	    $('#side-menu').metisMenu();
-	}   
+  		// broken, should be done by ember (was done by sb-admin-2.js before):
+      $('#side-menu').metisMenu();
+  	}   
 });
 App.ScheduleView = Ember.View.extend({
     didInsertElement: function() {
-		// broken, should be done by ember (was done by sb-admin-2.js before):
+  		// broken, should be done by ember (was done by sb-admin-2.js before):
 	    $('#side-menu').metisMenu();
 	}   
 });
@@ -198,7 +189,7 @@ App.IndexView = Ember.View.extend({
 App.IndexController = Ember.ObjectController.extend({
 	needs: ["Notifications"],
 	notifications: function() {
-        return this.get('store').find('notification');
+    return this.get('store').find('notification');
 	}.property(),
 	ouTree: null,
 });
@@ -209,6 +200,9 @@ App.NotificationsController = Ember.ObjectController.extend({
 /*
  * DS Models
  */
+
+var attr = DS.attr;
+var hasMany = DS.hasMany;
 
 // Organizational Unit
 App.Ou = DS.Model.extend({
@@ -227,10 +221,10 @@ App.Notification = DS.Model.extend({
   tstamp: attr('string'),
   message: attr('string'),
   cssClass: function(key,value) {
-	if (!value) {
-	  var cc = "fa fa-"+this.get('ntype')+" fa-fw";
-	  return cc;
-	}
+  	if (!value) {
+  	  var cc = "fa fa-"+this.get('ntype')+" fa-fw";
+  	  return cc;
+  	}
   }.property()
 });
 
@@ -251,7 +245,6 @@ App.TreeNodeComponent = Ember.Component.extend({
   didClick: function() {
     console.log('You clicked: '+this.get('node.text'));
     //this.transitionTo('ous' ); // FIXME does nothing?
-
   }
 });
 
