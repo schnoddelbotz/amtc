@@ -16,7 +16,7 @@ ActiveRecord\Config::initialize(function($cfg)
    $cfg->set_connections(
      array(
        //'development' => 'mysql://username:password@localhost/production_database_name'
-     	'development' => 'sqlite://unix(/scratch/me.db)'
+      'development' => 'sqlite://unix(/scratch/me.db)'
      )
    );
    //$cfg->set_default_connection('production');
@@ -40,16 +40,16 @@ $app->get('/rest-config.js', function () use ($app) {
 
 // Return static markdown help pages, json encoded
 $app->get('/pages/:id', function ($id) {
-    if ($page = sprintf("%d", $id)) {    	
-    	$file = sprintf("pages/%d.md", $page);
-    	$contents = 'Not found';
-		is_readable($file) && $contents = file_get_contents($file);
-      	echo json_encode( array('page'=>array(
-			'id' => $page,
-    		'page_name' => 'unused',
-    		'page_title' => 'unused',
-    		'page_content' => $contents
-  		)));
+    if ($page = sprintf("%d", $id)) {     
+      $file = sprintf("pages/%d.md", $page);
+      $contents = 'Not found';
+    is_readable($file) && $contents = file_get_contents($file);
+        echo json_encode( array('page'=>array(
+      'id' => $page,
+        'page_name' => 'unused',
+        'page_title' => 'unused',
+        'page_content' => $contents
+      )));
     }
 });
 

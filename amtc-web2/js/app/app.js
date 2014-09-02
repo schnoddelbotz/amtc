@@ -8,10 +8,10 @@
 
 var App = Ember.Application.create({
 
-	// http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
-	ready: function() {
+  // http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
+  ready: function() {
 
-		// actual sb-admin-2.js page/template initialization
+    // actual sb-admin-2.js page/template initialization
     $(window).bind("load resize", function() {
       topOffset = 50;
       width = (this.window.innerWidth > 0) ? this.window.innerWidth : this.screen.width;
@@ -30,15 +30,15 @@ var App = Ember.Application.create({
       }
     });
 
-  	// just for demo... we have a flashing bolt as progress indicator :-)
-		window.setTimeout( function(){
-			$('#bolt').removeClass('flash');
-		}, 1500);
-		// to trigger flash on ajax activity
-		$(document).ajaxStart(function () {
+    // just for demo... we have a flashing bolt as progress indicator :-)
+    window.setTimeout( function(){
+      $('#bolt').removeClass('flash');
+    }, 1500);
+    // to trigger flash on ajax activity
+    $(document).ajaxStart(function () {
       $('#bolt').addClass('flash');
     });
-		// and to calm it down again when done
+    // and to calm it down again when done
     $(document).ajaxStop(function () {
       $('#bolt').removeClass('flash');
     });
@@ -69,8 +69,8 @@ App.Router.map(function() {
 
 App.IndexRoute = Ember.Route.extend({
   enter: function() {
-  	console.log("Entered App.IndexRoute");
-  	window.scrollTo(0, 0);
+    console.log("Entered App.IndexRoute");
+    window.scrollTo(0, 0);
   },
   setupController: function(controller,model) {
     console.log('setup controller ouS');
@@ -84,7 +84,7 @@ App.IndexRoute = Ember.Route.extend({
         console.log('ouTree is now ...:');
         console.log(controller);
         console.log(controller.get('ouTree'));
-		});
+    });
   }
 });
 App.PageRoute = Ember.Route.extend({
@@ -101,84 +101,84 @@ App.PageRoute = Ember.Route.extend({
 
 App.PageView = Ember.View.extend({
     didInsertElement: function() {
-  		// broken, should be done by ember (was done by sb-admin-2.js before):
+      // broken, should be done by ember (was done by sb-admin-2.js before):
       $('#side-menu').metisMenu();
-  	}   
+    }   
 });
 App.ScheduleView = Ember.View.extend({
     didInsertElement: function() {
-  		// broken, should be done by ember (was done by sb-admin-2.js before):
-	    $('#side-menu').metisMenu();
-	}   
+      // broken, should be done by ember (was done by sb-admin-2.js before):
+      $('#side-menu').metisMenu();
+  }   
 });
 App.IndexView = Ember.View.extend({
     templateName: 'index',
     didInsertElement: function() {
-	    // broken, should be done by ember (was done by sb-admin-2.js before):
-	    $('#side-menu').metisMenu();
+      // broken, should be done by ember (was done by sb-admin-2.js before):
+      $('#side-menu').metisMenu();
 
-		// in sb-admin-2 demo, this came in via morris-data.js
-		// should be retreived via REST in real life...
-	    Morris.Area({
-	        element: 'morris-area-chart',
-	        data: [{
-	            period: '2012-02-24 05:45',
-	            windows: 6,
-	            linux: null,
-	            unreachable: 2
-	        }, {
-	            period: '2012-02-24 06:00',
-	            windows: 13,
-	            linux: 4,
-	            unreachable: 4
-	        }, {
-	            period: '2012-02-24 06:15',
-	            windows: 20,
-	            linux: 7,
-	            unreachable: 3
-	        }, {
-	            period: '2012-02-24 06:30',
-	            windows: 54,
-	            linux: 12,
-	            unreachable: 14
-	        }, {
-	            period: '2012-02-24 06:45',
-	            windows: 112,
-	            linux: 27,
-	            unreachable: 4
-	        }, {
-	            period: '2012-02-24 07:00',
-	            windows: 140,
-	            linux: 57,
-	            unreachable: 3
-	        }, {
-	            period: '2012-02-24 07:15',
-	            windows: 70,
-	            linux: 90,
-	            unreachable: 70
-	        }, {
-	            period: '2012-02-24 07:30',
-	            windows: 140,
-	            linux: 110,
-	            unreachable: 0
-	        }, {
-	            period: '2012-02-24 07:45',
-	            windows: 120,
-	            linux: 80,
-	            unreachable: 0
-	        }, {
-	            period: '2012-02-24 08:00',
-	            windows: 120,
-	            linux: 67,
-	            unreachable: 13
-	        }],
-	        xkey: 'period',
-	        ykeys: ['linux', 'unreachable', 'windows'],
-	        labels: ['Linux', 'unreachable', 'Windows'],
-	        pointSize: 2,
-	        hideHover: 'auto',
-	        resize: true
-	    });
+    // in sb-admin-2 demo, this came in via morris-data.js
+    // should be retreived via REST in real life...
+      Morris.Area({
+          element: 'morris-area-chart',
+          data: [{
+              period: '2012-02-24 05:45',
+              windows: 6,
+              linux: null,
+              unreachable: 2
+          }, {
+              period: '2012-02-24 06:00',
+              windows: 13,
+              linux: 4,
+              unreachable: 4
+          }, {
+              period: '2012-02-24 06:15',
+              windows: 20,
+              linux: 7,
+              unreachable: 3
+          }, {
+              period: '2012-02-24 06:30',
+              windows: 54,
+              linux: 12,
+              unreachable: 14
+          }, {
+              period: '2012-02-24 06:45',
+              windows: 112,
+              linux: 27,
+              unreachable: 4
+          }, {
+              period: '2012-02-24 07:00',
+              windows: 140,
+              linux: 57,
+              unreachable: 3
+          }, {
+              period: '2012-02-24 07:15',
+              windows: 70,
+              linux: 90,
+              unreachable: 70
+          }, {
+              period: '2012-02-24 07:30',
+              windows: 140,
+              linux: 110,
+              unreachable: 0
+          }, {
+              period: '2012-02-24 07:45',
+              windows: 120,
+              linux: 80,
+              unreachable: 0
+          }, {
+              period: '2012-02-24 08:00',
+              windows: 120,
+              linux: 67,
+              unreachable: 13
+          }],
+          xkey: 'period',
+          ykeys: ['linux', 'unreachable', 'windows'],
+          labels: ['Linux', 'unreachable', 'Windows'],
+          pointSize: 2,
+          hideHover: 'auto',
+          resize: true
+      });
     }   
 });
 
@@ -187,11 +187,11 @@ App.IndexView = Ember.View.extend({
  */
 
 App.IndexController = Ember.ObjectController.extend({
-	needs: ["Notifications"],
-	notifications: function() {
+  needs: ["Notifications"],
+  notifications: function() {
     return this.get('store').find('notification');
-	}.property(),
-	ouTree: null,
+  }.property(),
+  ouTree: null,
 });
 App.NotificationsController = Ember.ObjectController.extend({
 });
@@ -221,10 +221,10 @@ App.Notification = DS.Model.extend({
   tstamp: attr('string'),
   message: attr('string'),
   cssClass: function(key,value) {
-  	if (!value) {
-  	  var cc = "fa fa-"+this.get('ntype')+" fa-fw";
-  	  return cc;
-  	}
+    if (!value) {
+      var cc = "fa fa-"+this.get('ntype')+" fa-fw";
+      return cc;
+    }
   }.property()
 });
 
@@ -256,8 +256,8 @@ App.TreeNodeComponent = Ember.Component.extend({
 var showdown = new Showdown.converter();
 Ember.Handlebars.helper('format-markdown', function(input) {
   if (input) {
-  	var md = showdown.makeHtml(input);
-  	md = md.replace("<h1 id=",'<h1 class="page-header" id=');
+    var md = showdown.makeHtml(input);
+    md = md.replace("<h1 id=",'<h1 class="page-header" id=');
     var html = new Handlebars.SafeString(md);    
     return html;
   } else {

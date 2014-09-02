@@ -673,23 +673,23 @@
 </script>
 
 <script data-template-name="components/tree-branch" type="text/x-handlebars">
-	{{#each child in node.children}}
-	  {{tree-node node=child}}
-	{{/each}}
+  {{#each child in node.children}}
+    {{tree-node node=child}}
+  {{/each}}
 </script>
 
 <script data-template-name="components/tree-node" type="text/x-handlebars">
-	<span {{bindAttr class=":toggle-icon node.children.length::leaf"}} {{action toggle}}>
-	  {{#if isExpanded}}
-	    &#x25BC;
-	  {{else}}
-	    &#x25B6;
-	  {{/if}}
-	</span>
-	{{#link-to 'ou' node.id}}{{node.name}}{{/link-to}}
-	{{#if isExpanded}}
-	  {{tree-branch node=node}}
-	{{/if}}
+  <span {{bindAttr class=":toggle-icon node.children.length::leaf"}} {{action toggle}}>
+    {{#if isExpanded}}
+      &#x25BC;
+    {{else}}
+      &#x25B6;
+    {{/if}}
+  </span>
+  {{#link-to 'ou' node.id}}{{node.name}}{{/link-to}}
+  {{#if isExpanded}}
+    {{tree-branch node=node}}
+  {{/if}}
 </script>
 
 <script src="js/jslibs.js"></script>
