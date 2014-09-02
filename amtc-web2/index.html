@@ -12,6 +12,51 @@
 </head>
 <body>
 
+<script type="text/x-handlebars" data-template-name='_ouSelection'>
+  <li>
+      {{#linkTo 'control' tagName="li"}}<a {{bindAttr href="view.href"}}>
+        <i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts<span class="fa arrow"></span></a>
+      {{/linkTo}}
+      
+     
+      
+      {{#if ouTree}}
+        {{tree-branch node=ouTree}}
+      {{else}}
+        <ul class="nav nav-second-level"><li><a href="#"><i class="fa fa-spinner fa-spin"></i> <i>loading rooms...</i></a></li></ul>
+      {{/if}}
+      
+  </li>
+</script>
+<!-- 
+  was:
+      <ul class="nav nav-second-level">
+          <li>
+              <a href="#">Second Level Item</a>
+          </li>
+          <li>
+              <a href="#">Second Level Item</a>
+          </li>
+          <li>
+              <a href="#">Third Level <span class="fa arrow"></span></a>
+              <ul class="nav nav-third-level">
+                  <li>
+                      <a href="#">Third Level Item</a>
+                  </li>
+                  <li>
+                      <a href="#">Third Level Item</a>
+                  </li>
+                  <li>
+                      <a href="#">Third Level Item</a>
+                  </li>
+                  <li>
+                      <a href="#">Third Level Item</a>
+                  </li>
+              </ul>
+          </li>
+      </ul>
+-->
+
 <script type="text/x-handlebars">
   <div id="wrapper">
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
@@ -22,17 +67,11 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="index.html">amtc-web <i id="bolt" class="fa fa-bolt fa-fw grey flash"></i> <i>remote. power. management.</i></a>
+            <a class="navbar-brand" href="index.html">
+            amtc-web <i id="bolt" class="fa fa-bolt fa-fw grey flash"></i> 
+            <i>remote. power. management.</i></a>
         </div>
         <!-- /.navbar-header -->
-
-        <!-- FIXME FIXME does not work here ... but only in index ...-->
-         {{#if ouTree}}
-            {{tree-branch node=ouTree}}
-         {{else}}
-            
-         {{/if}}
-
          
         <ul class="nav navbar-top-links navbar-right">
             <li class="dropdown">
@@ -261,36 +300,9 @@
                     <li>
                         <a class="active" href="#"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                     </li>
-                    <li>
-                        {{#linkTo 'control' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts<span class="fa arrow"></span></a>{{/linkTo}}
-                        <ul class="nav nav-second-level">
-                            <li>
-                                <a href="#">Second Level Item</a>
-                            </li>
-                            <li>
-                                <a href="#">Second Level Item</a>
-                            </li>
-                            <li>
-                                <a href="#">Third Level <span class="fa arrow"></span></a>
-                                <ul class="nav nav-third-level">
-                                    <li>
-                                        <a href="#">Third Level Item</a>
-                                    </li>
-                                    <li>
-                                        <a href="#">Third Level Item</a>
-                                    </li>
-                                    <li>
-                                        <a href="#">Third Level Item</a>
-                                    </li>
-                                    <li>
-                                        <a href="#">Third Level Item</a>
-                                    </li>
-                                </ul>
-                                <!-- /.nav-third-level -->
-                            </li>
-                        </ul>
-                        <!-- /.nav-second-level -->
-                    </li>
+
+                    {{partial "ouSelection"}}
+
                     {{#linkTo 'logs' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>{{/linkTo}}
                     {{#linkTo 'charts' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-area-chart fa-fw"></i> Energy Consumption</a>{{/linkTo}}
                     {{#linkTo 'schedule' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Power Schedule</a>{{/linkTo}}
@@ -311,7 +323,7 @@
                         <!-- /.nav-second-level -->
                     </li>
                     <li>
-                        <a href="#"><i class="fa fa-ambulance fa-fw"></i> Documentation<span class="fa arrow"></span></a>
+                        <a href="#"><i class="fa fa-ambulance fa-fw"></i> Help<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
                             <li> <a href="#/pages/1"><i class="fa fa-wrench fa-fw"></i> Configuring AMT</a> </li>
                             <li> <a href="#/pages/2"><i class="fa fa-child fa-fw"></i> amtc-web First Steps</a> </li>
@@ -341,6 +353,7 @@
         <!-- /.col-lg-12 -->
     </div>
     <!-- /.row -->
+
     <!-- Colorful big numbers OS header-->
     <div class="row">
         <div class="col-lg-3 col-md-6">
@@ -432,7 +445,7 @@
             </div>
         </div>
     </div>
-    <!-- Stats Graph -->
+    <!-- 1st col: Stats Graph and "Recent OS / power..." (tbd) and, 2nd col: Notifications -->
     <div class="row">
         <div class="col-lg-8">
             <div class="panel panel-default">
