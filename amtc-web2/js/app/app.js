@@ -70,7 +70,7 @@ App.Router.map(function() {
 
 App.ApplicationRoute = Ember.Route.extend({
   setupController: function(controller,model) {
-    console.log('setup controller ouS');
+    console.log('Entered App.ApplicationRoute, triggering load of OUs');
     this._super(controller,model);
       var p=this;
       $.ajax({
@@ -78,9 +78,7 @@ App.ApplicationRoute = Ember.Route.extend({
         type: "GET"//,
       }).then(function(response) {
         controller.set('ouTree', response.ous);
-        console.log('ouTree is now ...:');
-        console.log(controller);
-        console.log(controller.get('ouTree'));
+        console.log('App.ApplicationRoute received OUs successfully');
     });
   }
 });
@@ -101,24 +99,16 @@ App.PageRoute = Ember.Route.extend({
 /*
  * Views
  */
-
-App.PageView = Ember.View.extend({
+App.ApplicationView = Ember.View.extend({
     didInsertElement: function() {
       // broken, should be done by ember (was done by sb-admin-2.js before):
+      console.log("App.ApplicationView.didInsertElement() initializing metisMenu");
       $('#side-menu').metisMenu();
     }   
-});
-App.ScheduleView = Ember.View.extend({
-    didInsertElement: function() {
-      // broken, should be done by ember (was done by sb-admin-2.js before):
-      $('#side-menu').metisMenu();
-  }   
 });
 App.IndexView = Ember.View.extend({
     templateName: 'index',
     didInsertElement: function() {
-      // broken, should be done by ember (was done by sb-admin-2.js before):
-      $('#side-menu').metisMenu();
 
     // in sb-admin-2 demo, this came in via morris-data.js
     // should be retreived via REST in real life...
