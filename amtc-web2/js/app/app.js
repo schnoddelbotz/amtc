@@ -3,6 +3,7 @@
  *
  * amtc-web EmberJS app
  *
+ * http://emberjs.com/guides/concepts/naming-conventions/
  *
  */ 
 
@@ -67,11 +68,7 @@ App.Router.map(function() {
   });
 });
 
-App.IndexRoute = Ember.Route.extend({
-  enter: function() {
-    console.log("Entered App.IndexRoute");
-    window.scrollTo(0, 0);
-  },
+App.ApplicationRoute = Ember.Route.extend({
   setupController: function(controller,model) {
     console.log('setup controller ouS');
     this._super(controller,model);
@@ -85,6 +82,12 @@ App.IndexRoute = Ember.Route.extend({
         console.log(controller);
         console.log(controller.get('ouTree'));
     });
+  }
+});
+App.IndexRoute = Ember.Route.extend({
+  enter: function() {
+    console.log("Entered App.IndexRoute");
+    window.scrollTo(0, 0);
   }
 });
 App.PageRoute = Ember.Route.extend({
@@ -185,6 +188,24 @@ App.IndexView = Ember.View.extend({
 /*
  * Controller
  */
+
+
+App.ApplicationController = Ember.Controller.extend({
+  appName: 'amtc-web', // available as {{appName}} throughout app template
+
+  // the initial value of the `search` property
+  search: '',
+
+  actions: {
+    query: function() {
+      // the current value of the text field
+      var query = this.get('search');
+      this.transitionToRoute('search', { query: query });
+    }
+  }
+
+});
+
 
 App.IndexController = Ember.ObjectController.extend({
   needs: ["Notifications"],
