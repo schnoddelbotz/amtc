@@ -13,6 +13,12 @@ ul.ember-view.tree-branch {
     list-style-type: none;
     padding-left: 20px;
 }
+.tree-node .toggle-icon.leaf {
+    visibility: hidden;
+}
+.tree-node a:hover {
+    text-decoration: none;
+}
 
 /* 
  *  Implements the flashing bolt
