@@ -60,7 +60,7 @@ App.Router.map(function() {
   this.resource('about');
   this.resource('control');
   this.resource('logs');
-  this.resource('charts');
+  this.resource('energy');
   this.resource('schedule');
   this.resource('setup');
   this.resource('ous', function() {
@@ -105,9 +105,9 @@ App.OuRoute = Ember.Route.extend({
     this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('ou', params.id);
   },
-  setupController: function(controller,model) {
+  //setupController: function(controller,model) {
     // fetch more room specific data...?
-  }
+  //}
 });
 
 /*
