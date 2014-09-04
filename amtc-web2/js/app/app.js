@@ -4,8 +4,10 @@
  * amtc-web EmberJS app
  *
  * http://emberjs.com/guides/concepts/naming-conventions/
+ * http://ember-addons.github.io/bootstrap-for-ember/ ?
  *
  */ 
+
 
 var App = Ember.Application.create({
 
@@ -47,6 +49,8 @@ var App = Ember.Application.create({
 
 });
 
+var attr = DS.attr;
+var hasMany = DS.hasMany;
 
 /*
  * Routes 
@@ -79,6 +83,7 @@ App.ApplicationRoute = Ember.Route.extend({
       }).then(function(response) {
         controller.set('ouTree', response.ous);
         console.log('App.ApplicationRoute received OUs successfully');
+        $('#side-menu').metisMenu(); // FIXME ... do it AGAIN here only
     });
   }
 });
@@ -95,6 +100,16 @@ App.PageRoute = Ember.Route.extend({
     return this.store.find('page', params.id);
   }
 });
+App.OuRoute = Ember.Route.extend({
+  model: function(params) {
+    console.log("OuRoute, set currentOU -> " + params.id);
+    this.set('currentOU', params.id); // hmm, unneeded? better...how?
+    return this.store.find('ou', params.id);
+  },
+  setupController: function(controller,model) {
+    // fetch more room specific data...?
+  }
+});
 
 /*
  * Views
@@ -103,7 +118,7 @@ App.ApplicationView = Ember.View.extend({
     didInsertElement: function() {
       // broken, should be done by ember (was done by sb-admin-2.js before):
       console.log("App.ApplicationView.didInsertElement() initializing metisMenu");
-      $('#side-menu').metisMenu();
+     // $('#side-menu').metisMenu(); <---- FIXME DO IT HERE ALWAYS ... until kicked out finally
     }   
 });
 App.IndexView = Ember.View.extend({
@@ -179,7 +194,6 @@ App.IndexView = Ember.View.extend({
  * Controller
  */
 
-
 App.ApplicationController = Ember.Controller.extend({
   appName: 'amtc-web', // available as {{appName}} throughout app template
 
@@ -193,10 +207,7 @@ App.ApplicationController = Ember.Controller.extend({
       this.transitionToRoute('search', { query: query });
     }
   }
-
 });
-
-
 App.IndexController = Ember.ObjectController.extend({
   needs: ["Notifications"],
   notifications: function() {
@@ -206,14 +217,15 @@ App.IndexController = Ember.ObjectController.extend({
 });
 App.NotificationsController = Ember.ObjectController.extend({
 });
+App.OuController = Ember.ObjectController.extend({
+  currentOU: null
+});
 
 
 /*
  * DS Models
  */
 
-var attr = DS.attr;
-var hasMany = DS.hasMany;
 
 // Organizational Unit
 App.Ou = DS.Model.extend({
@@ -244,11 +256,12 @@ App.Notification = DS.Model.extend({
  */
 App.TreeBranchComponent = Ember.Component.extend({
   tagName: 'ul',
-  classNames: ['tree-branch']
+  classNames: ['tree-branch', 'nav', /*'collapse',*/ ]
 });
 App.TreeNodeComponent = Ember.Component.extend({
   tagName: 'li',
-  classNames: ['tree-node'],
+  //classNames: ['tree-node'],
+  /*
   isExpanded: false,
   toggle: function() {
     this.toggleProperty('isExpanded');
@@ -257,6 +270,7 @@ App.TreeNodeComponent = Ember.Component.extend({
     console.log('You clicked: '+this.get('node.text'));
     //this.transitionTo('ous' ); // FIXME does nothing?
   }
+  */
 });
 
 /*

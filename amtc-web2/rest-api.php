@@ -43,9 +43,9 @@ $app->get('/pages/:id', function ($id) {
     if ($page = sprintf("%d", $id)) {     
       $file = sprintf("pages/%d.md", $page);
       $contents = 'Not found';
-    is_readable($file) && $contents = file_get_contents($file);
-        echo json_encode( array('page'=>array(
-      'id' => $page,
+      is_readable($file) && $contents = file_get_contents($file);
+      echo json_encode( array('page'=>array(
+        'id' => $page,
         'page_name' => 'unused',
         'page_title' => 'unused',
         'page_content' => $contents
