@@ -83,7 +83,6 @@ App.ApplicationRoute = Ember.Route.extend({
       }).then(function(response) {
         controller.set('ouTree', response.ous);
         console.log('App.ApplicationRoute received OUs successfully');
-        $('#side-menu').metisMenu(); // FIXME ... do it AGAIN here only
     });
   }
 });
@@ -118,7 +117,7 @@ App.ApplicationView = Ember.View.extend({
     didInsertElement: function() {
       // broken, should be done by ember (was done by sb-admin-2.js before):
       console.log("App.ApplicationView.didInsertElement() initializing metisMenu");
-     // $('#side-menu').metisMenu(); <---- FIXME DO IT HERE ALWAYS ... until kicked out finally
+      $('#side-menu').metisMenu(); //<---- FIXME DO IT HERE ALWAYS ... until kicked out finally
     }   
 });
 App.IndexView = Ember.View.extend({
@@ -260,17 +259,14 @@ App.TreeBranchComponent = Ember.Component.extend({
 });
 App.TreeNodeComponent = Ember.Component.extend({
   tagName: 'li',
-  //classNames: ['tree-node'],
-  /*
-  isExpanded: false,
+  isExpanded: true,
   toggle: function() {
     this.toggleProperty('isExpanded');
   },
   didClick: function() {
     console.log('You clicked: '+this.get('node.text'));
-    //this.transitionTo('ous' ); // FIXME does nothing?
   }
-  */
+  
 });
 
 /*
