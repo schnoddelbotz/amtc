@@ -19,10 +19,10 @@ var App = Ember.Application.create({
       topOffset = 50;
       width = (this.window.innerWidth > 0) ? this.window.innerWidth : this.screen.width;
       if (width < 768) {
-        $('div.navbar-collapse').addClass('collapse')
+        $('div.navbar-collapse').addClass('collapse');
         topOffset = 100; // 2-row-menu
       } else {
-        $('div.navbar-collapse').removeClass('collapse')
+        $('div.navbar-collapse').removeClass('collapse');
       }
 
       height = (this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height;
@@ -67,6 +67,10 @@ App.Router.map(function() {
     this.resource('ou', { path: ':id' });
     this.route('new');
   });
+  this.resource('optionsets', function() {
+    this.resource('optionset', { path: ':id' });
+    this.route('new');
+  });
   this.resource('pages', function() {
     this.resource('page', { path: ':id' });
   });
@@ -75,6 +79,7 @@ App.Router.map(function() {
 App.ApplicationRoute = Ember.Route.extend({
   setupController: function(controller,model) {
     console.log('Entered App.ApplicationRoute, triggering load of OUs');
+    window.scrollTo(0, 0);
     this._super(controller,model);
       var p=this;
       $.ajax({
@@ -99,15 +104,13 @@ App.PageRoute = Ember.Route.extend({
     return this.store.find('page', params.id);
   }
 });
+
 App.OuRoute = Ember.Route.extend({
   model: function(params) {
     console.log("OuRoute, set currentOU -> " + params.id);
     this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('ou', params.id);
   },
-  //setupController: function(controller,model) {
-    // fetch more room specific data...?
-  //}
 });
 App.OusRoute = Ember.Route.extend({
   setupController: function(controller,model) {
@@ -134,6 +137,25 @@ App.OusIndexRoute = Ember.Route.extend({
     return this.store.find('ou');
   }
 });
+
+App.OptionsetRoute = Ember.Route.extend({
+  model: function(params) {
+    console.log("App.OptionsetRoute -> " + params.id);
+    //this.set('currentOU', params.id); // hmm, unneeded? better...how?
+    return this.store.find('optionset', params.id);
+  },
+});
+App.OptionsetsIndexRoute = Ember.Route.extend({
+  enter: function() {
+    // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
+    window.scrollTo(0, 0);
+  },
+  model: function() {
+    console.log("App.OptionsetsIndexRoute");
+    return this.store.find('optionset');
+  }
+});
+
 
 /*
  * Views
@@ -307,6 +329,64 @@ App.OusController = App.OuController;/*Ember.ObjectController.extend({
   needs: ["Ous"],
   ouTree: null,
 });*/
+App.OptionsetController = Ember.ObjectController.extend({
+
+  currentOU: null,
+  isEditing: false,
+  ouTree: null,
+
+  actions: {
+    removeOptionset: function (device) {
+      if (confirm("Really delete this optionset?")) {
+        console.log('FINALLY Remove it');
+        var device = this.get('model');
+        device.deleteRecord();
+        device.save().then(function(device) {
+          humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
+            { timeout: 1500, clickToClose: false });
+          console.log("FIXME - transtionToRoute doesnt work here...");
+          window.location.href = '#/optionsets';
+        }, function(device){
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Delete failed! Please reload page.',
+            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+      });
+      }
+    },
+
+    becameError: function() {
+      alert("This does not work... elsewhere?");
+    },
+
+    edit: function() {
+      this.set('isEditing', true);
+    },
+
+    doneEditingReturn: function() {
+      this.set('isEditing', false);
+      this.get('model').save().then(function(device) {
+        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
+            { timeout: 800 });
+        //this.transitionToRoute('exams/exam', exam); // FIXME does nothing?
+        window.location.href = '#/optionsets';
+      }, function(device){
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.',
+            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+      });
+    },
+
+    doneEditing: function() {
+      this.set('isEditing', false);
+      this.get('model').save().then(function(device) {
+        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
+            { timeout: 800 });
+      }, function(device){ 
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.', 
+            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+      });
+    }
+  } 
+ 
+});
 
 
 
@@ -339,6 +419,21 @@ App.Notification = DS.Model.extend({
       return cc;
     }
   }.property()
+});
+// AMT Option sets
+App.Optionset = DS.Model.extend({
+  name: attr('string'),
+  description: attr('string'),
+  sw_dash: attr('boolean'),
+  sw_v5: attr('boolean'),
+  sw_scan22: attr('boolean'),
+  sw_scan3389: attr('boolean'),
+  sw_usetls: attr('boolean'),
+  sw_skipcertchk: attr('boolean'),
+  opt_maxthreads: attr('string'),
+  opt_timeout: attr('string'),
+  opt_passfile: attr('string'),
+  opt_cacertfile: attr('string')
 });
 
 /*

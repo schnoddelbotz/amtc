@@ -276,7 +276,7 @@
                             <li>
                                 <a href="#/systemhealth"><i class="fa fa-plug fa-fw"></i> Scheduler Log and Status</a>
                             </li>
-                            {{#linkTo 'setup' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>{{/linkTo}}
+                            {{#linkTo 'optionsets' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>{{/linkTo}}
                         </ul>
                         <!-- /.nav-second-level -->
                     </li>
@@ -644,6 +644,127 @@
       </div>
 </script>
 
+<!-- OptionSets -->
+<script type="text/x-handlebars" id="optionsets">
+{{! Display /optionsets page: tabular room list view plus actions:add/remove/edit menu  }}
+    <div class="row">
+        <div class="col-lg-12">
+            {{outlet}} <!-- see rooms/index : big table view of rooms -->
+        </div>
+    </div>
+
+    <div class="row">
+        <h3>Actions</h3>
+        <ul>
+            <li>{{#link-to 'optionsets.new'}}Add Optionset...{{/link-to}}</li>
+        </ul>
+    </div class="row">
+</script>
+
+<script type="text/x-handlebars" id="optionsets/index">
+    {{! Display a table with all rooms }}
+    <h1 class="page-header">AMT(c) Option sets</h1>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Edit</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Options</th>
+        </tr>
+      </thead>
+      {{#each model}}
+        <tr>
+          <td>{{#link-to 'optionset' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
+          <td>{{#link-to 'optionset' this}}{{name}}{{/link-to}}</td>
+          <td>{{description}}</td>
+          <td>TLS etc.</td>
+        </td></tr>
+      {{/each}}
+    </table>
+</script>
+
+<script type="text/x-handlebars" id="optionset">
+    {{! Display a single OU edit form using partial _deviceEdit }}
+    <h1 class="page-header">Edit Optionset {{name}}</h1>
+    {{partial "optionsetEdit"}}
+    <div id="editbutton">
+      <button {{action "removeOptionset"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete Option set</button>
+      <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save</button> 
+      <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+    </div>
+</script>
+
+<script type="text/x-handlebars" id="optionsets/new">
+    <h1 class="page-header">Create a new Optionset</h1>
+    <p>
+      Optionsets are used to apply AMTC command line options (like whether to use TLS, which timeout, which AMT password etc.) to rooms.
+      A newly created option set does not get assigned to any room by default. You have to visit the {{#link-to 'ous' this}}Room/OU administration page{{/link-to}} to make these assignments.
+    </p>
+    {{partial "optionsetEdit"}}
+    <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save option set</button>
+</script>
+
+<script type="text/x-handlebars" data-template-name='_optionsetEdit'>
+  <form id="optionsetEditForm">
+   <fieldset>
+      <div class="inputline">
+        <label for "name">Option set name</label>
+        {{input type="text" value=name insert-newline="doneEditing" placeholder="shorthand name"}}
+      </div>
+      <div class="inputline">
+        <label for "description">Description</label>
+          {{input type="text" value=description insert-newline="doneEditing" placeholder="..."}}
+      </div>
+      <div class="inputline">
+        <label for "description">Enforce AMT v5 EOI</label>
+          {{input type="checkbox" checked=sw_v5}}
+      </div>
+      <div class="inputline">
+        <label for "description">Enforce DASH (AMT v9)</label>
+          {{input type="checkbox" checked=sw_dash}}
+      </div>
+      <div class="inputline">
+        <label for "description">Enable SSH portscan</label>
+          {{input type="checkbox" checked=sw_scan22}}
+      </div>
+      <div class="inputline">
+        <label for "description">Enbale RDP portscan</label>
+          {{input type="checkbox" checked=sw_scan3389}}
+      </div>
+      <div class="inputline">
+        <label for "description">Use TLS (port 16993)</label>
+          {{input type="checkbox" checked=sw_usetls}}
+      </div>
+      {{#if sw_usetls}}
+        <div class="inputline">
+          <label for "description">Skip TLS cert verification</label>
+            {{input type="checkbox" checked=sw_skipcertchk}}
+        </div>
+        <div class="inputline">
+          <label for "description">TLS CA cert file</label>
+            {{input type="text" value=opt_cacertfile insert-newline="doneEditing"}}
+        </div>
+      {{/if}}
+      <div class="inputline">
+        <label for "description">AMT password file</label>
+          {{input type="text" value=opt_passfile insert-newline="doneEditing" placeholder="/path/to/file"}}
+      </div>
+      <div class="inputline">
+        <label for "description">Maximum number of threads</label>
+          {{input type="text" value=opt_maxthreads insert-newline="doneEditing" size=2 placeholder="170"}}
+      </div>
+      <div class="inputline">
+        <label for "description">Connection timeout [s]</label>
+          {{input type="text" value=opt_timeout insert-newline="doneEditing" size=2 placeholder="10"}}
+      </div>
+
+   </fieldset>
+  </form>
+  <div class="clearboth"></div><br>
+</script>
+
+<!-- OUs / Rooms -->
 <!-- from http://jsbin.com/alabob/70/edit : OU chooser / tree-branch/node -->
 <script type="text/x-handlebars" data-template-name='_ouSelection'>
   {{#if ouTree}}
@@ -728,9 +849,7 @@
     </div>
 </script>
 
-<script type="text/x-handlebars" id="ous/new">
-{{! Create NEW display form -- currently just using the _deviceEdit  }}
-    <h1 class="page-header">Create a new OU / room</h1>
+<script type="text/x-handlebars" id="ous/new">    <h1 class="page-header">Create a new OU / room</h1>
     {{partial "ouEdit"}}
     <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save device</button>
 </script>

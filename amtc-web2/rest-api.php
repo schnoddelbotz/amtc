@@ -65,7 +65,7 @@ $app->get('/notifications', function () {
   echo json_encode( $result );
 });
 
-// OUs / Rooms
+/**************** OUs / Rooms ************************************************/
 $app->get('/ous', function () {
   $result = array('ous'=>array());
   foreach (OU::all() as $record) {
@@ -123,8 +123,44 @@ $app->delete('/ous/:id', function ($id) {
     }
 });
 
+/**************** AMT Optionsets *********************************************/
+$app->get('/optionsets', function () {
+  $result = array('optionsets'=>array());
+  foreach (Optionset::all() as $record) {
+    $r = $record->to_array();
+    $result['optionsets'][] = $r;
+  }
+  # relations? Book::all(array('include'=>array('author'));
+  echo json_encode( $result );
+});
+$app->get('/optionsets/:id', function ($ouid) use ($app) {
+    if ($os = Optionset::find($ouid)) {
+      echo json_encode( array('optionset'=> $os->to_array()) );
+    }
+});
+$app->put('/optionsets/:id', function ($id) {
+  //$post = json_decode(file_get_contents("php://$input"));
+  $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
+  $udev = $put['optionset'];
+  if ($dev = Optionset::find_by_id($id)) {
+    // this should be a foreach...? but ember currently submits ou_path, which is computed :-/
+    $dev->name = $udev->name;
+    $dev->description = $udev->description;
+    //$dev->parent = $udev->parent;
+    // is there something like $dev->isDirty? if so...:
+    $dev->save();
+    echo json_encode( array('optionset'=> $dev->to_array()) );
+  }
+});
+$app->delete('/optionsets/:id', function ($id) {
+    if ($dev = Optionset::find_by_id($id)) {
+      echo json_encode( array('optionset'=> $dev->to_array()) );
+      $dev->delete();
+    }
+});
 
 
+/*****************************************************************************/
 /*
  *
  * ... run, forrest, run!

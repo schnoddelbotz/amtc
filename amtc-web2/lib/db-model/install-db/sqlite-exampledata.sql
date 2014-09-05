@@ -24,3 +24,8 @@ INSERT INTO "ous" VALUES(11,3,'E 27','');
 INSERT INTO "ous" VALUES(12,4,'D 11','');
 INSERT INTO "ous" VALUES(13,4,'D 12','');
 INSERT INTO "ous" VALUES(14,4,'D 13','');
+-- and some amtc option sets
+INSERT INTO "optionsets" VALUES(1,'AMT v6 - No TLS','Uses EOI',0,0,1,1,0,0,40,5,'/tmp/test1.pass','');
+INSERT INTO "optionsets" VALUES(2,'AMT v9 - No TLS','Uses DASH',0,1,1,1,0,0,40,5,'/tmp/test2.pass','');
+INSERT INTO "optionsets" VALUES(3,'AMT v9 - with TLS, no cert check','Uses DASH',0,1,1,1,1,1,40,5,'/tmp/test2.pass','');
+INSERT INTO "optionsets" VALUES(4,'AMT v9 - with TLS, verify cert','Uses DASH',0,1,1,1,1,0,40,5,'/tmp/test2.pass','/tmp/my.ca.crt');

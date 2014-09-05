@@ -20,8 +20,8 @@ ul.ember-view.tree-branch {
     text-decoration: none;
 }
 
-#ouEditForm label {
-    width:150px;
+#ouEditForm label, #optionsetEditForm label {
+    width:220px;
 }
 /* 
  *  Implements the flashing bolt
