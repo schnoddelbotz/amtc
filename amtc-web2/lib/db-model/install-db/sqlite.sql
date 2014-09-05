@@ -9,19 +9,15 @@ CREATE TABLE notifications (
   message           VARCHAR(64)
 );
 
--- rooms as containers for groups of clients
-CREATE TABLE rooms (
-  id                INTEGER PRIMARY KEY, 
-  roomname          VARCHAR(32), 
-  seats             INTEGER
-);
-
--- organizational units
+-- organizational units / rooms
 CREATE TABLE ous (
   id                INTEGER      NOT NULL PRIMARY KEY AUTOINCREMENT,
   parent            INTEGER      NULL,
+  optionset_id      INT,
   name              VARCHAR(128) NOT NULL,
-  description       VARCHAR(255)
+  description       VARCHAR(255),
+  
+  FOREIGN KEY(optionset_id) REFERENCES optionsets(id)
 );
 
 -- amt(c) option sets

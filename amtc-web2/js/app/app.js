@@ -264,9 +264,12 @@ App.IndexController = Ember.ObjectController.extend({
 App.NotificationsController = Ember.ObjectController.extend({
 });
 App.OuController = Ember.ObjectController.extend({
-  //needs: ["Ous"],
+  //needs: ["Optionsets"],
   ous: function() {
         return this.get('store').find('ou');
+  }.property(),
+  optionsets: function() { //// ???????
+        return this.get('store').find('optionset');
   }.property(),
 
   currentOU: null,
@@ -400,6 +403,7 @@ App.Ou = DS.Model.extend({
   name: attr('string'),
   description: attr('string'),
   parent: attr('string'),
+  optionset_id: DS.belongsTo('optionset'),
   ou_path: attr('string')
 });
 // Markdown help / documentation pages

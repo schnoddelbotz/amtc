@@ -774,13 +774,13 @@
   {{/if}}
 </script>
 
-<script data-template-name="components/tree-branch" type="text/x-handlebars">
+<script type="text/x-handlebars" data-template-name="components/tree-branch">
   {{#each child in node.children}}
     {{tree-node node=child}}
   {{/each}}
 </script>
 
-<script data-template-name="components/tree-node" type="text/x-handlebars">
+<script type="text/x-handlebars" data-template-name="components/tree-node">
   {{#link-to 'ou' node.id}}
     <span {{bindAttr class=":toggle-icon node.children.length::leaf"}} {{action toggle}}>
       {{#if isExpanded}}
@@ -808,7 +808,9 @@
     <div class="row">
         <h3>Actions</h3>
         <ul>
-            <li>{{#link-to 'ous.new'}}Add room...{{/link-to}}</li>
+            <li>{{#link-to 'ous.new'}}Add room{{/link-to}}</li>
+            <li>{{#link-to 'ous'}}List rooms{{/link-to}}</li>
+            <li>{{#link-to 'optionsets'}}Edit optionsets{{/link-to}}</li>
         </ul>
     </div class="row">
 </script>
@@ -832,7 +834,7 @@
           <td>{{#link-to 'ou' this}}{{ou_path}}{{/link-to}}</td>
           <td>{{name}}</td>
           <td>{{description}}</td>
-          <td>AMT Optionset 123</td>
+          <td>{{optionset_id.name}}</td>
         </td></tr>
       {{/each}}
     </table>
@@ -859,32 +861,37 @@
 {{! http://emberjs.com/api/classes/Ember.Select.html }}
 <form id="ouEditForm">
  <fieldset>
-    <div class="inputline">
+    <div class="form-group">
       <label for "name">OU / room name</label>
-      {{input type="text" value=name insert-newline="doneEditing"}}
+      {{input class="form-control" type="text" value=name insert-newline="doneEditing"}}
+      <p class="help-block">e.g. D 23.2</p>
     </div>
-    <div class="inputline">
+    <div class="form-group">
       <label for "description">OU description</label>
-        {{input type="text" value=description insert-newline="doneEditing"}}
+      {{input class="form-control" type="text" value=description insert-newline="doneEditing"}}
+      <p class="help-block"></p>
     </div>
-    <div class="inputline">
+    <div class="form-group">
       <label for "optionset">Parent OU</label>
       {{view Ember.Select content=ous
+                          class="form-control"
                           value=parent
-                          selection=FIXMEBROKEN
+                          selection=parent
                           prompt="Choose OU"
                           optionValuePath="content.id"
                           optionLabelPath="content.name" }}
+      <p class="help-block">Choose the parent OU (or "folder") for this room</p>
     </div>
-    <div class="inputline">
-    <div class="inputline">
+    <div class="form-group">
       <label for "optionset">AMT option set</label>
-      {{view Ember.Select content=providers
+      {{view Ember.Select content=optionsets
+                          class="form-control"
                           value=providerid.id
-                          selection=provider_id
+                          selection=optionset_id
                           prompt="Choose AMT Option set"
                           optionValuePath="content.id"
-                          optionLabelPath="content.description" }}
+                          optionLabelPath="content.name" }}
+      <p class="help-block">Optionsets may be created ...here... They will NOT be inherited.</p>
     </div>
  </fieldset>
 </form>

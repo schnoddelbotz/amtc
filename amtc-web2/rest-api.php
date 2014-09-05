@@ -25,6 +25,7 @@ ActiveRecord\Config::initialize(function($cfg)
 $app = new \Slim\Slim();
 $app->response()->header('Content-Type', 'application/json;charset=utf-8');
 
+
 /* 
  *  Non-DB-Model requests 
  */
@@ -57,7 +58,8 @@ $app->get('/pages/:id', function ($id) {
  *  DB-Model requests 
  */
 
-// Notifications / Short user messages for dashboard
+/**************** Notifications / Short user messages for dashboard **********/
+
 $app->get('/notifications', function () {
   sleep(2); // just to test the spinner ...
   $result = array('notifications'=>array());
@@ -66,6 +68,7 @@ $app->get('/notifications', function () {
 });
 
 /**************** OUs / Rooms ************************************************/
+
 $app->get('/ous', function () {
   $result = array('ous'=>array());
   foreach (OU::all() as $record) {
@@ -88,15 +91,12 @@ $app->get('/ou-tree', function () use ($app) {
   )));
 });
 $app->put('/ous/:id', function ($id) {
-  //$post = json_decode(file_get_contents("php://$input"));
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $udev = $put['ou'];
   if ($dev = OU::find_by_id($id)) {
-    // this should be a foreach...? but ember currently submits ou_path, which is computed :-/
     $dev->name = $udev->name;
     $dev->description = $udev->description;
     $dev->parent = $udev->parent;
-    // is there something like $dev->isDirty? if so...:
     $dev->save();
     echo json_encode( array('ou'=> $dev->to_array()) );
   }
@@ -106,12 +106,9 @@ $app->post('/ous', function () use ($app) {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $ndev = $post['ou'];
   if ($dev = new OU) {
-    // this should be a foreach...? but ember currently submits ou_path, which is computed :-/
     $dev->name = $ndev->name;
     $dev->description = $ndev->description;
     $dev->parent = $ndev->parent;
-    //$dev->ou_id = 1; // FIXME
-    // is there something like $dev->isDirty? if so...:
     $dev->save();
     echo json_encode( array('device'=> $dev->to_array()) );
   }
@@ -124,13 +121,13 @@ $app->delete('/ous/:id', function ($id) {
 });
 
 /**************** AMT Optionsets *********************************************/
+
 $app->get('/optionsets', function () {
   $result = array('optionsets'=>array());
   foreach (Optionset::all() as $record) {
     $r = $record->to_array();
     $result['optionsets'][] = $r;
   }
-  # relations? Book::all(array('include'=>array('author'));
   echo json_encode( $result );
 });
 $app->get('/optionsets/:id', function ($ouid) use ($app) {
@@ -139,15 +136,11 @@ $app->get('/optionsets/:id', function ($ouid) use ($app) {
     }
 });
 $app->put('/optionsets/:id', function ($id) {
-  //$post = json_decode(file_get_contents("php://$input"));
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $udev = $put['optionset'];
   if ($dev = Optionset::find_by_id($id)) {
-    // this should be a foreach...? but ember currently submits ou_path, which is computed :-/
     $dev->name = $udev->name;
     $dev->description = $udev->description;
-    //$dev->parent = $udev->parent;
-    // is there something like $dev->isDirty? if so...:
     $dev->save();
     echo json_encode( array('optionset'=> $dev->to_array()) );
   }
@@ -165,4 +158,7 @@ $app->delete('/optionsets/:id', function ($id) {
  *
  * ... run, forrest, run!
  */
+
 $app->run();
+
+
