@@ -268,7 +268,7 @@
                         <a href="#"><i class="fa fa-wrench fa-fw"></i> Administration<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
                             <li>
-                                <a href="#/notifications"><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>
+                                <a href="#/ous"><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>
                             </li>
                             <li>
                                 <a href="#/usermanagement"><i class="fa fa-users fa-fw"></i> Users and Groups</a>
@@ -579,7 +579,7 @@
     <!-- /.row -->
 </script>
 
-<script type="text/x-handlebars" id="ou">
+<script type="text/x-handlebars" id="controlou000fixme">
   <div class="row">
     <div class="col-lg-12">
         <h1 class="page-header">Monitor and Control {{name}}</h1>
@@ -674,6 +674,102 @@
   {{#if isExpanded}}
     {{tree-branch node=node}}
   {{/if}}
+</script>
+
+<script type="text/x-handlebars" id="ous">
+{{! Display /rooms page: tabular room list view plus actions:add/remove/edit menu  }}
+    <div class="row">
+        <div class="col-lg-12">
+            {{outlet}} <!-- see rooms/index : big table view of rooms -->
+        </div>
+    </div>
+
+    <div class="row">
+        <h3>Actions</h3>
+        <ul>
+            <li>{{#link-to 'ous.new'}}Add room...{{/link-to}}</li>
+        </ul>
+    </div class="row">
+</script>
+
+<script type="text/x-handlebars" id="ous/index">
+    {{! Display a table with all rooms }}
+    <h1 class="page-header">List of rooms</h1>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Edit</th>
+          <th>OU</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Optionset</th>
+        </tr>
+      </thead>
+      {{#each model}}
+        <tr>
+          <td>{{#link-to 'ou' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
+          <td>{{#link-to 'ou' this}}{{ou_path}}{{/link-to}}</td>
+          <td>{{name}}</td>
+          <td>{{description}}</td>
+          <td>AMT Optionset 123</td>
+        </td></tr>
+      {{/each}}
+    </table>
+</script>
+
+<script type="text/x-handlebars" id="ou">
+    {{! Display a single OU edit form using partial _deviceEdit }}
+    <h1 class="page-header">Edit OU / Room {{name}}</h1>
+    {{partial "ouEdit"}}
+    <div id="editbutton">
+      <button {{action "removeOu"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete OU</button>
+      <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save</button> 
+      <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+    </div>
+</script>
+
+<script type="text/x-handlebars" id="ous/new">
+{{! Create NEW display form -- currently just using the _deviceEdit  }}
+    <h1 class="page-header">Create a new OU / room</h1>
+    {{partial "ouEdit"}}
+    <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save device</button>
+</script>
+
+<script type="text/x-handlebars" data-template-name='_ouEdit'>
+{{! Edit/Display EXISTING display form (only) }}
+{{! http://emberjs.com/api/classes/Ember.Select.html }}
+<form id="ouEditForm">
+ <fieldset>
+    <div class="inputline">
+      <label for "name">OU / room name</label>
+      {{input type="text" value=name insert-newline="doneEditing"}}
+    </div>
+    <div class="inputline">
+      <label for "description">OU description</label>
+        {{input type="text" value=description insert-newline="doneEditing"}}
+    </div>
+    <div class="inputline">
+      <label for "optionset">Parent OU</label>
+      {{view Ember.Select content=ous
+                          value=parent
+                          selection=FIXMEBROKEN
+                          prompt="Choose OU"
+                          optionValuePath="content.id"
+                          optionLabelPath="content.name" }}
+    </div>
+    <div class="inputline">
+    <div class="inputline">
+      <label for "optionset">AMT option set</label>
+      {{view Ember.Select content=providers
+                          value=providerid.id
+                          selection=provider_id
+                          prompt="Choose AMT Option set"
+                          optionValuePath="content.id"
+                          optionLabelPath="content.description" }}
+    </div>
+ </fieldset>
+</form>
+<div class="clearboth"></div><br>
 </script>
 
 <script src="js/jslibs.js"></script>

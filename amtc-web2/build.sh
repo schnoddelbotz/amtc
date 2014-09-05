@@ -69,7 +69,7 @@ fi
 # (might want to add app.js... + amtc-web.css ... not yet / dev)
 cat css/bootstrap.min.css css/plugins/metisMenu/metisMenu.min.css      \
     css/plugins/timeline.css css/sb-admin-2.css css/plugins/morris.css \
-    css/font-awesome.min.css > css/styles.css
+    css/font-awesome.min.css css/humane-original.css > css/styles.css
 cat js/jquery.min.js js/bootstrap.min.js js/handlebars.js js/emberjs.min.js \
     js/ember-data.min.js js/showdown.js js/moment.js js/humane.min.js       \
     js/plugins/metisMenu/metisMenu.min.js js/plugins/morris/raphael.min.js  \

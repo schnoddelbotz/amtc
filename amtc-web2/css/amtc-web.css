@@ -20,6 +20,9 @@ ul.ember-view.tree-branch {
     text-decoration: none;
 }
 
+#ouEditForm label {
+    width:150px;
+}
 /* 
  *  Implements the flashing bolt
  *  http://stackoverflow.com/questions/275931/how-do-you-make-an-element-flash-in-jquery

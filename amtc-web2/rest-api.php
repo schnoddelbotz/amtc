@@ -64,6 +64,18 @@ $app->get('/notifications', function () {
   foreach (Notification::all() as $record) { $result['notifications'][] = $record->to_array(); }
   echo json_encode( $result );
 });
+
+// OUs / Rooms
+$app->get('/ous', function () {
+  $result = array('ous'=>array());
+  foreach (OU::all() as $record) {
+    $r = $record->to_array();
+    $r['ou_path'] = $record->getPathString();
+    $result['ous'][] = $r;
+  }
+  # relations? Book::all(array('include'=>array('author'));
+  echo json_encode( $result );
+});
 $app->get('/ous/:id', function ($ouid) use ($app) {
     if ($ou = OU::find($ouid)) {
       echo json_encode( array('ou'=> $ou->to_array()) );
@@ -74,6 +86,41 @@ $app->get('/ou-tree', function () use ($app) {
       /* arg 1 is start PID 1 and defaults to one (/). */
       /* should be set to current user's 'home ou' */
   )));
+});
+$app->put('/ous/:id', function ($id) {
+  //$post = json_decode(file_get_contents("php://$input"));
+  $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
+  $udev = $put['ou'];
+  if ($dev = OU::find_by_id($id)) {
+    // this should be a foreach...? but ember currently submits ou_path, which is computed :-/
+    $dev->name = $udev->name;
+    $dev->description = $udev->description;
+    $dev->parent = $udev->parent;
+    // is there something like $dev->isDirty? if so...:
+    $dev->save();
+    echo json_encode( array('ou'=> $dev->to_array()) );
+  }
+});
+// this should live in admin/index.php or such?
+$app->post('/ous', function () use ($app) {
+  $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
+  $ndev = $post['ou'];
+  if ($dev = new OU) {
+    // this should be a foreach...? but ember currently submits ou_path, which is computed :-/
+    $dev->name = $ndev->name;
+    $dev->description = $ndev->description;
+    $dev->parent = $ndev->parent;
+    //$dev->ou_id = 1; // FIXME
+    // is there something like $dev->isDirty? if so...:
+    $dev->save();
+    echo json_encode( array('device'=> $dev->to_array()) );
+  }
+});
+$app->delete('/ous/:id', function ($id) {
+    if ($dev = OU::find_by_id($id)) {
+      echo json_encode( array('ou'=> $dev->to_array()) );
+      $dev->delete();
+    }
 });
 
 

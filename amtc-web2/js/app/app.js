@@ -109,6 +109,31 @@ App.OuRoute = Ember.Route.extend({
     // fetch more room specific data...?
   //}
 });
+App.OusRoute = Ember.Route.extend({
+  setupController: function(controller,model) {
+    console.log('setup controller ouS');
+    this._super(controller,model);
+        var p=this;
+        $.ajax({
+            url: "rest-api.php/ous",
+            type: "GET"//,
+        }).then(function(response) {
+          controller.set('ouTree', response.ous);
+          //console.log('ouTree is now ...:');
+          //console.log(controller.get('ouTree'));
+        });
+  }
+});
+App.OusIndexRoute = Ember.Route.extend({
+  enter: function() {
+    // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
+    window.scrollTo(0, 0);
+  },
+  model: function() {
+    console.log("DevicesIndexRoute");
+    return this.store.find('ou');
+  }
+});
 
 /*
  * Views
@@ -217,8 +242,72 @@ App.IndexController = Ember.ObjectController.extend({
 App.NotificationsController = Ember.ObjectController.extend({
 });
 App.OuController = Ember.ObjectController.extend({
-  currentOU: null
+  //needs: ["Ous"],
+  ous: function() {
+        return this.get('store').find('ou');
+  }.property(),
+
+  currentOU: null,
+  isEditing: false,
+  ouTree: null,
+
+  actions: {
+    removeOu: function (device) {
+      if (confirm("Really delete this device?")) {
+        console.log('FINALLY Remove it');
+        var device = this.get('model');
+        device.deleteRecord();
+        device.save().then(function(device) {
+          humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
+            { timeout: 1500, clickToClose: false });
+          console.log("FIXME - transtionToRoute doesnt work here...");
+          window.location.href = '#/ous';
+        }, function(device){
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Delete failed! Please reload page.',
+            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+      });
+      }
+    },
+
+    becameError: function() {
+      alert("This does not work... elsewhere?");
+    },
+
+    edit: function() {
+      this.set('isEditing', true);
+    },
+
+    doneEditingReturn: function() {
+      this.set('isEditing', false);
+      this.get('model').save().then(function(device) {
+        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
+            { timeout: 800 });
+        //this.transitionToRoute('exams/exam', exam); // FIXME does nothing?
+        window.location.href = '#/ous';
+      }, function(device){
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.',
+            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+      });
+    },
+
+    doneEditing: function() {
+      this.set('isEditing', false);
+      this.get('model').save().then(function(device) {
+        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
+            { timeout: 800 });
+      }, function(device){ 
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.', 
+            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+      });
+    }
+  } 
+ 
 });
+App.OusController = App.OuController;/*Ember.ObjectController.extend({
+  needs: ["Ous"],
+  ouTree: null,
+});*/
+
 
 
 /*
@@ -229,7 +318,9 @@ App.OuController = Ember.ObjectController.extend({
 // Organizational Unit
 App.Ou = DS.Model.extend({
   name: attr('string'),
-  description: attr('string')
+  description: attr('string'),
+  parent: attr('string'),
+  ou_path: attr('string')
 });
 // Markdown help / documentation pages
 App.Page = DS.Model.extend({
