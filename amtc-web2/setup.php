@@ -1,4 +1,41 @@
-<!DOCTYPE html>
+<?php
+  //error_reporting(E_ALL);
+  //ini_set('display_errors','on');
+  // YEAH!!! neeeds cleanup/fix!!
+  /*
+   *   
+   */
+  $cfgFile = "data/siteconfig.php";
+  if ($_POST && !file_exists($cfgFile)) {
+    header('Content-Type: application/json;charset=utf-8');
+    $x = array("message"=>"Configuration written successfully", "data"=>$_POST);
+    $cfgTpl = '<?php define("AMTC_PDOSTRING", \'%s\'); ?>';
+    $phpArPdoString = addslashes($_POST['pdoString']);
+    $phpArPdoString = preg_replace('@^sqlite://(.*)@', 'sqlite://unix(/\\1)', $phpArPdoString);
+    $cfg = sprintf($cfgTpl, $phpArPdoString);
+    if (!is_writable(dirname($cfgFile))) {
+      $x = array("errorMsg"=>"Data directory not writable!");
+    } elseif (false === file_put_contents($cfgFile, $cfg)) {
+      $x = array("errorMsg"=>"Could not!");
+    } else {
+      if ($_POST['selectedDB'] == 'SQLite') {
+        // create db if non-existant
+        @touch($_POST['sqlitePath']);
+      }
+      if ($_POST['importDemo']==true) {
+        //$x = array("errorMsg"=>$_POST['pdoString']."hahaha");
+        $dbh = new PDO($_POST['pdoString']);
+        foreach (Array('lib/db-model/install-db/sqlite.sql', 'lib/db-model/install-db/sqlite-exampledata.sql') as $f) {
+          $sql = file_get_contents($f);
+          $dbh->exec($sql);
+        }
+      }
+      // fixme: add _htaccess thing
+    }
+    echo json_encode($x);
+    exit(0);  
+  }
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -13,12 +50,13 @@
 <body>
 
 <?php
-   if (file_exists("data/siteconfig.php"))
-    die('<div class="jumbotron">
-      <h1><span class="label label-danger">Nope!</span> Setup tool is blocked</h1>
-      <p><br>Please rename existing data/siteconfig.php to re-run initial installation.</p>
-    </div>
-    ');
+ if (file_exists("data/siteconfig.php"))
+  die('<div class="jumbotron">
+    <h1><span class="label label-danger">Nope!</span> Setup tool is blocked</h1>
+    <p><br>Please rename existing data/siteconfig.php to re-run initial installation.</p>
+    <p>Try visiting the <a href="index.html">amtc-web frontend</a> now. Should it fail, check JavaScript console.</p>
+  </div>
+  ');
 ?>
 
 <script type="text/x-handlebars">
@@ -130,11 +168,31 @@
                 <label>Example data</label>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" value=""> Install example data (some OUs, AMT option sets, and hosts)
+                        {{input type="checkbox" checked=importDemo}} Install example data (some OUs, AMT option sets, and hosts)
                     </label>
                 </div>
             </div>
-            <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Write configuration</button>
+
+            <div class="form-group">
+                <label>Performance optimization</label>
+                <div class="checkbox">
+                    <label>
+                        {{input type="checkbox" checked=installHtaccess}} Enable RewriteRules via .htaccess
+                    </label>
+                    <p class="help-block">Your webserver must have mod_rewrite enabled and AllowOverride must
+                                          be configured to allow use of .htaccess files. <br>Given that, you may
+                                          check this option to deliver gzip compressed HTML/CSS/JS to clients.</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+              <div class="alert alert-danger">
+                <em>Warning!</em> This setup tool currently offers no way yet to check config before writing it.<br>
+                Once the configuration is submitted, this tool will be locked.<br> You will have
+                to delete the configuration file (<code>data/siteconfig.php</code>) manually to re-enable it.
+              </div>
+              <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Write configuration</button>
+            </div>
         </form>
       </div>
       <!-- /.col-lg-12 -->
@@ -180,6 +238,8 @@
     mysqlHost: null,
     mysqlPassword: null,
     mysqlDB: null,
+    importDemo: null,
+    installHtaccess: null,
 
     dbs: [
       "SQLite",
@@ -198,13 +258,37 @@
         if (this.get('selectedDB')=='MySQL') {
           return 'mysql://' + this.get('mysqlUser') + ':' + this.get('mysqlPassword') + "@" + this.get('mysqlHost') + "/" + this.get('mysqlDB');
         } else {
-          return 'sqlite://unix(' + this.get('sqlitePath') + ')';
+          return 'sqlite:/' + this.get('sqlitePath');
         }
     }.property('selectedDB','sqlitePath','mysqlUser','mysqlPassword','mysqlHost','mysqlDB'),
 
     doneEditing: function() {
-        humane.log('<i class="glyphicon glyphicon-saved"></i> Not yet, sorry.',
-            { timeout: 800 });
+      var d = {
+        dbtype: this.get('selectedDB'),
+        sqlitePath: this.get('sqlitePath'),
+        mysqlUser: this.get('mysqlUser'),
+        mysqlHost: this.get('mysqlHost'),
+        mysqlPassword: this.get('mysqlPassword'),
+        mysqlDB: this.get('mysqlDB'),
+        importDemo: this.get('importDemo'),
+        installHtaccess: this.get('installHtaccess'),
+        pdoString: this.get('pdoString')
+      };
+      $.ajax({type:"POST", url:"setup.php", data:jQuery.param(d), dataType:"json"}).then(function(response) {
+        console.log(response);
+        if (typeof response.errorMsg != "undefined")
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Save failed: '+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
+        else {
+          humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully! Warping into amtc-web!', { timeout: 1500 });
+          window.setTimeout( function(){
+            window.location.href = 'index.html';
+          }, 2000);
+        }
+      }, function(response){
+        console.log("what happened?");
+        //humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.',
+          //{ timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+      });
     }
   });
 </script>

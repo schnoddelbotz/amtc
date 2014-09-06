@@ -5,6 +5,7 @@
 
 date_default_timezone_set('Europe/Berlin');
 
+@include 'data/siteconfig.php'; // to let static ember help pages work event without DB
 require 'lib/Slim/Slim.php';
 require 'lib/php-activerecord/ActiveRecord.php';
 
@@ -15,11 +16,10 @@ ActiveRecord\Config::initialize(function($cfg)
    $cfg->set_model_directory('lib/db-model');
    $cfg->set_connections(
      array(
-       //'development' => 'mysql://username:password@localhost/production_database_name'
-      'development' => 'sqlite://unix(/scratch/me.db)'
+      'production' => AMTC_PDOSTRING
      )
    );
-   //$cfg->set_default_connection('production');
+   $cfg->set_default_connection('production');
 });
 
 $app = new \Slim\Slim();
