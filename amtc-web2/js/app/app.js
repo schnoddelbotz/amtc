@@ -82,13 +82,23 @@ App.ApplicationRoute = Ember.Route.extend({
     window.scrollTo(0, 0);
     this._super(controller,model);
       var p=this;
-      $.ajax({
-        url: "rest-api.php/ou-tree",
-        type: "GET"//,
-      }).then(function(response) {
-        controller.set('ouTree', response.ous);
-        console.log('App.ApplicationRoute received OUs successfully');
-    });
+      $.ajax( { url: "rest-api.php/ou-tree", type: "GET" }).then(
+        function(response) {
+          controller.set('ouTree', response.ous);
+          console.log('App.ApplicationRoute received OUs successfully');
+        },
+        function(response){
+          // we received an error from the server.
+          // it only _MIGHT_ indicate setup hasn't been done.
+          // FIXME: let user decide to... - and check/show return msg!
+          humane.log('<i class="glyphicon glyphicon-fire"></i> DB down or unconfigured?'+
+                     '<br>Redirecting to setup...', { timeout: 2000 });
+          window.setTimeout( function(){
+            window.location.href = 'setup.php';
+          }, 2500);
+          // ^ helps avoiding index.php
+        }
+      );
   }
 });
 App.IndexRoute = Ember.Route.extend({

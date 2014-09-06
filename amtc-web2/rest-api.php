@@ -4,7 +4,7 @@
 // sleep(2);
 
 @include 'data/siteconfig.php'; // to let static ember help pages work event without DB
-//date_default_timezone_set( isset(AMTC_TZ) ? AMTC_TZ : 'Europe/Berlin');
+// FIXME date_default_timezone_set( @isset(AMTC_TZ) ? AMTC_TZ : 'Europe/Berlin');
 
 require 'lib/php-activerecord/ActiveRecord.php';
 require 'lib/Slim/Slim.php';
@@ -20,6 +20,7 @@ $app->response()->header('Content-Type', 'application/json;charset=utf-8');
     $result = array('error'=>'Not configured yet.');
     echo json_encode( $result ); // <- to be catched by ember index.html app -> redir 2 setup.php
   }
+  // index.html already does this (redir to setup.php) now on failure in ou-tree route
 */
 
 // Initialize http://www.phpactiverecord.org/
