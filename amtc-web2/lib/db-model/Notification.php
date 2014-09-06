@@ -1,4 +1,4 @@
 <?php
-class PC extends ActiveRecord\Model
+class Notification extends ActiveRecord\Model
 {
 }

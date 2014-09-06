@@ -1,5 +1,5 @@
 <?php
-  //error_reporting(E_ALL);
+  error_reporting(E_NONE);
   //ini_set('display_errors','on');
   // YEAH!!! neeeds cleanup/fix!!
   /*
@@ -11,26 +11,26 @@
     $x = array("message"=>"Configuration written successfully", "data"=>$_POST);
     $cfgTpl = '<?php define("AMTC_PDOSTRING", \'%s\'); ?>';
     $phpArPdoString = addslashes($_POST['pdoString']);
-    $phpArPdoString = preg_replace('@^sqlite://(.*)@', 'sqlite://unix(/\\1)', $phpArPdoString);
+    $phpArPdoString = preg_replace('@^sqlite:(.*)@', 'sqlite://unix(\\1)', $phpArPdoString);
     $cfg = sprintf($cfgTpl, $phpArPdoString);
     if (!is_writable(dirname($cfgFile))) {
       $x = array("errorMsg"=>"Data directory not writable!");
     } elseif (false === file_put_contents($cfgFile, $cfg)) {
       $x = array("errorMsg"=>"Could not!");
     } else {
-      if ($_POST['selectedDB'] == 'SQLite') {
+      $dbh = new PDO($_POST['pdoString']);
+      $selectedDB = strtolower($_POST['selectedDB']);
+      if ($selectedDB == 'sqlite') {
         // create db if non-existant
-        @touch($_POST['sqlitePath']);
+        @touch($_POST['sqlitePath']);        
       }
-      if ($_POST['importDemo']==true) {
-        //$x = array("errorMsg"=>$_POST['pdoString']."hahaha");
-        $dbh = new PDO($_POST['pdoString']);
-        foreach (Array('lib/db-model/install-db/sqlite.sql', 'lib/db-model/install-db/sqlite-exampledata.sql') as $f) {
-          $sql = file_get_contents($f);
-          $dbh->exec($sql);
-        }
-      }
-      // fixme: add _htaccess thing
+      $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'.sql'));
+      $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-minimal.sql')); 
+      
+      if ($_POST['importDemo']=='true'/* yes, a string. fixme */)
+        $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-exampledata.sql')); 
+        
+      // fixme: add _htaccess thing ... and some sanitization ... and error checking ... and stuff.
     }
     echo json_encode($x);
     exit(0);  
@@ -52,7 +52,7 @@
 <?php
  if (file_exists("data/siteconfig.php"))
   die('<div class="jumbotron">
-    <h1><span class="label label-danger">Nope!</span> Setup tool is blocked</h1>
+    <h1><span class="label label-danger">Nope!</span> Setup tool is locked</h1>
     <p><br>Please rename existing data/siteconfig.php to re-run initial installation.</p>
     <p>Try visiting the <a href="index.html">amtc-web frontend</a> now. Should it fail, check JavaScript console.</p>
   </div>
@@ -189,7 +189,8 @@
               <div class="alert alert-danger">
                 <em>Warning!</em> This setup tool currently offers no way yet to check config before writing it.<br>
                 Once the configuration is submitted, this tool will be locked.<br> You will have
-                to delete the configuration file (<code>data/siteconfig.php</code>) manually to re-enable it.
+                to delete the configuration file (<code>data/siteconfig.php</code>) manually to re-enable it.<br>
+                <em>Currently, only SQLite is supported!</em>
               </div>
               <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Write configuration</button>
             </div>
@@ -238,33 +239,40 @@
     mysqlHost: null,
     mysqlPassword: null,
     mysqlDB: null,
-    importDemo: null,
+    importDemo: true,
     installHtaccess: null,
 
     dbs: [
       "SQLite",
-      "MySQL"
+      "MySQL",
+      "Oracle",
+      "PostgreSQL"
     ],
     
     isMySQL: function() {
         return (this.get('selectedDB')=='MySQL') ? true : false;
-    }.property('selectedDB'),
-    
+    }.property('selectedDB'),    
     isSQLite: function() {
         return (this.get('selectedDB')=='SQLite') ? true : false;
+    }.property('selectedDB'),
+    isOracle: function() {
+        return (this.get('selectedDB')=='Oracle') ? true : false;
+    }.property('selectedDB'),
+    isPostgreSQL: function() {
+        return (this.get('selectedDB')=='PostgreSQL') ? true : false;
     }.property('selectedDB'),
 
     pdoString: function() {
         if (this.get('selectedDB')=='MySQL') {
           return 'mysql://' + this.get('mysqlUser') + ':' + this.get('mysqlPassword') + "@" + this.get('mysqlHost') + "/" + this.get('mysqlDB');
         } else {
-          return 'sqlite:/' + this.get('sqlitePath');
+          return 'sqlite:' + this.get('sqlitePath');
         }
     }.property('selectedDB','sqlitePath','mysqlUser','mysqlPassword','mysqlHost','mysqlDB'),
 
     doneEditing: function() {
       var d = {
-        dbtype: this.get('selectedDB'),
+        selectedDB: this.get('selectedDB'),
         sqlitePath: this.get('sqlitePath'),
         mysqlUser: this.get('mysqlUser'),
         mysqlHost: this.get('mysqlHost'),
@@ -286,8 +294,9 @@
         }
       }, function(response){
         console.log("what happened?");
-        //humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.',
-          //{ timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+        console.log(response.responseText);
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.'+response.responseText,
+          { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
       });
     }
   });

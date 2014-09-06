@@ -3,8 +3,8 @@
 
 -- notifications: Short messages for dashboard
 CREATE TABLE "notifications" (
-  "id"                INTEGER     PRIMARY KEY AUTOINCREMENT,
-  "tstamp"            DATETIME    DEFAULT CURRENT_TIMESTAMP,
+  "id"                INTEGER     PRIMARY KEY,
+  "tstamp"            INTEGER(4)  DEFAULT (strftime('%s','now')),
   "ntype"             VARCHAR(12),
   "message"           VARCHAR(64)
 );
@@ -32,14 +32,14 @@ CREATE TABLE "pcs" (
 -- state logging of hosts. log occurs upon state change.
 CREATE TABLE "statelogs" (
   "pcid"              INTEGER     DEFAULT NULL,
-  "logdate"           TIMESTAMP   NOT NULL,
+  "tstamp"            INTEGER(4)  DEFAULT (strftime('%s','now')),
   "open_port"         INTEGER     DEFAULT NULL,
   "state_begin"       INTEGER     DEFAULT NULL,
   "state_amt"         INTEGER, 
   "state_http"        INTEGER
 );
-CREATE INDEX "logdata_ld" ON "statelog" ("logdate");
-CREATE INDEX "logdata_pd" ON "statelog" ("pcid");
+CREATE INDEX "logdata_ld" ON "statelogs" ("tstamp");
+CREATE INDEX "logdata_pd" ON "statelogs" ("pcid");
 
 -- amt(c) option sets
 CREATE TABLE "optionsets" (
@@ -64,12 +64,12 @@ CREATE TABLE "optionsets" (
 CREATE TABLE "jobs" (
   "id"                INTEGER NOT NULL PRIMARY KEY,
   "cmd_state"         INTEGER DEFAULT '0',
-  "createdat"         DATETIME DEFAULT NULL,
+  "createdat"         INTEGER(4)  DEFAULT (strftime('%s','now')),
   "username"          TEXT,
   "amtc_cmd"          CHAR(1) NOT NULL,
   "amtc_hosts"        TEXT, -- now ids of hosts...? FIXME tbd
-  "startedat"         TEXT,
-  "doneat"            TEXT,
+  "startedat"         INTEGER(4),
+  "doneat"            INTEGER(4),
   "amtc_delay"        REAL,
   "ou_id"             INTEGER, -- req'd to determine optionset; allow override?
 
