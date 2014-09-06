@@ -84,19 +84,27 @@ App.ApplicationRoute = Ember.Route.extend({
       var p=this;
       $.ajax( { url: "rest-api.php/ou-tree", type: "GET" }).then(
         function(response) {
-          controller.set('ouTree', response.ous);
-          console.log('App.ApplicationRoute received OUs successfully');
+          var unconfigured = typeof response.exceptionMessage == 'undefined' ? false : response.exceptionMessage;
+          if (unconfigured == 'unconfigured') {
+            // unconfigured system detected. relocate to setup.php
+            humane.log('<i class="glyphicon glyphicon-fire"></i> '+
+                       'Unconfigured - warping into setup...!', { timeout: 2000 });
+            window.setTimeout( function(){
+              window.location.href = 'setup.php';
+            }, 2100);
+          } else {
+            // SUCCESS! OU tree received.
+            controller.set('ouTree', response.ous);
+            //console.log('App.ApplicationRoute received OUs successfully');
+          }
         },
         function(response){
-          // we received an error from the server.
-          // it only _MIGHT_ indicate setup hasn't been done.
-          // FIXME: let user decide to... - and check/show return msg!
-          humane.log('<i class="glyphicon glyphicon-fire"></i> DB down or unconfigured?'+
-                     '<br>Redirecting to setup...', { timeout: 2000 });
-          window.setTimeout( function(){
-            window.location.href = 'setup.php';
-          }, 2500);
-          // ^ helps avoiding index.php
+            // other error, like DB down
+          var res = jQuery.parseJSON(response.responseText);
+          var msg = (typeof res.exceptionMessage=='undefined') ? 
+                    'Check console, please.' : res.exceptionMessage;
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
         }
       );
   }

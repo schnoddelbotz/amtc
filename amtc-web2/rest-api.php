@@ -12,16 +12,22 @@ require 'lib/Slim/Slim.php';
 // Initialize http://www.slimframework.com/
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
+$app->config('debug', false); // ... and enables custom $app->error() handler
 $app->response()->header('Content-Type', 'application/json;charset=utf-8');
+$app->notFound(function () use ($app) {
+  echo json_encode(Array('error'=>'Not found')); 
+});
+$app->error(function (\Exception $e) use ($app) {
+  echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') ); // to much / insecure?
+});
 
-/*
-  FIXME to get rid of index.php:
-  if (!defined(AMTC_PDOSTRING) && not a request to /pages) {
-    $result = array('error'=>'Not configured yet.');
-    echo json_encode( $result ); // <- to be catched by ember index.html app -> redir 2 setup.php
-  }
-  // index.html already does this (redir to setup.php) now on failure in ou-tree route
-*/
+// this hack lets the ember GUI clearly detect a unconfigured system. redir->setup.php.
+if ( !defined('AMTC_PDOSTRING') && $app->request->getResourceUri() == '/ou-tree' ) {
+  header('Content-Type: application/json;charset=utf-8');
+  // index.html/ember looks for this 'special' exception/message:
+  echo json_encode( array('exceptionMessage'=> 'unconfigured') ); 
+  return 1; // will make it return a 200 OK anyway
+}
 
 // Initialize http://www.phpactiverecord.org/
 ActiveRecord\Config::initialize(function($cfg){
@@ -53,11 +59,12 @@ $app->get('/rest-config.js', function () use ($app) {
 });
 
 // Return static markdown help pages, json encoded
-$app->get('/pages/:id', function ($id) {
+$app->get('/pages/:id', function ($id) use ($app) {
     if ($page = sprintf("%d", $id)) {     
       $file = sprintf("pages/%d.md", $page);
       $contents = 'Not found';
-      is_readable($file) && $contents = file_get_contents($file);
+      is_readable($file) || $app->notFound();
+      $contents = file_get_contents($file);
       echo json_encode( array('page'=>array(
         'id' => $page,
         'page_name' => 'unused',
@@ -74,7 +81,7 @@ $app->get('/pages/:id', function ($id) {
 /**************** Notifications / Short user messages for dashboard **********/
 
 $app->get('/notifications', function () {
-  sleep(2); // just to test the spinner ...
+  sleep(1); // just to test the spinner ...
   $result = array('notifications'=>array());
   foreach (Notification::all(array("order" => "tstamp desc", 'limit' => 50)) as $record) { $result['notifications'][] = $record->to_array(); }
   echo json_encode( $result );
@@ -171,5 +178,4 @@ $app->delete('/optionsets/:id', function ($id) {
  */
 
 $app->run();
-
 
