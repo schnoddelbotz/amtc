@@ -479,5 +479,5 @@ Ember.Handlebars.helper('format-markdown', function(input) {
 
 // moment.js PRETTY timestamps
 Ember.Handlebars.helper('format-from-now', function(date) {
-  return moment(date).fromNow();
+  return moment.unix(date).fromNow();
 });

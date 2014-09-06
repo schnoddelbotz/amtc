@@ -1,14 +1,12 @@
 
 -- example (old) notifications that will show up in dashboard
--- FIXME now ctime values!!!
-INSERT INTO "notifications" VALUES(NULL,'2014-07-31 19:45:06','user','greenfrog: reset all hosts in E27');
-INSERT INTO "notifications" VALUES(NULL,'2014-07-31 19:54:04','comment','greenfrog commented on E27');
-INSERT INTO "notifications" VALUES(NULL,'2014-08-01 07:51:03','envelope','daily status report sent');
-INSERT INTO "notifications" VALUES(NULL,'2014-08-01 07:30:43','toggle-on','E27: scheduled power up success');
-INSERT INTO "notifications" VALUES(NULL,'2014-08-01 21:46:13','toggle-off','E27: scheduled power down success');
-INSERT INTO "notifications" VALUES(NULL,'2014-08-02 03:46:38','warning','More than 10 hosts unreachable!');
-INSERT INTO "notifications" VALUES(NULL,'2014-08-02 07:50:51','envelope','daily status report sent');
-
+INSERT INTO "notifications" VALUES(NULL,1409902233,'envelope','daily status report sent');
+INSERT INTO "notifications" VALUES(NULL,1409934607,'user','greenfrog: reset all hosts in E27');
+INSERT INTO "notifications" VALUES(NULL,1409934707,'comment','greenfrog commented on E27');
+INSERT INTO "notifications" VALUES(NULL,1409952612,'toggle-off','E27: scheduled power down success');
+INSERT INTO "notifications" VALUES(NULL,1409985633,'toggle-on','E27: scheduled power up success');
+INSERT INTO "notifications" VALUES(NULL,1409988624,'envelope','daily status report sent');
+INSERT INTO "notifications" VALUES(NULL,1410004353,'warning','More than 10 hosts unreachable!');
 
 -- some amtc option sets
 INSERT INTO "optionsets" VALUES(1,'AMT v6 - No TLS','Uses EOI',0,0,1,1,0,0,40,5,'/tmp/test1.pass','');

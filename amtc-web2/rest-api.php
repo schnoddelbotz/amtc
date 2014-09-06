@@ -75,7 +75,7 @@ $app->get('/pages/:id', function ($id) {
 $app->get('/notifications', function () {
   sleep(2); // just to test the spinner ...
   $result = array('notifications'=>array());
-  foreach (Notification::all() as $record) { $result['notifications'][] = $record->to_array(); }
+  foreach (Notification::all(array("order" => "tstamp desc", 'limit' => 50)) as $record) { $result['notifications'][] = $record->to_array(); }
   echo json_encode( $result );
 });
 
