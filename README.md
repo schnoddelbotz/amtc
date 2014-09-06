@@ -1,5 +1,5 @@
-amtc
-====
+amtc [![Build Status](https://travis-ci.org/schnoddelbotz/amtc.svg?branch=master)](https://travis-ci.org/schnoddelbotz/amtc)
+================================
 
 `amtc` - Intel [vPro](http://de.wikipedia.org/wiki/Intel_vPro) [AMT](http://en.wikipedia.org/wiki/Intel_Active_Management_Technology) / [WS-Management](http://en.wikipedia.org/wiki/WS-Management) mass remote power management tool
 
