@@ -579,7 +579,7 @@
     <!-- /.row -->
 </script>
 
-<script type="text/x-handlebars" id="controlou000fixme">
+<script type="text/x-handlebars" id="control">
   <div class="row">
     <div class="col-lg-12">
         <h1 class="page-header">Monitor and Control {{name}}</h1>
@@ -857,45 +857,45 @@
 </script>
 
 <script type="text/x-handlebars" data-template-name='_ouEdit'>
-{{! Edit/Display EXISTING display form (only) }}
-{{! http://emberjs.com/api/classes/Ember.Select.html }}
-<form id="ouEditForm">
- <fieldset>
-    <div class="form-group">
-      <label for "name">OU / room name</label>
-      {{input class="form-control" type="text" value=name insert-newline="doneEditing"}}
-      <p class="help-block">e.g. D 23.2</p>
-    </div>
-    <div class="form-group">
-      <label for "description">OU description</label>
-      {{input class="form-control" type="text" value=description insert-newline="doneEditing"}}
-      <p class="help-block"></p>
-    </div>
-    <div class="form-group">
-      <label for "optionset">Parent OU</label>
-      {{view Ember.Select content=ous
-                          class="form-control"
-                          value=parent
-                          selection=parent
-                          prompt="Choose OU"
-                          optionValuePath="content.id"
-                          optionLabelPath="content.name" }}
-      <p class="help-block">Choose the parent OU (or "folder") for this room</p>
-    </div>
-    <div class="form-group">
-      <label for "optionset">AMT option set</label>
-      {{view Ember.Select content=optionsets
-                          class="form-control"
-                          value=providerid.id
-                          selection=optionset_id
-                          prompt="Choose AMT Option set"
-                          optionValuePath="content.id"
-                          optionLabelPath="content.name" }}
-      <p class="help-block">Optionsets may be created ...here... They will NOT be inherited.</p>
-    </div>
- </fieldset>
-</form>
-<div class="clearboth"></div><br>
+    {{! Edit/Display EXISTING display form (only) }}
+    {{! http://emberjs.com/api/classes/Ember.Select.html }}
+    <form id="ouEditForm">
+     <fieldset>
+        <div class="form-group">
+          <label for "name">OU / room name</label>
+          {{input class="form-control" type="text" value=name insert-newline="doneEditing"}}
+          <p class="help-block">e.g. D 23.2</p>
+        </div>
+        <div class="form-group">
+          <label for "description">OU description</label>
+          {{input class="form-control" type="text" value=description insert-newline="doneEditing"}}
+          <p class="help-block"></p>
+        </div>
+        <div class="form-group">
+          <label for "optionset">Parent OU</label>
+          {{view Ember.Select content=ous
+                              class="form-control"
+                              value=parent.id
+                              selection=parent
+                              prompt="Choose OU"
+                              optionValuePath="content.id"
+                              optionLabelPath="content.name" }}
+          <p class="help-block">Choose the parent OU (or "folder") for this room</p>
+        </div>
+        <div class="form-group">
+          <label for "optionset">AMT option set</label>
+          {{view Ember.Select content=optionsets
+                              class="form-control"
+                              value=optionset_id.id
+                              selection=optionset_id
+                              prompt="Choose AMT Option set"
+                              optionValuePath="content.id"
+                              optionLabelPath="content.name" }}
+          <p class="help-block">Optionsets may be created ...here... They will NOT be inherited.</p>
+        </div>
+     </fieldset>
+    </form>
+    <div class="clearboth"></div><br>
 </script>
 
 <script src="js/jslibs.js"></script>

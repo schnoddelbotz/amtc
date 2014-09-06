@@ -4,7 +4,7 @@
 // sleep(2);
 
 @include 'data/siteconfig.php'; // to let static ember help pages work event without DB
-// FIXME date_default_timezone_set( @isset(AMTC_TZ) ? AMTC_TZ : 'Europe/Berlin');
+date_default_timezone_set( defined('AMTC_TZ') ? AMTC_TZ : 'Europe/Berlin');
 
 require 'lib/php-activerecord/ActiveRecord.php';
 require 'lib/Slim/Slim.php';

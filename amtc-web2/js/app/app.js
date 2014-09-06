@@ -131,8 +131,9 @@ App.OuRoute = Ember.Route.extend({
   },
 });
 App.OusRoute = Ember.Route.extend({
+  //// FIXME wtf????
   setupController: function(controller,model) {
-    console.log('setup controller ouS');
+    console.log('OusRoute setupController()');
     this._super(controller,model);
         var p=this;
         $.ajax({
@@ -148,10 +149,11 @@ App.OusRoute = Ember.Route.extend({
 App.OusIndexRoute = Ember.Route.extend({
   enter: function() {
     // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
+    console.log("OusIndexRoute enter()");
     window.scrollTo(0, 0);
   },
   model: function() {
-    console.log("DevicesIndexRoute");
+    console.log("OusIndexRoute model()");
     return this.store.find('ou');
   }
 });
@@ -284,10 +286,12 @@ App.NotificationsController = Ember.ObjectController.extend({
 App.OuController = Ember.ObjectController.extend({
   //needs: ["Optionsets"],
   ous: function() {
-        return this.get('store').find('ou');
+    console.log("OuController ous()");
+    return this.get('store').find('ou');
   }.property(),
   optionsets: function() { //// ???????
-        return this.get('store').find('optionset');
+    console.log("OusIndexRoute optionsets()");
+    return this.get('store').find('optionset');
   }.property(),
 
   currentOU: null,
@@ -346,7 +350,8 @@ App.OuController = Ember.ObjectController.extend({
   } 
  
 });
-App.OusController = App.OuController;/*Ember.ObjectController.extend({
+//App.OusController = App.OuController;
+/*Ember.ObjectController.extend({
   needs: ["Ous"],
   ouTree: null,
 });*/
@@ -420,7 +425,7 @@ App.OptionsetController = Ember.ObjectController.extend({
 App.Ou = DS.Model.extend({
   name: attr('string'),
   description: attr('string'),
-  parent: attr('string'),
+  parent: DS.belongsTo('ou'),
   optionset_id: DS.belongsTo('optionset'),
   ou_path: attr('string')
 });
