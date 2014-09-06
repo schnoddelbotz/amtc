@@ -3,16 +3,27 @@
 // do this to trigger async REST issues...:
 // sleep(2);
 
-date_default_timezone_set('Europe/Berlin');
-
 @include 'data/siteconfig.php'; // to let static ember help pages work event without DB
-require 'lib/Slim/Slim.php';
+//date_default_timezone_set( isset(AMTC_TZ) ? AMTC_TZ : 'Europe/Berlin');
+
 require 'lib/php-activerecord/ActiveRecord.php';
+require 'lib/Slim/Slim.php';
 
+// Initialize http://www.slimframework.com/
 \Slim\Slim::registerAutoloader();
+$app = new \Slim\Slim();
+$app->response()->header('Content-Type', 'application/json;charset=utf-8');
 
-ActiveRecord\Config::initialize(function($cfg)
-{
+/*
+  FIXME to get rid of index.php:
+  if (!defined(AMTC_PDOSTRING) && not a request to /pages) {
+    $result = array('error'=>'Not configured yet.');
+    echo json_encode( $result ); // <- to be catched by ember index.html app -> redir 2 setup.php
+  }
+*/
+
+// Initialize http://www.phpactiverecord.org/
+ActiveRecord\Config::initialize(function($cfg){
    $cfg->set_model_directory('lib/db-model');
    $cfg->set_connections(
      array(
@@ -22,9 +33,10 @@ ActiveRecord\Config::initialize(function($cfg)
    $cfg->set_default_connection('production');
 });
 
-$app = new \Slim\Slim();
-$app->response()->header('Content-Type', 'application/json;charset=utf-8');
 
+/*****************************************************************************/
+/**************** Only SLIM request handling below ***************************/
+/*****************************************************************************/
 
 /* 
  *  Non-DB-Model requests 
@@ -101,7 +113,6 @@ $app->put('/ous/:id', function ($id) {
     echo json_encode( array('ou'=> $dev->to_array()) );
   }
 });
-// this should live in admin/index.php or such?
 $app->post('/ous', function () use ($app) {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $ndev = $post['ou'];
@@ -151,7 +162,6 @@ $app->delete('/optionsets/:id', function ($id) {
       $dev->delete();
     }
 });
-
 
 /*****************************************************************************/
 /*
