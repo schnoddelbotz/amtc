@@ -30,7 +30,7 @@ CREATE TABLE "pcs" (
 );
 
 -- state logging of hosts. log occurs upon state change.
-CREATE TABLE "statelog" (
+CREATE TABLE "statelogs" (
   "pcid"              INTEGER     DEFAULT NULL,
   "logdate"           TIMESTAMP   NOT NULL,
   "open_port"         INTEGER     DEFAULT NULL,
