@@ -58,7 +58,6 @@ var hasMany = DS.hasMany;
 
 App.Router.map(function() {
   this.resource('about');
-  this.resource('control');
   this.resource('logs');
   this.resource('energy');
   this.resource('schedule');
@@ -73,6 +72,10 @@ App.Router.map(function() {
   });
   this.resource('pages', function() {
     this.resource('page', { path: ':id' });
+  });
+  // 
+  this.resource('monitors', function() {
+    this.resource('monitor', { path: ':id' });
   });
 });
 
@@ -122,51 +125,32 @@ App.PageRoute = Ember.Route.extend({
     return this.store.find('page', params.id);
   }
 });
-
 App.OuRoute = Ember.Route.extend({
   model: function(params) {
-    console.log("OuRoute, set currentOU -> " + params.id);
+    console.log("App.OuRoute model(), set currentOU -> " + params.id);
     this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('ou', params.id);
   },
 });
 App.OusRoute = Ember.Route.extend({
-  //// FIXME wtf????
-  setupController: function(controller,model) {
-    console.log('OusRoute setupController()');
-    this._super(controller,model);
-        var p=this;
-        $.ajax({
-            url: "rest-api.php/ous",
-            type: "GET"//,
-        }).then(function(response) {
-          controller.set('ouTree', response.ous);
-          //console.log('ouTree is now ...:');
-          //console.log(controller.get('ouTree'));
-        });
-  }
+  model: function() {
+    console.log("OusRoute model()");
+    return this.store.find('ou');
+  },
 });
-
-
 App.OusIndexRoute = Ember.Route.extend({
   enter: function() {
     // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
     console.log("OusIndexRoute enter()");
     window.scrollTo(0, 0);
-  },
-  model: function() {
-    console.log("OusIndexRoute model()");
-    return this.store.find('ou');
   }
 });
-
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
     console.log("New OU route");
     return this.store.createRecord('ou');
   }
 });
-
 App.OptionsetRoute = Ember.Route.extend({
   model: function(params) {
     console.log("App.OptionsetRoute -> " + params.id);
@@ -204,11 +188,11 @@ App.OptionsetsNewRoute = Ember.Route.extend({
  * Views
  */
 App.ApplicationView = Ember.View.extend({
-    didInsertElement: function() {
-      // broken, should be done by ember (was done by sb-admin-2.js before):
-      console.log("App.ApplicationView.didInsertElement() initializing metisMenu");
-      $('#side-menu').metisMenu(); //<---- FIXME DO IT HERE ALWAYS ... until kicked out finally
-    }   
+  didInsertElement: function() {
+    // broken, should be done by ember (was done by sb-admin-2.js before):
+    console.log("App.ApplicationView.didInsertElement() initializing metisMenu");
+    $('#side-menu').metisMenu(); //<---- FIXME DO IT HERE ALWAYS ... until kicked out finally
+  }   
 });
 App.IndexView = Ember.View.extend({
     templateName: 'index',
@@ -307,11 +291,8 @@ App.IndexController = Ember.ObjectController.extend({
 App.NotificationsController = Ember.ObjectController.extend({
 });
 App.OuController = Ember.ObjectController.extend({
-  needs: ["optionset"],
-  ous: function() {
-    console.log("OuController ous()");
-    return this.get('store').find('ou');
-  }.property(),
+
+  needs: ["optionset","ous"],
 
   optionsets: function() { //// ???????
     console.log("OusIndexRoute optionsets()");
@@ -367,16 +348,8 @@ App.OuController = Ember.ObjectController.extend({
       });
     }
   } 
- 
 });
 App.OusNewController = App.OuController; // FIXME: evil?
-
-//App.OusController = App.OuController;
-/*Ember.ObjectController.extend({
-  needs: ["Ous"],
-  ouTree: null,
-});*/
-
 App.OptionsetController = Ember.ObjectController.extend({
 
   currentOU: null,
@@ -432,8 +405,7 @@ App.OptionsetController = Ember.ObjectController.extend({
             { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
       });
     }
-  } 
- 
+  }  
 });
 App.OptionsetsNewController = App.OptionsetController; // FIXME: evil?
 

@@ -481,7 +481,7 @@
     <!-- /.row -->
 </script>
 
-<script type="text/x-handlebars" id="control">
+<script type="text/x-handlebars" id="monitor">
   <div class="row">
     <div class="col-lg-12">
         <h1 class="page-header">Monitor and Control {{name}}</h1>
@@ -713,7 +713,7 @@
 </script>
 
 <script type="text/x-handlebars" data-template-name="components/tree-node">
-  {{#link-to 'ou' node.id}}
+  {{#link-to 'monitor' node.id}}
     <span {{bindAttr class=":toggle-icon node.children.length::leaf"}} {{action toggle}}>
       {{#if isExpanded}}
         &#x25BC;
@@ -808,8 +808,8 @@
         </div>
         <div class="form-group">
           <label for "optionset">Parent OU</label>
-          {{#if ous}}
-          {{view Ember.Select content=ous
+          {{#if controllers.ous}}
+          {{view Ember.Select content=controllers.ous
                               class="form-control"
                               value=parent_id.id
                               selection=parent_id
