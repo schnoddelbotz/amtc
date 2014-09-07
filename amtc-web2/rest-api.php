@@ -166,6 +166,17 @@ $app->put('/optionsets/:id', function ($id) {
   if ($dev = Optionset::find_by_id($id)) {
     $dev->name = $udev->name;
     $dev->description = $udev->description;
+    $dev->sw_v5 = $udev->sw_v5;
+    // this gets boring. improve.
+    $dev->sw_dash = $udev->sw_dash;
+    $dev->sw_scan22 = $udev->sw_scan22;
+    $dev->sw_scan3389 = $udev->sw_scan3389;
+    $dev->sw_skipcertchk = $udev->sw_skipcertchk;
+    $dev->sw_usetls = $udev->sw_usetls;
+    $dev->opt_cacertfile = $udev->opt_cacertfile;
+    $dev->opt_maxthreads = $udev->opt_maxthreads;
+    $dev->opt_passfile = $udev->opt_passfile;
+    $dev->opt_timeout = $udev->opt_timeout;
     $dev->save();
     echo json_encode( array('optionset'=> $dev->to_array()) );
   }

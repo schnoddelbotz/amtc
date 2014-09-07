@@ -146,6 +146,8 @@ App.OusRoute = Ember.Route.extend({
         });
   }
 });
+
+
 App.OusIndexRoute = Ember.Route.extend({
   enter: function() {
     // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
@@ -157,6 +159,7 @@ App.OusIndexRoute = Ember.Route.extend({
     return this.store.find('ou');
   }
 });
+
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
     console.log("New OU route");
@@ -175,18 +178,27 @@ App.OptionsetsIndexRoute = Ember.Route.extend({
   enter: function() {
     // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
     window.scrollTo(0, 0);
+    console.log("Optionsets INDEX route!");
   },
   model: function() {
     console.log("App.OptionsetsIndexRoute");
     return this.store.find('optionset');
   }
 });
-/*App.OptionsetsNewRoute = Ember.Route.extend({
+
+/*
+App.OptionsetsNewRoute = Ember.Route.extend({
+  enter: function() {
+    // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
+    console.log("NEW Optionset route!");
+  },
   model: function() {
     console.log("New Optionset route");
     return this.store.createRecord('optionset');
   }
-}); Y?  Uncaught Error: More context objects were passed than there are dynamic segments for the route: ous.index jslibs.js:2766 */
+}); 
+  FIXME - currently breaks New optionset creation.
+  Y?  Uncaught Error: More context objects were passed than there are dynamic segments for the route: ous.index jslibs.js:2766 */
 
 /*
  * Views
@@ -357,7 +369,6 @@ App.OuController = Ember.ObjectController.extend({
   } 
  
 });
-
 App.OusNewController = App.OuController; // FIXME: evil?
 
 //App.OusController = App.OuController;
@@ -373,12 +384,12 @@ App.OptionsetController = Ember.ObjectController.extend({
   ouTree: null,
 
   actions: {
-    removeOptionset: function (device) {
+    removeOptionset: function () {
       if (confirm("Really delete this optionset?")) {
         console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
-        device.save().then(function(device) {
+        device.save().then(function() {
           humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
@@ -401,7 +412,7 @@ App.OptionsetController = Ember.ObjectController.extend({
     doneEditingReturn: function() {
       this.set('isEditing', false);
       console.log(this.get('model'));
-      this.get('model').save().then(function(device) {
+      this.get('model').save().then(function() {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
             { timeout: 800 });
         window.location.href = '#/optionsets';
@@ -413,7 +424,7 @@ App.OptionsetController = Ember.ObjectController.extend({
 
     doneEditing: function() {
       this.set('isEditing', false);
-      this.get('model').save().then(function(device) {
+      this.get('model').save().then(function() {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
             { timeout: 800 });
       }, function(device){ 
@@ -424,7 +435,7 @@ App.OptionsetController = Ember.ObjectController.extend({
   } 
  
 });
-
+App.OptionsetsNewController = App.OptionsetController; // FIXME: evil?
 
 
 /*
