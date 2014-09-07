@@ -56,11 +56,9 @@ var hasMany = DS.hasMany;
  * Routes 
  */
 App.Router.map(function() {
-  this.resource('about');
   this.resource('logs');
   this.resource('energy');
   this.resource('schedule');
-  this.resource('setup');
   this.resource('ous', function() {
     this.resource('ou', { path: ':id' });
     this.route('new');
@@ -77,10 +75,17 @@ App.Router.map(function() {
   });
 });
 
+// http://stackoverflow.com/questions/13120474/emberjs-scroll-to-top-when-changing-view
+Ember.Route.reopen({
+  render: function(controller, model) {
+    this._super();
+    window.scrollTo(0, 0);
+  }
+});
+
 App.ApplicationRoute = Ember.Route.extend({
   setupController: function(controller,model) {
-    console.log('Entered App.ApplicationRoute, triggering load of OUs');
-    window.scrollTo(0, 0);
+    console.log('Entered App.ApplicationRoute, triggering load of ou-tree');    
     this._super(controller,model);
       var p=this;
       $.ajax( { url: "rest-api.php/ou-tree", type: "GET" }).then(
@@ -110,16 +115,9 @@ App.ApplicationRoute = Ember.Route.extend({
       );
   }
 });
-App.IndexRoute = Ember.Route.extend({
-  enter: function() {
-    console.log("Entered App.IndexRoute");
-    window.scrollTo(0, 0);
-  }
-});
 App.PageRoute = Ember.Route.extend({
-  enter: function() { window.scrollTo(0, 0); },
   model: function(params) {
-    console.log("Page route");
+    console.log("PageRoute fetching single page");
     return this.store.find('page', params.id);
   }
 });
@@ -132,16 +130,9 @@ App.OuRoute = Ember.Route.extend({
 });
 App.OusRoute = Ember.Route.extend({
   model: function() {
-    console.log("OusRoute model()");
+    console.log("OusRoute model() fetching ous");
     return this.store.find('ou');
   },
-});
-App.OusIndexRoute = Ember.Route.extend({
-  enter: function() {
-    // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
-    console.log("OusIndexRoute enter()");
-    window.scrollTo(0, 0);
-  }
 });
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
@@ -156,7 +147,7 @@ App.OptionsetRoute = Ember.Route.extend({
     return this.store.find('optionset', params.id);
   },
 });
-/* not needed
+/* not needed?
 App.OptionsetsRoute = Ember.Route.extend({
   model: function() {
     console.log("App.OptionsetsRoute");
@@ -165,13 +156,8 @@ App.OptionsetsRoute = Ember.Route.extend({
 });
 */
 App.OptionsetsIndexRoute = Ember.Route.extend({
-  enter: function() {
-    // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
-    window.scrollTo(0, 0);
-    console.log("Optionsets INDEX route!");
-  },
   model: function() {
-    console.log("App.OptionsetsIndexRoute");
+    console.log("App.OptionsetsIndexRoute model() fetching optionsets");
     return this.store.find('optionset');
   }
 });
@@ -190,7 +176,16 @@ App.OptionsetsNewRoute = Ember.Route.extend({
     return this.store.createRecord('optionset');
   }
   //
+});
+
+App.MonitorRoute = Ember.Route.extend({
+  model: function(params) {
+    console.log("MonitorRoute model(): set currentOU -> " + params.id + " and fetch ou data");
+    this.set('currentOU', params.id); // hmm, unneeded? better...how?
+    return this.store.find('ou', params.id);
+  }
 }); 
+
 
 /*
  * Views
