@@ -91,7 +91,11 @@ App.ApplicationRoute = Ember.Route.extend({
       $.ajax( { url: "rest-api.php/ou-tree", type: "GET" }).then(
         function(response) {
           var unconfigured = typeof response.exceptionMessage == 'undefined' ? false : response.exceptionMessage;
-          if (unconfigured == 'unconfigured') {
+          if (window.location.hash.match('#/pages')) {
+              console.log("Ok, unconfigured, but you may read the docs.");
+              // FIXME in setup.php: should fetch them via rest-api directly!
+          }
+          else if (unconfigured == 'unconfigured') {
             // unconfigured system detected. relocate to setup.php
             humane.log('<i class="glyphicon glyphicon-fire"></i> '+
                        'Unconfigured - warping into setup...!', { timeout: 2000 });
