@@ -149,7 +149,7 @@ $app->delete('/ous/:id', function ($id) {
 
 $app->get('/optionsets', function () {
   $result = array('optionsets'=>array());
-  foreach (Optionset::all() as $record) {
+  foreach (Optionset::all(array("order" => "name asc")) as $record) {
     $r = $record->to_array();
     $result['optionsets'][] = $r;
   }

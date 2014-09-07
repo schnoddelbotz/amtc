@@ -342,17 +342,6 @@ App.OuController = Ember.ObjectController.extend({
         humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.',
             { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
       } -- why broken? -- */);
-    },
-
-    doneEditing: function() {
-      this.set('isEditing', false);
-      this.get('model').save().then(function() {
-        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
-            { timeout: 800 });
-      }, function(){ 
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.', 
-            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      });
     }
   } 
 });
@@ -400,17 +389,6 @@ App.OptionsetController = Ember.ObjectController.extend({
         humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.',
             { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
       }*/);
-    },
-
-    doneEditing: function() {
-      this.set('isEditing', false);
-      this.get('model').save().then(function() {
-        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
-            { timeout: 800 });
-      }, function(device){ 
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.', 
-            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      });
     }
   }  
 });
