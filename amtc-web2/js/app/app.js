@@ -300,6 +300,7 @@ App.OuController = Ember.ObjectController.extend({
     console.log("OuController ous()");
     return this.get('store').find('ou');
   }.property(),
+
   optionsets: function() { //// ???????
     console.log("OusIndexRoute optionsets()");
     return this.get('store').find('optionset');
@@ -333,7 +334,7 @@ App.OuController = Ember.ObjectController.extend({
 
     doneEditingReturn: function() {
       this.set('isEditing', false);
-      this.get('model').save().then(function(ou) {
+      this.get('model').save().then(function() {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
             { timeout: 800 });
         window.location.href = '#/ous';
@@ -345,10 +346,10 @@ App.OuController = Ember.ObjectController.extend({
 
     doneEditing: function() {
       this.set('isEditing', false);
-      this.get('model').save().then(function(ou) {
+      this.get('model').save().then(function() {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
             { timeout: 800 });
-      }, function(ou){ 
+      }, function(){ 
         humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.', 
             { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
       });
@@ -437,7 +438,23 @@ App.Ou = DS.Model.extend({
   description: attr('string'),
   parent_id: DS.belongsTo('ou'),
   optionset_id: DS.belongsTo('optionset'),
-  ou_path: attr('string')
+  ou_path: attr('string'),
+ 
+  //optionsetidValue: attr('number'),
+  /// FIXME FIXME ... still feels hackish, but makes the dropdown+save work...
+  optionsetid: function(key,value) {
+    if (value) { 
+      //console.log('optionsetidValue set '+value.id); 
+      //this.set('optionsetidValue',value.id); 
+      //this.set('optionset_id',value); // this happens, but i don't want it :-(
+      return value; 
+    }
+    else {
+      console.log('get optionset -> ' + this.get('optionset_id.id'));
+      return this.get('optionset_id');
+    }
+  }.property('optionset_id'),
+
 });
 // Markdown help / documentation pages
 App.Page = DS.Model.extend({

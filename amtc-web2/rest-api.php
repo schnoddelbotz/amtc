@@ -121,6 +121,7 @@ $app->put('/ous/:id', function ($id) {
     $dev->name = $udev->name;
     $dev->description = $udev->description;
     $dev->parent_id = $udev->parent_id;
+    $dev->optionset_id = $udev->optionset_id;
     $dev->save();
     echo json_encode( array('ou'=> $dev->to_array()) );
   }
@@ -132,6 +133,7 @@ $app->post('/ous', function () use ($app) {
     $dev->name = $ndev->name;
     $dev->description = $ndev->description;
     $dev->parent_id = $ndev->parent_id;
+    $dev->optionset_id = $ndev->optionset_id;
     $dev->save();
     echo json_encode( array('ou'=> $dev->to_array()) );
   }

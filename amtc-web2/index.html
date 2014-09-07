@@ -606,8 +606,9 @@
     {{partial "optionsetEdit"}}
     <div id="editbutton">
       <button {{action "removeOptionset"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete Option set</button>
-      <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save</button> 
-      <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+      <!-- fixme: use #if isDirty -->
+        <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save</button> 
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
     </div>
 </script>
 
@@ -626,11 +627,11 @@
    <fieldset>
       <div class="inputline">
         <label for "name">Option set name</label>
-        {{input type="text" value=name insert-newline="doneEditing" placeholder="shorthand name"}}
+        {{input type="text" value=name insert-newline="doneEditingReturn" placeholder="shorthand name"}}
       </div>
       <div class="inputline">
         <label for "description">Description</label>
-          {{input type="text" value=description insert-newline="doneEditing" placeholder="..."}}
+          {{input type="text" value=description insert-newline="doneEditingReturn" placeholder="..."}}
       </div>
       <div class="inputline">
         <label for "description">Enforce AMT v5 EOI</label>
@@ -762,14 +763,18 @@
     {{partial "ouEdit"}}
     <div id="editbutton">
       <button {{action "removeOu"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete OU</button>
-      <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save</button> 
-      <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+      {{#if isDirty}}
+        <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save</button> 
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+      {{/if}}
     </div>
 </script>
 
 <script type="text/x-handlebars" id="ous/new">    <h1 class="page-header">Create a new OU / room</h1>
     {{partial "ouEdit"}}
-    <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save new OU</button>
+    <button class="btn btn-default" {{action 'doneEditingReturn'}}>
+      <span class="glyphicon glyphicon-floppy-disk"></span> Save new OU
+    </button>
 </script>
 
 <script type="text/x-handlebars" data-template-name='_ouEdit'>
@@ -779,16 +784,17 @@
      <fieldset>
         <div class="form-group">
           <label for "name">OU / room name</label>
-          {{input class="form-control" type="text" value=name insert-newline="doneEditing"}}
+          {{input class="form-control" type="text" value=name insert-newline="doneEditingReturn"}}
           <p class="help-block">e.g. D 23.2</p>
         </div>
         <div class="form-group">
           <label for "description">OU description</label>
-          {{input class="form-control" type="text" value=description insert-newline="doneEditing"}}
+          {{input class="form-control" type="text" value=description insert-newline="doneEditingReturn"}}
           <p class="help-block"></p>
         </div>
         <div class="form-group">
           <label for "optionset">Parent OU</label>
+          {{#if ous}}
           {{view Ember.Select content=ous
                               class="form-control"
                               value=parent_id.id
@@ -796,17 +802,20 @@
                               prompt="Choose OU"
                               optionValuePath="content.id"
                               optionLabelPath="content.name" }}
+          {{/if}}
           <p class="help-block">Choose the parent OU (or "folder") for this room</p>
         </div>
         <div class="form-group">
           <label for "optionset">AMT option set</label>
+          {{#if optionsets}}
           {{view Ember.Select content=optionsets
                               class="form-control"
-                              value=Nope
+                              value=optionsetid.id
                               selection=optionset_id
                               prompt="Choose AMT Option set"
                               optionValuePath="content.id"
                               optionLabelPath="content.name" }}
+          {{/if}}
           <p class="help-block">Optionsets may be created ...here... They will NOT be inherited.</p>
         </div>
      </fieldset>
