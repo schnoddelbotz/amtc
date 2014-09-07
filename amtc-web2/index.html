@@ -572,15 +572,29 @@
           <th>Edit</th>
           <th>Name</th>
           <th>Description</th>
-          <th>Options</th>
+          <th>AMT v5</th>
+          <th>DASH</th>
+          <th>Scan SSH</th>
+          <th>Scan RDP</th>
+          <th>Use TLS</th>
+          <th>Skip crt verify</th>
+          <th>TLS CA crt</th>
+          <th>AMT password file</th>
         </tr>
       </thead>
       {{#each model}}
         <tr>
           <td>{{#link-to 'optionset' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
           <td>{{#link-to 'optionset' this}}{{name}}{{/link-to}}</td>
-          <td>{{description}}</td>
-          <td>TLS etc.</td>
+          <td>{{description}}</td>          
+          <td>{{check-mark sw_v5}}</td>
+          <td>{{check-mark sw_dash}}</td>
+          <td>{{check-mark sw_scan22}}</td>
+          <td>{{check-mark sw_scan3389}}</td>
+          <td>{{check-mark sw_usetls}}</td>
+          <td>{{check-mark sw_skipcertchk}}</td>
+          <td>{{opt_cacertfile}}</td>
+          <td>{{opt_passfile}}</td>
         </td></tr>
       {{/each}}
     </table>
@@ -755,7 +769,7 @@
 
 <script type="text/x-handlebars" id="ous/new">    <h1 class="page-header">Create a new OU / room</h1>
     {{partial "ouEdit"}}
-    <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save device</button>
+    <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save new OU</button>
 </script>
 
 <script type="text/x-handlebars" data-template-name='_ouEdit'>
@@ -777,8 +791,8 @@
           <label for "optionset">Parent OU</label>
           {{view Ember.Select content=ous
                               class="form-control"
-                              value=parent.id
-                              selection=parent
+                              value=parent_id.id
+                              selection=parent_id
                               prompt="Choose OU"
                               optionValuePath="content.id"
                               optionLabelPath="content.name" }}
@@ -788,7 +802,7 @@
           <label for "optionset">AMT option set</label>
           {{view Ember.Select content=optionsets
                               class="form-control"
-                              value=optionset_id.id
+                              value=Nope
                               selection=optionset_id
                               prompt="Choose AMT Option set"
                               optionValuePath="content.id"

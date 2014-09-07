@@ -157,6 +157,12 @@ App.OusIndexRoute = Ember.Route.extend({
     return this.store.find('ou');
   }
 });
+App.OusNewRoute = Ember.Route.extend({
+  model: function() {
+    console.log("New OU route");
+    return this.store.createRecord('ou');
+  }
+});
 
 App.OptionsetRoute = Ember.Route.extend({
   model: function(params) {
@@ -175,7 +181,12 @@ App.OptionsetsIndexRoute = Ember.Route.extend({
     return this.store.find('optionset');
   }
 });
-
+/*App.OptionsetsNewRoute = Ember.Route.extend({
+  model: function() {
+    console.log("New Optionset route");
+    return this.store.createRecord('optionset');
+  }
+}); Y?  Uncaught Error: More context objects were passed than there are dynamic segments for the route: ous.index jslibs.js:2766 */
 
 /*
  * Views
@@ -284,7 +295,7 @@ App.IndexController = Ember.ObjectController.extend({
 App.NotificationsController = Ember.ObjectController.extend({
 });
 App.OuController = Ember.ObjectController.extend({
-  //needs: ["Optionsets"],
+  needs: ["optionset"],
   ous: function() {
     console.log("OuController ous()");
     return this.get('store').find('ou');
@@ -316,33 +327,28 @@ App.OuController = Ember.ObjectController.extend({
       }
     },
 
-    becameError: function() {
-      alert("This does not work... elsewhere?");
-    },
-
     edit: function() {
       this.set('isEditing', true);
     },
 
     doneEditingReturn: function() {
       this.set('isEditing', false);
-      this.get('model').save().then(function(device) {
+      this.get('model').save().then(function(ou) {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
             { timeout: 800 });
-        //this.transitionToRoute('exams/exam', exam); // FIXME does nothing?
         window.location.href = '#/ous';
-      }, function(device){
+      }/*, function(ou){
         humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.',
             { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      });
+      } -- why broken? -- */);
     },
 
     doneEditing: function() {
       this.set('isEditing', false);
-      this.get('model').save().then(function(device) {
+      this.get('model').save().then(function(ou) {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
             { timeout: 800 });
-      }, function(device){ 
+      }, function(ou){ 
         humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.', 
             { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
       });
@@ -350,11 +356,15 @@ App.OuController = Ember.ObjectController.extend({
   } 
  
 });
+
+App.OusNewController = App.OuController; // FIXME: evil?
+
 //App.OusController = App.OuController;
 /*Ember.ObjectController.extend({
   needs: ["Ous"],
   ouTree: null,
 });*/
+
 App.OptionsetController = Ember.ObjectController.extend({
 
   currentOU: null,
@@ -389,15 +399,15 @@ App.OptionsetController = Ember.ObjectController.extend({
 
     doneEditingReturn: function() {
       this.set('isEditing', false);
+      console.log(this.get('model'));
       this.get('model').save().then(function(device) {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
             { timeout: 800 });
-        //this.transitionToRoute('exams/exam', exam); // FIXME does nothing?
         window.location.href = '#/optionsets';
-      }, function(device){
+      }/*, function(device){
         humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.',
             { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      });
+      }*/);
     },
 
     doneEditing: function() {
@@ -425,7 +435,7 @@ App.OptionsetController = Ember.ObjectController.extend({
 App.Ou = DS.Model.extend({
   name: attr('string'),
   description: attr('string'),
-  parent: DS.belongsTo('ou'),
+  parent_id: DS.belongsTo('ou'),
   optionset_id: DS.belongsTo('optionset'),
   ou_path: attr('string')
 });
@@ -499,6 +509,12 @@ Ember.Handlebars.helper('format-markdown', function(input) {
     return input;
   }
 });
+Ember.Handlebars.helper('check-mark', function(input) {
+    return input ?
+      new Handlebars.SafeString(showdown.makeHtml('<i class="fa fa-check-square-o"></i> ')) :
+      new Handlebars.SafeString(showdown.makeHtml('<i class="fa fa-square-o"></i> '));
+});
+
 
 // moment.js PRETTY timestamps
 Ember.Handlebars.helper('format-from-now', function(date) {

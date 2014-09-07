@@ -39,6 +39,10 @@ ActiveRecord\Config::initialize(function($cfg){
    );
    $cfg->set_default_connection('production');
 });
+// fixme: how-to...
+// PRAGMA foreign_keys = ON;
+// ^ needed for sqlite to respect constraints
+// see http://www.sqlite.org/pragma.html#pragma_foreign_keys
 
 
 /*****************************************************************************/
@@ -116,7 +120,7 @@ $app->put('/ous/:id', function ($id) {
   if ($dev = OU::find_by_id($id)) {
     $dev->name = $udev->name;
     $dev->description = $udev->description;
-    $dev->parent = $udev->parent;
+    $dev->parent_id = $udev->parent_id;
     $dev->save();
     echo json_encode( array('ou'=> $dev->to_array()) );
   }
@@ -127,9 +131,9 @@ $app->post('/ous', function () use ($app) {
   if ($dev = new OU) {
     $dev->name = $ndev->name;
     $dev->description = $ndev->description;
-    $dev->parent = $ndev->parent;
+    $dev->parent_id = $ndev->parent_id;
     $dev->save();
-    echo json_encode( array('device'=> $dev->to_array()) );
+    echo json_encode( array('ou'=> $dev->to_array()) );
   }
 });
 $app->delete('/ous/:id', function ($id) {

@@ -6,11 +6,11 @@
 class OU extends ActiveRecord\Model
 {
   static $belongs_to = array(
-    array('parent', 'class_name' => 'OU', 'foreign_key'=>'parent'),
+    array('parent_id', 'class_name' => 'OU', 'foreign_key'=>'parent_id'),
   );
 
   static $has_many = array(
-    array('children', 'class_name' => 'OU', 'foreign_key' => 'parent'),
+    array('children', 'class_name' => 'OU', 'foreign_key' => 'parent_id'),
   );
 
 
@@ -21,13 +21,13 @@ class OU extends ActiveRecord\Model
    */
   function getPathString() {
     $p[] = $this->name;
-    $has_parent = Ou::exists(array('id'=>$this->parent));
-    $parent_id = $this->parent;
+    $has_parent = Ou::exists(array('id'=>$this->parent_id));
+    $parent_id = $this->parent_id;
     while ($has_parent) {
       $n = Ou::find($parent_id);
-      $parent_id = $n->parent;
+      $parent_id = $n->parent_id;
       array_unshift($p,$n->name);
-      $has_parent = Ou::exists(array('id'=>$n->parent));
+      $has_parent = Ou::exists(array('id'=>$n->parent_id));
     }
     return implode('/', $p);
   }
@@ -35,7 +35,7 @@ class OU extends ActiveRecord\Model
 
   /*
    * returns a top-down nested tree, starting at $startPid.
-   * The 'root' level element MUST have id=1 and parent=NULL.
+   * The 'root' level element MUST have id=1 and parent_id=NULL.
    */
   static function getTree($startPid=1) {
     if ($s = OU::find($startPid)) {

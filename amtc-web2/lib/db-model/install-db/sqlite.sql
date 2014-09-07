@@ -12,12 +12,13 @@ CREATE TABLE "notifications" (
 -- organizational units / rooms
 CREATE TABLE "ous" (
   "id"                INTEGER      PRIMARY KEY AUTOINCREMENT,
-  "parent"            INTEGER      NULL,
+  "parent_id"         INTEGER      NULL,
   "optionset_id"      INT,
   "name"              VARCHAR(128) NOT NULL,
   "description"       VARCHAR(255),
   
-  FOREIGN KEY(optionset_id) REFERENCES optionsets(id)
+  FOREIGN KEY(optionset_id) REFERENCES optionsets(id),
+  FOREIGN KEY(parent_id) REFERENCES ous(id) ON DELETE RESTRICT
 );
 
 -- hosts to be placed into ous
