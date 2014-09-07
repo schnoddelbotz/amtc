@@ -31,13 +31,13 @@ if ( !defined('AMTC_PDOSTRING') && $app->request->getResourceUri() == '/ou-tree'
 
 // Initialize http://www.phpactiverecord.org/
 ActiveRecord\Config::initialize(function($cfg){
-   $cfg->set_model_directory('lib/db-model');
-   $cfg->set_connections(
+  $cfg->set_model_directory('lib/db-model');
+  $cfg->set_connections(
      array(
       'production' => AMTC_PDOSTRING
      )
-   );
-   $cfg->set_default_connection('production');
+  );
+  $cfg->set_default_connection('production');
 });
 // fixme: how-to...
 // PRAGMA foreign_keys = ON;
@@ -55,27 +55,27 @@ ActiveRecord\Config::initialize(function($cfg){
  
 // provide URI for ember-data REST adapter, based on this php script's location
 $app->get('/rest-config.js', function () use ($app) {    
-    $app->response->header('Content-Type', 'application/javascript;charset=utf-8');
-    $path = substr($_SERVER['SCRIPT_NAME'],1);
-    echo "DS.RESTAdapter.reopen({\n";
-    echo " namespace: '$path'\n";
-    echo "});\n";
+  $app->response->header('Content-Type', 'application/javascript;charset=utf-8');
+  $path = substr($_SERVER['SCRIPT_NAME'],1);
+  echo "DS.RESTAdapter.reopen({\n";
+  echo " namespace: '$path'\n";
+  echo "});\n";
 });
 
 // Return static markdown help pages, json encoded
 $app->get('/pages/:id', function ($id) use ($app) {
-    if ($page = sprintf("%d", $id)) {     
-      $file = sprintf("pages/%d.md", $page);
-      $contents = 'Not found';
-      is_readable($file) || $app->notFound();
-      $contents = file_get_contents($file);
-      echo json_encode( array('page'=>array(
-        'id' => $page,
-        'page_name' => 'unused',
-        'page_title' => 'unused',
-        'page_content' => $contents
-      )));
-    }
+  if ($page = sprintf("%d", $id)) {     
+    $file = sprintf("pages/%d.md", $page);
+    $contents = 'Not found';
+    is_readable($file) || $app->notFound();
+    $contents = file_get_contents($file);
+    echo json_encode( array('page'=>array(
+      'id' => $page,
+      'page_name' => 'unused',
+      'page_title' => 'unused',
+      'page_content' => $contents
+    )));
+  }
 });
 
 /* 
@@ -104,9 +104,9 @@ $app->get('/ous', function () {
   echo json_encode( $result );
 });
 $app->get('/ous/:id', function ($ouid) use ($app) {
-    if ($ou = OU::find($ouid)) {
-      echo json_encode( array('ou'=> $ou->to_array()) );
-    }
+  if ($ou = OU::find($ouid)) {
+    echo json_encode( array('ou'=> $ou->to_array()) );
+  }
 });
 $app->get('/ou-tree', function () use ($app) {
   echo json_encode( array('ous'=>OU::getTree(
@@ -139,10 +139,10 @@ $app->post('/ous', function () use ($app) {
   }
 });
 $app->delete('/ous/:id', function ($id) {
-    if ($dev = OU::find_by_id($id)) {
-      echo json_encode( array('ou'=> $dev->to_array()) );
-      $dev->delete();
-    }
+  if ($dev = OU::find_by_id($id)) {
+    echo json_encode( array('ou'=> $dev->to_array()) );
+    $dev->delete();
+  }
 });
 
 /**************** AMT Optionsets *********************************************/
@@ -156,9 +156,9 @@ $app->get('/optionsets', function () {
   echo json_encode( $result );
 });
 $app->get('/optionsets/:id', function ($ouid) use ($app) {
-    if ($os = Optionset::find($ouid)) {
-      echo json_encode( array('optionset'=> $os->to_array()) );
-    }
+  if ($os = Optionset::find($ouid)) {
+    echo json_encode( array('optionset'=> $os->to_array()) );
+  }
 });
 $app->put('/optionsets/:id', function ($id) {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
@@ -182,10 +182,31 @@ $app->put('/optionsets/:id', function ($id) {
   }
 });
 $app->delete('/optionsets/:id', function ($id) {
-    if ($dev = Optionset::find_by_id($id)) {
-      echo json_encode( array('optionset'=> $dev->to_array()) );
-      $dev->delete();
-    }
+  if ($dev = Optionset::find_by_id($id)) {
+    echo json_encode( array('optionset'=> $dev->to_array()) );
+    $dev->delete();
+  }
+});
+$app->post('/optionsets', function () use ($app) {
+  $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
+  $udev = $post['optionset'];
+  if ($dev = new Optionset) {
+    $dev->name = $udev->name;
+    $dev->description = $udev->description;
+    $dev->sw_v5 = $udev->sw_v5;
+    // this gets boring. improve.
+    $dev->sw_dash = $udev->sw_dash;
+    $dev->sw_scan22 = $udev->sw_scan22;
+    $dev->sw_scan3389 = $udev->sw_scan3389;
+    $dev->sw_skipcertchk = $udev->sw_skipcertchk;
+    $dev->sw_usetls = $udev->sw_usetls;
+    $dev->opt_cacertfile = $udev->opt_cacertfile;
+    $dev->opt_maxthreads = $udev->opt_maxthreads;
+    $dev->opt_passfile = $udev->opt_passfile;
+    $dev->opt_timeout = $udev->opt_timeout;
+    $dev->save();
+    echo json_encode( array('optionset'=> $dev->to_array()) );
+  }
 });
 
 /*****************************************************************************/

@@ -55,7 +55,6 @@ var hasMany = DS.hasMany;
 /*
  * Routes 
  */
-
 App.Router.map(function() {
   this.resource('about');
   this.resource('logs');
@@ -73,7 +72,6 @@ App.Router.map(function() {
   this.resource('pages', function() {
     this.resource('page', { path: ':id' });
   });
-  // 
   this.resource('monitors', function() {
     this.resource('monitor', { path: ':id' });
   });
@@ -158,6 +156,14 @@ App.OptionsetRoute = Ember.Route.extend({
     return this.store.find('optionset', params.id);
   },
 });
+/* not needed
+App.OptionsetsRoute = Ember.Route.extend({
+  model: function() {
+    console.log("App.OptionsetsRoute");
+    return this.store.find('optionset');
+  }
+});
+*/
 App.OptionsetsIndexRoute = Ember.Route.extend({
   enter: function() {
     // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
@@ -169,20 +175,22 @@ App.OptionsetsIndexRoute = Ember.Route.extend({
     return this.store.find('optionset');
   }
 });
-
-/*
 App.OptionsetsNewRoute = Ember.Route.extend({
   enter: function() {
     // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
-    console.log("NEW Optionset route!");
+    console.log("OptionsetsNewRoute enter()");
   },
+  /*
+  FIXME - currently breaks New optionset creation.
+  Y?  Uncaught Error: More context objects were passed than there are dynamic segments for the route: ous.index jslibs.js:2766 
+  */
+  //
   model: function() {
-    console.log("New Optionset route");
+    console.log("OptionsetsNewRoute model()");
     return this.store.createRecord('optionset');
   }
+  //
 }); 
-  FIXME - currently breaks New optionset creation.
-  Y?  Uncaught Error: More context objects were passed than there are dynamic segments for the route: ous.index jslibs.js:2766 */
 
 /*
  * Views
@@ -195,78 +203,77 @@ App.ApplicationView = Ember.View.extend({
   }   
 });
 App.IndexView = Ember.View.extend({
-    templateName: 'index',
-    didInsertElement: function() {
+  templateName: 'index',
+  didInsertElement: function() {
 
-    // in sb-admin-2 demo, this came in via morris-data.js
-    // should be retreived via REST in real life...
-      Morris.Area({
-          element: 'morris-area-chart',
-          data: [{
-              period: '2012-02-24 05:45',
-              windows: 6,
-              linux: null,
-              unreachable: 2
-          }, {
-              period: '2012-02-24 06:00',
-              windows: 13,
-              linux: 4,
-              unreachable: 4
-          }, {
-              period: '2012-02-24 06:15',
-              windows: 20,
-              linux: 7,
-              unreachable: 3
-          }, {
-              period: '2012-02-24 06:30',
-              windows: 54,
-              linux: 12,
-              unreachable: 14
-          }, {
-              period: '2012-02-24 06:45',
-              windows: 112,
-              linux: 27,
-              unreachable: 4
-          }, {
-              period: '2012-02-24 07:00',
-              windows: 140,
-              linux: 57,
-              unreachable: 3
-          }, {
-              period: '2012-02-24 07:15',
-              windows: 70,
-              linux: 90,
-              unreachable: 70
-          }, {
-              period: '2012-02-24 07:30',
-              windows: 140,
-              linux: 110,
-              unreachable: 0
-          }, {
-              period: '2012-02-24 07:45',
-              windows: 120,
-              linux: 80,
-              unreachable: 0
-          }, {
-              period: '2012-02-24 08:00',
-              windows: 120,
-              linux: 67,
-              unreachable: 13
-          }],
-          xkey: 'period',
-          ykeys: ['linux', 'unreachable', 'windows'],
-          labels: ['Linux', 'unreachable', 'Windows'],
-          pointSize: 2,
-          hideHover: 'auto',
-          resize: true
-      });
-    }   
+  // in sb-admin-2 demo, this came in via morris-data.js
+  // should be retreived via REST in real life...
+  Morris.Area({
+    element: 'morris-area-chart',
+    data: [{
+        period: '2012-02-24 05:45',
+        windows: 6,
+        linux: null,
+        unreachable: 2
+    }, {
+        period: '2012-02-24 06:00',
+        windows: 13,
+        linux: 4,
+        unreachable: 4
+    }, {
+        period: '2012-02-24 06:15',
+        windows: 20,
+        linux: 7,
+        unreachable: 3
+    }, {
+        period: '2012-02-24 06:30',
+        windows: 54,
+        linux: 12,
+        unreachable: 14
+    }, {
+        period: '2012-02-24 06:45',
+        windows: 112,
+        linux: 27,
+        unreachable: 4
+    }, {
+        period: '2012-02-24 07:00',
+        windows: 140,
+        linux: 57,
+        unreachable: 3
+    }, {
+        period: '2012-02-24 07:15',
+        windows: 70,
+        linux: 90,
+        unreachable: 70
+    }, {
+        period: '2012-02-24 07:30',
+        windows: 140,
+        linux: 110,
+        unreachable: 0
+    }, {
+        period: '2012-02-24 07:45',
+        windows: 120,
+        linux: 80,
+        unreachable: 0
+    }, {
+        period: '2012-02-24 08:00',
+        windows: 120,
+        linux: 67,
+        unreachable: 13
+    }],
+    xkey: 'period',
+    ykeys: ['linux', 'unreachable', 'windows'],
+    labels: ['Linux', 'unreachable', 'Windows'],
+    pointSize: 2,
+    hideHover: 'auto',
+    resize: true
+    });
+  }   
 });
 
 /*
  * Controller
  */
-
 App.ApplicationController = Ember.Controller.extend({
   appName: 'amtc-web', // available as {{appName}} throughout app template
 
@@ -437,7 +444,6 @@ App.Ou = DS.Model.extend({
       return this.get('optionset_id');
     }
   }.property('optionset_id'),
-
 });
 // Markdown help / documentation pages
 App.Page = DS.Model.extend({
@@ -509,12 +515,13 @@ Ember.Handlebars.helper('format-markdown', function(input) {
     return input;
   }
 });
-Ember.Handlebars.helper('check-mark', function(input) {
-    return input ?
-      new Handlebars.SafeString(showdown.makeHtml('<i class="fa fa-check-square-o"></i> ')) :
-      new Handlebars.SafeString(showdown.makeHtml('<i class="fa fa-square-o"></i> '));
-});
 
+// print fontAwesome checkmarks for input true/false
+Ember.Handlebars.helper('check-mark', function(input) {
+  return input ?
+    new Handlebars.SafeString(showdown.makeHtml('<i class="fa fa-check-square-o"></i> ')) :
+    new Handlebars.SafeString(showdown.makeHtml('<i class="fa fa-square-o"></i> '));
+});
 
 // moment.js PRETTY timestamps
 Ember.Handlebars.helper('format-from-now', function(date) {
