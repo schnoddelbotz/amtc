@@ -97,7 +97,13 @@ $app->get('/ous', function () {
   $result = array('ous'=>array());
   foreach (OU::all() as $record) {
     $r = $record->to_array();
-    $r['ou_path'] = $record->getPathString();
+    $children = OU::find('all', array('conditions' => array('parent_id = ?', $r['id'])));
+    $kids = array();
+    foreach ($children as $childOu) {
+      $kids[] = $childOu->id;
+    }
+    $r['children'] = $kids;
+    $r['ou_path'] = $record->getPathString(); // should/could be done clientside, too
     $result['ous'][] = $r;
   }
   # relations? Book::all(array('include'=>array('author'));

@@ -697,8 +697,47 @@
 </script>
 
 <!-- OUs / Rooms -->
-<!-- from http://jsbin.com/alabob/70/edit : OU chooser / tree-branch/node -->
+<!-- bascis from  http://www.manning.com/skeie/ ; thank you :-) -->
 <script type="text/x-handlebars" data-template-name='_ouSelection'>
+  {{#if controller.ous.content}}
+    {{#each node in controllers.ous.ous}}
+      {{#if node.isRootLevel}}
+        {{tree-menu-node node=node action="selectNode" selectedNode=selectedNode}}
+      {{/if}}
+    {{/each}}
+  {{else}}
+    <a href="#"><i class="fa fa-spinner fa-spin"></i> <i>loading rooms...</i></a>
+  {{/if}}
+</script>
+
+<script type="text/x-handlebars" data-template-name="components/tree-menu">
+  UNUSED UNUSED FIXME FIXME
+  {{#each node in controllers.ous.ous}}
+    {{tree-menu-node node=node allowMultipleSelections=false action="selectNode" selectedNode=selectedNode}}
+  {{/each}}
+</script>
+
+<script type="text/x-handlebars" data-template-name="components/tree-menu-node">
+  {{#if node.hasChildren}}
+    {{#if node.isExpanded}}
+      <span class="downarrow" {{action "toggleExpanded"}}></span>
+    {{else}}
+      <span class="rightarrow" {{action "toggleExpanded"}}></span>
+    {{/if}}
+    <li {{action "toggleExpanded"}}>{{node.name}}</li>
+  {{else}}
+      <li {{action "selectNode" node}} {{bind-attr class=isSelected}}>{{node.name}}</li>
+  {{/if}}
+
+  {{#if node.isExpanded}}
+    {{#each child in node.children}}      
+        {{tree-menu-node node=child action="selectNode" selectedNode=selectedNode}}
+    {{/each}}
+  {{/if}}
+</script>
+
+
+<script type="text/x-handlebars" data-template-name='_ouSelection_____OLd'>
   {{#if ouTree}}
     {{tree-branch node=ouTree}}
   {{else}}
@@ -759,7 +798,7 @@
         <th>Optionset</th>
       </tr>
     </thead>
-    {{#each model}}
+    {{#each controller.ous}}
       <tr>
         <td>{{#link-to 'ou' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
         <td>{{#link-to 'ou' this}}{{ou_path}}{{/link-to}}</td>
@@ -777,8 +816,9 @@
   {{partial "ouEdit"}}
   <div id="editbutton">
     <button {{action "removeOu"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete OU</button>
-    <!-- fixme use #if isDirty, currently breaks with drop downs... why? -->
+      <!-- fixme use #if isDirty, currently breaks with drop downs... why? -->
       <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+      {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
   </div>
 </script>
 
@@ -807,8 +847,8 @@
       </div>
       <div class="form-group">
         <label for "optionset">Parent OU</label>
-        {{#if controllers.ous}}
-        {{view Ember.Select content=controllers.ous
+        {{#if controllers.ous.ous}}
+        {{view Ember.Select content=controllers.ous.ous
                             class="form-control"
                             value=parent_id.id
                             selection=parent_id

@@ -84,6 +84,10 @@ Ember.Route.reopen({
 });
 
 App.ApplicationRoute = Ember.Route.extend({
+  model: function() {
+    console.log("ApplicationRoute model() fetching ous");
+    return this.store.find('ou');
+  },
   setupController: function(controller,model) {
     console.log('ApplicationRoute setupController() triggering load of ou-tree');    
     this._super(controller,model);
@@ -133,10 +137,12 @@ App.OuRoute = Ember.Route.extend({
   },
 });
 App.OusRoute = Ember.Route.extend({
+/*
   model: function() {
     console.log("OusRoute model() fetching ous");
     return this.store.find('ou');
   },
+*/ // already done by AppRoute, as OUs are required for menu
 });
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
@@ -180,9 +186,10 @@ App.MonitorRoute = Ember.Route.extend({
 App.ApplicationView = Ember.View.extend({
   didInsertElement: function() {
     // broken, should be done by ember (was done by sb-admin-2.js before):
-    console.log("App.ApplicationView.didInsertElement() initializing metisMenu");
-    $('#side-menu').metisMenu(); //<---- FIXME DO IT HERE ALWAYS ... until kicked out finally
-  }   
+    //console.log("App.ApplicationView.didInsertElement() initializing metisMenu");
+    // FIXME reactivate or DROP
+    // $('#side-menu').metisMenu(); //<---- FIXME DO IT HERE ALWAYS ... until kicked out finally
+  }
 });
 App.IndexView = Ember.View.extend({
   templateName: 'index',
@@ -258,16 +265,26 @@ App.IndexView = Ember.View.extend({
  */
 App.ApplicationController = Ember.Controller.extend({
   appName: 'amtc-web', // available as {{appName}} throughout app template
+  needs: ["ous"],
+
+  ous: function() {
+    return this.get('store').find('ou');
+  }.property(),
 
   // the initial value of the `search` property
   search: '',
-
   actions: {
     query: function() {
       // the current value of the text field
       var query = this.get('search');
       this.transitionToRoute('search', { query: query });
+    },
+    selectNode: function(node) {
+      console.log('TreeMenuComponent node: ' + node);
+      this.set('selectedNode', node.get('id'));
+      this.transitionToRoute('monitor', node.get('id') )
     }
+
   }
 });
 App.IndexController = Ember.ObjectController.extend({
@@ -277,16 +294,13 @@ App.IndexController = Ember.ObjectController.extend({
   }.property(),
   ouTree: null,
 });
+
 App.NotificationsController = Ember.ObjectController.extend({
 });
 App.OuController = Ember.ObjectController.extend({
 
   needs: ["optionsets","ous"],
 
-  /*optionsets: function() { //// ???????
-    console.log("OuController optionsets()");
-    return this.get('store').find('optionset');
-  }.property(),*/
 
   currentOU: null,
   isEditing: false,
@@ -329,6 +343,17 @@ App.OuController = Ember.ObjectController.extend({
       } -- why broken? -- */);
     }
   } 
+});
+App.OusController = Ember.ObjectController.extend({
+  ous: function() {
+    return this.get('store').find('ou');
+  }.property(),
+});
+App.OusIndexController = Ember.ObjectController.extend({
+  needs: ["ous"],
+  ous: function() {
+    return this.get('store').find('ou');
+  }.property(),
 });
 App.OusNewController = App.OuController; // FIXME: evil?
 App.OptionsetController = Ember.ObjectController.extend({
@@ -391,7 +416,6 @@ App.OptionsetsController = Ember.ObjectController.extend({
  * DS Models
  */
 
-
 // Organizational Unit
 App.Ou = DS.Model.extend({
   name: attr('string'),
@@ -399,14 +423,12 @@ App.Ou = DS.Model.extend({
   parent_id: DS.belongsTo('ou'),
   optionset_id: DS.belongsTo('optionset'),
   ou_path: attr('string'),
+  children: DS.hasMany('ou'), // NEW XXX ou-tree ...
  
-  //optionsetidValue: attr('number'),
   /// FIXME FIXME ... still feels hackish, but makes the dropdown+save work...
   optionsetid: function(key,value) {
     if (value) { 
-      //console.log('optionsetidValue set '+value.id); 
-      //this.set('optionsetidValue',value.id); 
-      //this.set('optionset_id',value); // this happens, but i don't want it :-(
+       //this.set('optionset_id',value);
       return value; 
     }
     else {
@@ -414,7 +436,42 @@ App.Ou = DS.Model.extend({
       return this.get('optionset_id');
     }
   }.property('optionset_id'),
+  
+  // new ou-tree; 1:1 from https://github.com/joachimhs/Montric/blob/master/Montric.View/src/main/webapp/js/app/models/MainMenuModel.js
+  isSelected: false,
+  isExpanded: false,
+  isRootLevel: function() {
+    return this.get('parent_id.id')==1 ? true : false; /// OH SOOOO HACKISH
+  }.property('children').cacheable(),
+  hasChildren: function() {
+    return this.get('children').get('length') > 0;
+  }.property('children').cacheable(),
+  isLeaf: function() {
+    return this.get('children').get('length') == 0;
+  }.property('children').cacheable(),
+  isExpandedObserver: function() {
+    console.log('isExpanded: ' + this.get('id'));
+    if (this.get('isExpanded')) {
+      var children = this.get('children.content');
+      if (children) {
+        //console.log('Sorting children');
+        children.sort(App.Ou.compareNodes);
+      }
+    }
+  }.observes('isExpanded')
 });
+App.Ou.reopenClass({
+  compareNodes: function(nodeOne, nodeTwo) {
+    if (nodeOne.get('id') > nodeTwo.get('id'))
+        return 1;
+    if (nodeOne.get('id') < nodeTwo.get('id'))
+        return -1;
+    return 0;
+  }
+});
+
+
+
 // Markdown help / documentation pages
 App.Page = DS.Model.extend({
   page_name: attr('string'),
@@ -467,6 +524,38 @@ App.TreeNodeComponent = Ember.Component.extend({
   }
   
 });
+
+App.TreeMenuComponent = Ember.Component.extend({
+  classNames: ['nav'],
+  tagName: 'ul',
+  actions: {
+    selectNode: function(node) {
+      console.log('TreeMenuComponent node: ' + node);
+      this.set('selectedNode', node.get('id'));
+    }
+  }
+});
+App.TreeMenuNodeComponent = Ember.Component.extend({
+  classNames: ['pointer','nav'],
+  tagName: 'li',
+  actions: {
+    toggleExpanded: function() {
+      this.toggleProperty('node.isExpanded');
+    },
+    toggleSelected: function() {
+      this.toggleProperty('node.isSelected');
+    },
+    selectNode: function(node) {
+      //console.log('selectedNode: ' + node);
+      this.sendAction('action', node);
+    }
+  },
+  isSelected: function() {
+    //console.log("'" + this.get('selectedNode') + "' :: '" + this.get('node.id') + "'");
+    return this.get('selectedNode') === this.get('node.id');
+  }.property('selectedNode', 'node.id')
+});
+
 
 /*
  * Handlebars helpers

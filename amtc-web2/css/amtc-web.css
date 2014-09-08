@@ -6,7 +6,7 @@
  */
 
 /* EmberJS-generated navbar menu items would use hair otherwise */
-div.sidebar-nav ul li a { cursor: pointer; }
+.pointer, div.sidebar-nav ul li a { cursor: pointer; }
 
 ul.ember-view.tree-branch {
     color:#999;
