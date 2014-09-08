@@ -85,7 +85,7 @@ Ember.Route.reopen({
 
 App.ApplicationRoute = Ember.Route.extend({
   setupController: function(controller,model) {
-    console.log('Entered App.ApplicationRoute, triggering load of ou-tree');    
+    console.log('ApplicationRoute setupController() triggering load of ou-tree');    
     this._super(controller,model);
       var p=this;
       $.ajax( { url: "rest-api.php/ou-tree", type: "GET" }).then(
@@ -121,7 +121,7 @@ App.ApplicationRoute = Ember.Route.extend({
 });
 App.PageRoute = Ember.Route.extend({
   model: function(params) {
-    console.log("PageRoute fetching single page");
+    console.log("PageRoute model() fetching single page");
     return this.store.find('page', params.id);
   }
 });
@@ -140,43 +140,32 @@ App.OusRoute = Ember.Route.extend({
 });
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
-    console.log("New OU route");
+    console.log("OusNewRoute model() creating new OU");
     return this.store.createRecord('ou');
   }
 });
 App.OptionsetRoute = Ember.Route.extend({
   model: function(params) {
-    console.log("App.OptionsetRoute -> " + params.id);
+    console.log("OptionsetRoute model() for id " + params.id);
     //this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('optionset', params.id);
   },
 });
-/* not needed?
 App.OptionsetsRoute = Ember.Route.extend({
   model: function() {
-    console.log("App.OptionsetsRoute");
+    console.log("OptionsetsRoute model() fetching optionsets");
     return this.store.find('optionset');
   }
 });
-*/
 App.OptionsetsIndexRoute = Ember.Route.extend({
   model: function() {
-    console.log("App.OptionsetsIndexRoute model() fetching optionsets");
+    console.log("OptionsetsIndexRoute model() fetching optionsets");
     return this.store.find('optionset');
   }
 });
 App.OptionsetsNewRoute = Ember.Route.extend({
-  enter: function() {
-    // stack.../questions/13120474/emberjs-scroll-to-top-when-changing-view
-    console.log("OptionsetsNewRoute enter()");
-  },
-  /*
-  FIXME - currently breaks New optionset creation.
-  Y?  Uncaught Error: More context objects were passed than there are dynamic segments for the route: ous.index jslibs.js:2766 
-  */
-  //
   model: function() {
-    console.log("OptionsetsNewRoute model()");
+    console.log("OptionsetsNewRoute model() creating new optionset");
     return this.store.createRecord('optionset');
   }
   //
@@ -298,12 +287,12 @@ App.NotificationsController = Ember.ObjectController.extend({
 });
 App.OuController = Ember.ObjectController.extend({
 
-  needs: ["optionset","ous"],
+  needs: ["optionsets","ous"],
 
-  optionsets: function() { //// ???????
-    console.log("OusIndexRoute optionsets()");
+  /*optionsets: function() { //// ???????
+    console.log("OuController optionsets()");
     return this.get('store').find('optionset');
-  }.property(),
+  }.property(),*/
 
   currentOU: null,
   isEditing: false,
@@ -398,7 +387,11 @@ App.OptionsetController = Ember.ObjectController.extend({
   }  
 });
 App.OptionsetsNewController = App.OptionsetController; // FIXME: evil?
-
+App.OptionsetsController = Ember.ObjectController.extend({
+  optionsets: function() {
+    return this.get('store').find('optionset');
+  }.property(),
+});
 
 /*
  * DS Models

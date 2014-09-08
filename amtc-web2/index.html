@@ -820,8 +820,8 @@
       </div>
       <div class="form-group">
         <label for "optionset">AMT option set</label>
-        {{#if optionsets}}
-        {{view Ember.Select content=optionsets
+        {{#if controllers.optionsets.optionsets}}
+        {{view Ember.Select content=controllers.optionsets.optionsets
                             class="form-control"
                             value=optionsetid.id
                             selection=optionset_id
