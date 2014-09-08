@@ -9,11 +9,11 @@
  */ 
 
 
+var attr = DS.attr;
+var hasMany = DS.hasMany;
 var App = Ember.Application.create({
-
   // http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
   ready: function() {
-
     // actual sb-admin-2.js page/template initialization
     $(window).bind("load resize", function() {
       topOffset = 50;
@@ -46,11 +46,8 @@ var App = Ember.Application.create({
       $('#bolt').removeClass('flash');
     });
   }
-
 });
 
-var attr = DS.attr;
-var hasMany = DS.hasMany;
 
 /*
  * Routes 
@@ -183,12 +180,11 @@ App.MonitorRoute = Ember.Route.extend({
 /*
  * Views
  */
+
 App.ApplicationView = Ember.View.extend({
   didInsertElement: function() {
-    // broken, should be done by ember (was done by sb-admin-2.js before):
-    //console.log("App.ApplicationView.didInsertElement() initializing metisMenu");
-    // FIXME reactivate or DROP
-    // $('#side-menu').metisMenu(); //<---- FIXME DO IT HERE ALWAYS ... until kicked out finally
+    console.log("App.ApplicationView.didInsertElement() initializing metisMenu");
+    $('#side-menu').metisMenu(); //<---- FIXME DO IT HERE ALWAYS ... until kicked out finally
   }
 });
 App.IndexView = Ember.View.extend({
@@ -263,6 +259,7 @@ App.IndexView = Ember.View.extend({
 /*
  * Controller
  */
+
 App.ApplicationController = Ember.Controller.extend({
   appName: 'amtc-web', // available as {{appName}} throughout app template
   needs: ["ous"],
@@ -298,13 +295,14 @@ App.IndexController = Ember.ObjectController.extend({
 App.NotificationsController = Ember.ObjectController.extend({
 });
 App.OuController = Ember.ObjectController.extend({
-
   needs: ["optionsets","ous"],
-
-
   currentOU: null,
   isEditing: false,
   ouTree: null,
+
+  ous: function() {
+    return this.get('store').find('ou');
+  }.property(),
 
   actions: {
     removeOu: function (device) {
@@ -337,7 +335,7 @@ App.OuController = Ember.ObjectController.extend({
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
             { timeout: 800 });
         window.location.href = '#/ous';
-      }/*, function(ou){
+      }/*, function(ou){                      //// FIXME !!!!
         humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.',
             { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
       } -- why broken? -- */);
@@ -345,9 +343,6 @@ App.OuController = Ember.ObjectController.extend({
   } 
 });
 App.OusController = Ember.ObjectController.extend({
-  ous: function() {
-    return this.get('store').find('ou');
-  }.property(),
 });
 App.OusIndexController = Ember.ObjectController.extend({
   needs: ["ous"],
@@ -469,9 +464,6 @@ App.Ou.reopenClass({
     return 0;
   }
 });
-
-
-
 // Markdown help / documentation pages
 App.Page = DS.Model.extend({
   page_name: attr('string'),
@@ -507,24 +499,8 @@ App.Optionset = DS.Model.extend({
 });
 
 /*
- * Components (used by OU atm)
+ * Components (used by N E W  OU chooser)
  */
-App.TreeBranchComponent = Ember.Component.extend({
-  tagName: 'ul',
-  classNames: ['tree-branch', 'nav', /*'collapse',*/ ]
-});
-App.TreeNodeComponent = Ember.Component.extend({
-  tagName: 'li',
-  isExpanded: true,
-  toggle: function() {
-    this.toggleProperty('isExpanded');
-  },
-  didClick: function() {
-    console.log('You clicked: '+this.get('node.text'));
-  }
-  
-});
-
 App.TreeMenuComponent = Ember.Component.extend({
   classNames: ['nav'],
   tagName: 'ul',
@@ -556,12 +532,11 @@ App.TreeMenuNodeComponent = Ember.Component.extend({
   }.property('selectedNode', 'node.id')
 });
 
-
 /*
  * Handlebars helpers
  */
 
- // markdown to html conversion
+// markdown to html conversion
 var showdown = new Showdown.converter();
 Ember.Handlebars.helper('format-markdown', function(input) {
   if (input) {

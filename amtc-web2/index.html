@@ -260,7 +260,9 @@
                         <a {{bindAttr href="view.href"}}>
                             <i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts<span class="fa arrow">
                         </a>
-                        {{partial "ouSelection"}}
+                        <ul class="nav nav-second-level">
+                            {{partial "ouSelection"}}
+                        </ul>
                     </li>
                     {{#linkTo 'logs' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>{{/linkTo}}
                     {{#linkTo 'energy' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-area-chart fa-fw"></i> Energy Consumption</a>{{/linkTo}}
@@ -611,7 +613,8 @@
   {{partial "optionsetEdit"}}
   <div id="editbutton">
     <button {{action "removeOptionset"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete Option set</button>
-      <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+    <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+    {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
   </div>
 </script>
 
@@ -700,71 +703,38 @@
 <!-- bascis from  http://www.manning.com/skeie/ ; thank you :-) -->
 <script type="text/x-handlebars" data-template-name='_ouSelection'>
   {{#if controller.ous.content}}
-    {{#each node in controllers.ous.ous}}
+    {{#each node in controller.ous}}
       {{#if node.isRootLevel}}
-        {{tree-menu-node node=node action="selectNode" selectedNode=selectedNode}}
+          {{tree-menu-node node=node action="selectNode" selectedNode=selectedNode}}
       {{/if}}
     {{/each}}
   {{else}}
     <a href="#"><i class="fa fa-spinner fa-spin"></i> <i>loading rooms...</i></a>
   {{/if}}
-</script>
-
-<script type="text/x-handlebars" data-template-name="components/tree-menu">
-  UNUSED UNUSED FIXME FIXME
-  {{#each node in controllers.ous.ous}}
-    {{tree-menu-node node=node allowMultipleSelections=false action="selectNode" selectedNode=selectedNode}}
-  {{/each}}
 </script>
 
 <script type="text/x-handlebars" data-template-name="components/tree-menu-node">
   {{#if node.hasChildren}}
-    {{#if node.isExpanded}}
-      <span class="downarrow" {{action "toggleExpanded"}}></span>
-    {{else}}
-      <span class="rightarrow" {{action "toggleExpanded"}}></span>
-    {{/if}}
-    <li {{action "toggleExpanded"}}>{{node.name}}</li>
+    <li {{action "toggleExpanded"}}>
+      <a href="#">
+        {{#if node.isExpanded}}
+          <i class="fa fa-folder-open-o" {{action "toggleExpanded"}}></i>
+        {{else}}
+          <i class="fa fa-folder-o" {{action "toggleExpanded"}}></i>
+        {{/if}}
+        {{node.name}}
+      </a>
+    </li>
   {{else}}
-      <li {{action "selectNode" node}} {{bind-attr class=isSelected}}>{{node.name}}</li>
+    <li {{action "selectNode" node}} {{bind-attr class=isSelected}}><a href="#"><i class="fa fa-caret-right"></i> {{node.name}}</a></li>
   {{/if}}
 
   {{#if node.isExpanded}}
-    {{#each child in node.children}}      
+    {{#each child in node.children}}
+      <ul class="nav ember-view">
         {{tree-menu-node node=child action="selectNode" selectedNode=selectedNode}}
+      </ul>
     {{/each}}
-  {{/if}}
-</script>
-
-
-<script type="text/x-handlebars" data-template-name='_ouSelection_____OLd'>
-  {{#if ouTree}}
-    {{tree-branch node=ouTree}}
-  {{else}}
-    <a href="#"><i class="fa fa-spinner fa-spin"></i> <i>loading rooms...</i></a>
-  {{/if}}
-</script>
-
-<script type="text/x-handlebars" data-template-name="components/tree-branch">
-  {{#each child in node.children}}
-    {{tree-node node=child}}
-  {{/each}}
-</script>
-
-<script type="text/x-handlebars" data-template-name="components/tree-node">
-  {{#link-to 'monitor' node.id}}
-    <span {{bindAttr class=":toggle-icon node.children.length::leaf"}} {{action toggle}}>
-      {{#if isExpanded}}
-        &#x25BC;
-      {{else}}
-        &#x25B6;
-      {{/if}}
-    </span>
-    {{node.name}}
-  {{/link-to}}
-
-  {{#if isExpanded}}
-    {{tree-branch node=node}}
   {{/if}}
 </script>
 
@@ -847,8 +817,8 @@
       </div>
       <div class="form-group">
         <label for "optionset">Parent OU</label>
-        {{#if controllers.ous.ous}}
-        {{view Ember.Select content=controllers.ous.ous
+        {{#if controller.ous}}
+        {{view Ember.Select content=controller.ous
                             class="form-control"
                             value=parent_id.id
                             selection=parent_id
