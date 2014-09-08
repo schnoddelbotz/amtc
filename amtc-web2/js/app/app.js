@@ -111,7 +111,7 @@ App.ApplicationRoute = Ember.Route.extend({
         function(response){
             // other error, like DB down
           var res = jQuery.parseJSON(response.responseText);
-          var msg = (typeof res.exceptionMessage=='undefined') ? 
+          var msg = (typeof res.exceptionMessage=='undefined') ?
                     'Check console, please.' : res.exceptionMessage;
           humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
@@ -315,15 +315,18 @@ App.OuController = Ember.ObjectController.extend({
         console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
-        device.save().then(function(device) {
+        device.save().then(function() {
           humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
           window.location.href = '#/ous';
-        }, function(device){
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Delete failed! Please reload page.',
-            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      });
+        }, function(response){
+          var res = jQuery.parseJSON(response.responseText);
+          var msg = (typeof res.exceptionMessage=='undefined') ? 
+                    'Check console, please.' : res.exceptionMessage;
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
+        });
       }
     },
 
@@ -362,11 +365,14 @@ App.OptionsetController = Ember.ObjectController.extend({
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
           window.location.href = '#/optionsets';
-        }, function(device){
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Delete failed! Please reload page.',
-            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      });
-      }
+        }, function(response){
+          var res = jQuery.parseJSON(response.responseText);
+          var msg = (typeof res.exceptionMessage=='undefined') ?
+                    'Check console, please.' : res.exceptionMessage;
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
+        }
+      )};
     },
 
     becameError: function() {

@@ -140,8 +140,9 @@ $app->post('/ous', function () use ($app) {
 });
 $app->delete('/ous/:id', function ($id) {
   if ($dev = OU::find_by_id($id)) {
-    echo json_encode( array('ou'=> $dev->to_array()) );
+    OU::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
+    echo json_encode( array('ou'=> $dev->to_array()) );
   }
 });
 
@@ -183,8 +184,9 @@ $app->put('/optionsets/:id', function ($id) {
 });
 $app->delete('/optionsets/:id', function ($id) {
   if ($dev = Optionset::find_by_id($id)) {
-    echo json_encode( array('optionset'=> $dev->to_array()) );
+    OU::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
+    echo json_encode( array('optionset'=> $dev->to_array()) );
   }
 });
 $app->post('/optionsets', function () use ($app) {
