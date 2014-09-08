@@ -434,7 +434,7 @@ App.Ou = DS.Model.extend({
   
   // new ou-tree; 1:1 from https://github.com/joachimhs/Montric/blob/master/Montric.View/src/main/webapp/js/app/models/MainMenuModel.js
   isSelected: false,
-  isExpanded: false,
+  isExpanded: true,
   isRootLevel: function() {
     return this.get('parent_id.id')==1 ? true : false; /// OH SOOOO HACKISH
   }.property('children').cacheable(),
@@ -499,18 +499,9 @@ App.Optionset = DS.Model.extend({
 });
 
 /*
- * Components (used by N E W  OU chooser)
+ * Components (menu tree...)
  */
-App.TreeMenuComponent = Ember.Component.extend({
-  classNames: ['nav'],
-  tagName: 'ul',
-  actions: {
-    selectNode: function(node) {
-      console.log('TreeMenuComponent node: ' + node);
-      this.set('selectedNode', node.get('id'));
-    }
-  }
-});
+
 App.TreeMenuNodeComponent = Ember.Component.extend({
   classNames: ['pointer','nav'],
   tagName: 'li',
