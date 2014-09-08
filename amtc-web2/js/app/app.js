@@ -157,12 +157,6 @@ App.OptionsetsRoute = Ember.Route.extend({
     return this.store.find('optionset');
   }
 });
-App.OptionsetsIndexRoute = Ember.Route.extend({
-  model: function() {
-    console.log("OptionsetsIndexRoute model() fetching optionsets");
-    return this.store.find('optionset');
-  }
-});
 App.OptionsetsNewRoute = Ember.Route.extend({
   model: function() {
     console.log("OptionsetsNewRoute model() creating new optionset");
