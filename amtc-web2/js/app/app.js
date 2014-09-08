@@ -434,7 +434,7 @@ App.Ou = DS.Model.extend({
   
   // new ou-tree; 1:1 from https://github.com/joachimhs/Montric/blob/master/Montric.View/src/main/webapp/js/app/models/MainMenuModel.js
   isSelected: false,
-  isExpanded: true,
+  isExpanded: false,
   isRootLevel: function() {
     return this.get('parent_id.id')==1 ? true : false; /// OH SOOOO HACKISH
   }.property('children').cacheable(),

@@ -260,7 +260,7 @@
                         <a {{bindAttr href="view.href"}}>
                             <i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts<span class="fa arrow">
                         </a>
-                        <ul class="nav nav-second-level">
+                        <ul class="nav nav-second-level in">
                             {{partial "ouSelection"}}
                         </ul>
                     </li>
@@ -709,7 +709,7 @@
       {{/if}}
     {{/each}}
   {{else}}
-    <a href="#"><i class="fa fa-spinner fa-spin"></i> <i>loading rooms...</i></a>
+    <li><a href="#"><i class="fa fa-spinner fa-spin"></i> <i>loading rooms...</i></a></li>
   {{/if}}
 </script>
 
@@ -726,7 +726,7 @@
       </a>
     </li>
   {{else}}
-    <li {{action "selectNode" node}} {{bind-attr class=isSelected}}><a href="#"><i class="fa fa-long-arrow-right"></i> {{node.name}}</a></li>
+    <li {{action "selectNode" node}} {{bind-attr class=isSelected}}><a href="#"><i class="fa fa-caret-right"></i> {{node.name}}</a></li>
   {{/if}}
 
   {{#if node.isExpanded}}
