@@ -80,8 +80,11 @@ Ember.Route.reopen({
   }
 });
 
-App.ApplicationRoute = Ember.Route.extend({
-  setupController: function(controller,model) {
+App.Route = Ember.Route.extend({
+  enter: function() {
+    console.log("ENTER App.Route");
+  },
+  /*setupController: function(controller,model) {
     console.log('ApplicationRoute setupController() triggering load of ou-tree');    
     this._super(controller,model);
       var p=this;
@@ -114,7 +117,7 @@ App.ApplicationRoute = Ember.Route.extend({
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
         }
       );
-  },
+  }*/
 });
 App.PageRoute = Ember.Route.extend({
   model: function(params) {
@@ -122,9 +125,28 @@ App.PageRoute = Ember.Route.extend({
     return this.store.find('page', params.id);
   }
 });
+/*
+ * http://emberjs.com/guides/routing/defining-your-routes/ :
+ *
+ * App.PostRoute = Ember.Route.extend({
+ *  model: function(params) {
+ *    return this.store.find('post', params.post_id);
+ *  }
+ * });
+ *
+ * "Because this pattern is so common, the above model hook is the default behavior." ?!
+ *
+  App.OptionsetRoute = Ember.Route.extend({
+    model: function(params) {
+      console.log("OptionsetRoute model() for id " + params.id);
+      //this.set('currentOU', params.id); // hmm, unneeded? better...how?
+      return this.store.find('optionset', params.id);
+    },
+  });
+*/
 App.OuRoute = Ember.Route.extend({
   model: function(params) {
-    console.log("App.OuRoute model(), set currentOU -> " + params.id);
+    console.log("App.OuRoute model(), find and set currentOU -> " + params.id);
     this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('ou', params.id);
   },
@@ -135,19 +157,14 @@ App.OusRoute = Ember.Route.extend({
     return this.store.find('ou');
   }
 });
+
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
     console.log("OusNewRoute model() creating new OU");
     return this.store.createRecord('ou');
   }
 });
-App.OptionsetRoute = Ember.Route.extend({
-  model: function(params) {
-    console.log("OptionsetRoute model() for id " + params.id);
-    //this.set('currentOU', params.id); // hmm, unneeded? better...how?
-    return this.store.find('optionset', params.id);
-  },
-});
+
 App.OptionsetsRoute = Ember.Route.extend({
   model: function() {
     console.log("OptionsetsRoute model() fetching optionsets");
@@ -159,9 +176,13 @@ App.OptionsetsNewRoute = Ember.Route.extend({
     console.log("OptionsetsNewRoute model() creating new optionset");
     return this.store.createRecord('optionset');
   }
-  //
 });
-
+App.NotificationsRoute = Ember.Route.extend({
+  model: function() {
+    console.log("NotificationsRoute model() fetching notifications");
+    return this.store.find('notification');
+  }
+});
 App.MonitorRoute = Ember.Route.extend({
   model: function(params) {
     console.log("MonitorRoute model(): set currentOU -> " + params.id + " and fetch ou data");
@@ -177,8 +198,7 @@ App.MonitorRoute = Ember.Route.extend({
 
 App.ApplicationView = Ember.View.extend({
   didInsertElement: function() {
-    console.log("App.ApplicationView.didInsertElement() initializing metisMenu");
-    $('#side-menu').metisMenu(); //<---- FIXME DO IT HERE ALWAYS ... until kicked out finally
+    $('#side-menu').metisMenu(); // initialize metisMenu 
   }
 });
 App.IndexView = Ember.View.extend({
@@ -273,20 +293,23 @@ App.ApplicationController = Ember.Controller.extend({
     }
 
   },
-  /*ous: function() {
-    console.log("ApplicationController model() - fetching OUs");
-    return this.get('store').find('ou');
-  }.property()*/
 });
 App.IndexController = Ember.ObjectController.extend({
-  needs: ["Notifications"],
-  notifications: function() {
+  needs: ["notifications"],
+  xxx: Ember.computed.alias("controllers.notifications"),
+
+  /*notifications: function() {
     return this.get('store').find('notification');
   }.property(),
-  ouTree: null,
+  */
+  ouTree: null, // fixme. remove.
 });
 
 App.NotificationsController = Ember.ObjectController.extend({
+  notifications: function() {
+    console.log("NotificationsController notifications() - fetching.");
+    return this.get('store').find('notification');
+  }.property()
 });
 App.OuController = Ember.ObjectController.extend({
   needs: ["optionsets","ous","ou"],
@@ -340,11 +363,10 @@ App.OuController = Ember.ObjectController.extend({
 });
 
 App.OusController = Ember.ObjectController.extend({
-  /// FIXME GRRR. Breaks ous/1
-  /*ous: function() {
-    console.log("OusController model() - fetching OUs");
+  ous: function() {
+    console.log("OusController ous() - fetching.");
     return this.get('store').find('ou');
-  }.property()*/
+  }.property()
 });
 
 App.OusIndexController = Ember.ObjectController.extend({

@@ -462,8 +462,8 @@
               <!-- /.panel-heading -->
               <div class="panel-body">
                   <div class="list-group">
-                      {{#if notifications}}
-                        {{#each msg in notifications}}
+                      {{#if controllers.notifications.notifications}}
+                        {{#each msg in controllers.notifications.notifications.content}}
                           <a href="#" class="list-group-item">
                            <i {{bind-attr class=msg.cssClass}}></i> {{msg.message}}
                            <span class="pull-right text-muted small"><em>{{format-from-now msg.tstamp}}</em></span>
@@ -702,8 +702,8 @@
 <!-- OUs / Rooms #if controller.ous.content -->
 <!-- bascis from  http://www.manning.com/skeie/ ; thank you :-) -->
 <script type="text/x-handlebars" data-template-name='_ouSelection'> 
-  {{#if controllers.ous.content}}
-    {{#each node in controllers.ous.content}}
+  {{#if controllers.ous.ous.content}}
+    {{#each node in controllers.ous.ous.content}}
       {{#if node.isRootLevel}}
           {{tree-menu-node node=node action="selectNode" selectedNode=selectedNode}}
       {{/if}}
