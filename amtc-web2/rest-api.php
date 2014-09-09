@@ -64,18 +64,15 @@ $app->get('/rest-config.js', function () use ($app) {
 
 // Return static markdown help pages, json encoded
 $app->get('/pages/:id', function ($id) use ($app) {
-  if ($page = sprintf("%d", $id)) {     
-    $file = sprintf("pages/%d.md", $page);
-    $contents = 'Not found';
-    is_readable($file) || $app->notFound();
-    $contents = file_get_contents($file);
-    echo json_encode( array('page'=>array(
-      'id' => $page,
-      'page_name' => 'unused',
-      'page_title' => 'unused',
-      'page_content' => $contents
-    )));
-  }
+  $file = sprintf("pages/%s.md", $id);
+  is_readable($file) || $app->notFound();
+  $contents = file_get_contents($file);
+  echo json_encode( array('page'=>array(
+    'id' => $id,
+    'page_name' => 'unused',
+    'page_title' => 'unused',
+    'page_content' => $contents
+  )));  
 });
 
 /* 
