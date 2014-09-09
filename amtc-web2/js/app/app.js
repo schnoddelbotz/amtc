@@ -33,6 +33,16 @@ var App = Ember.Application.create({
       }
     });
 
+    // AMTCWEB_IS_CONFIGURED gets defined via included script rest-api.php/rest-config.js
+    if (typeof AMTCWEB_IS_CONFIGURED != 'undefined' && AMTCWEB_IS_CONFIGURED===false) {
+      // unconfigured system detected. inform user and relocate to setup.php
+      humane.log('<i class="glyphicon glyphicon-fire"></i> '+
+                 'Unconfigured system detected!<br>warping into setup...', { timeout: 3000 });
+      window.setTimeout( function(){
+        window.location.href = 'setup.php';
+      }, 3100);
+    }
+
     // just for demo... we have a flashing bolt as progress indicator :-)
     window.setTimeout( function(){
       $('#bolt').removeClass('flash');
@@ -83,41 +93,7 @@ Ember.Route.reopen({
 App.Route = Ember.Route.extend({
   enter: function() {
     console.log("ENTER App.Route");
-  },
-  /*setupController: function(controller,model) {
-    console.log('ApplicationRoute setupController() triggering load of ou-tree');    
-    this._super(controller,model);
-      var p=this;
-      $.ajax( { url: "rest-api.php/ou-tree", type: "GET" }).then(
-        function(response) {
-          var unconfigured = typeof response.exceptionMessage == 'undefined' ? false : response.exceptionMessage;
-          if (window.location.hash.match('#/pages')) {
-              console.log("Ok, unconfigured, but you may read the docs.");
-              // FIXME in setup.php: should fetch them via rest-api directly!
-          }
-          else if (unconfigured == 'unconfigured') {
-            // unconfigured system detected. relocate to setup.php
-            humane.log('<i class="glyphicon glyphicon-fire"></i> '+
-                       'Unconfigured - warping into setup...!', { timeout: 2000 });
-            window.setTimeout( function(){
-              window.location.href = 'setup.php';
-            }, 2100);
-          } else {
-            // SUCCESS! OU tree received.
-            controller.set('ouTree', response.ous);
-            //console.log('App.ApplicationRoute received OUs successfully');
-          }
-        },
-        function(response){
-            // other error, like DB down
-          var res = jQuery.parseJSON(response.responseText);
-          var msg = (typeof res.exceptionMessage=='undefined') ?
-                    'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
-                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-        }
-      );
-  }*/
+  }
 });
 App.PageRoute = Ember.Route.extend({
   model: function(params) {

@@ -3,7 +3,8 @@
 // do this to trigger async REST issues...:
 // sleep(2);
 
-@include 'data/siteconfig.php'; // to let static ember help pages work event without DB
+$amtcwebConfigFile = 'data/siteconfig.php';
+@include $amtcwebConfigFile; // to let static ember help pages work event without DB
 date_default_timezone_set( defined('AMTC_TZ') ? AMTC_TZ : 'Europe/Berlin');
 
 require 'lib/php-activerecord/ActiveRecord.php';
@@ -55,12 +56,14 @@ ActiveRecord\Config::initialize(function($cfg){
  */
  
 // provide URI for ember-data REST adapter, based on this php script's location
-$app->get('/rest-config.js', function () use ($app) {    
+$app->get('/rest-config.js', function () use ($app,$amtcwebConfigFile) {    
   $app->response->header('Content-Type', 'application/javascript;charset=utf-8');
   $path = substr($_SERVER['SCRIPT_NAME'],1);
   echo "DS.RESTAdapter.reopen({\n";
   echo " namespace: '$path'\n";
   echo "});\n";
+  printf("var AMTCWEB_IS_CONFIGURED = %s;\n", 
+            file_exists($amtcwebConfigFile) ? 'true' : 'false');
 });
 
 // Return static markdown help pages, json encoded
@@ -111,12 +114,6 @@ $app->get('/ous/:id', function ($ouid) use ($app) {
   if ($ou = OU::find($ouid)) {
     echo json_encode( array('ou'=> $ou->to_array()) );
   }
-});
-$app->get('/ou-tree', function () use ($app) {
-  echo json_encode( array('ous'=>OU::getTree(
-      /* arg 1 is start PID 1 and defaults to one (/). */
-      /* should be set to current user's 'home ou' */
-  )));
 });
 $app->put('/ous/:id', function ($id) {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
