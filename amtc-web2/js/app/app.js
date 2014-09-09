@@ -354,10 +354,13 @@ App.OuController = Ember.ObjectController.extend({
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
             { timeout: 800 });
         window.location.href = '#/ous';
-      }/*, function(ou){                      //// FIXME !!!!
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.',
-            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      } -- why broken? -- */);
+      }, function(response){
+          var res = jQuery.parseJSON(response.responseText);
+          var msg = (typeof res.exceptionMessage=='undefined') ? 
+                    'Check console, please.' : res.exceptionMessage;
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
+      } );
     }
   } 
 });
