@@ -17,7 +17,9 @@ function FetchIfNotExists {
   fi
 }
 
-mkdir -p js css lib data
+mkdir -p js css lib
+# should improve: (but we need a place where httpd may write siteconfig.php)
+chmod 777 data
 FetchIfNotExists js/jquery.min.js http://code.jquery.com/jquery-${JQUERY}.min.js
 FetchIfNotExists js/jquery.min.map http://code.jquery.com/jquery-${JQUERY}.min.map
 FetchIfNotExists js/handlebars.js http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v${HANDLEBARS}.js
