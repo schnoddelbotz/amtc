@@ -130,6 +130,10 @@ App.OuRoute = Ember.Route.extend({
   },
 });
 App.OusRoute = Ember.Route.extend({
+  model: function(params) {
+    console.log("App.OusRoute model(), FETCH OUS");
+    return this.store.find('ou');
+  },
 });
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
@@ -252,7 +256,7 @@ App.IndexView = Ember.View.extend({
 
 App.ApplicationController = Ember.Controller.extend({
   appName: 'amtc-web', // available as {{appName}} throughout app template
-  needs: ["ou"],
+  needs: ["ou","ous"],
 
   // the initial value of the `search` property
   search: '',
@@ -285,10 +289,6 @@ App.OuController = Ember.ObjectController.extend({
   currentOU: null,
   isEditing: false,
   ouTree: null,
-
-  ous: function() {
-    return this.get('store').find('ou');
-  }.property(),
 
   actions: {
     removeOu: function (device) {
@@ -329,9 +329,13 @@ App.OuController = Ember.ObjectController.extend({
   } 
 });
 App.OusController = Ember.ObjectController.extend({
+  ous: function() {
+    console.log("OusController model() - fetching OUs");
+    return this.get('store').find('ou');
+  }.property(),
 });
 App.OusIndexController = Ember.ObjectController.extend({
-  needs: ["ou"],
+  needs: ["ous"],
 });
 App.OusNewController = App.OuController; // FIXME: evil?
 App.OptionsetController = Ember.ObjectController.extend({
@@ -385,9 +389,10 @@ App.OptionsetController = Ember.ObjectController.extend({
 });
 App.OptionsetsNewController = App.OptionsetController; // FIXME: evil?
 App.OptionsetsController = Ember.ObjectController.extend({
+  //needs: ["optionsets"],
   optionsets: function() {
     return this.get('store').find('optionset');
-  }.property(),
+  }.property()
 });
 
 /*

@@ -701,9 +701,9 @@
 
 <!-- OUs / Rooms #if controller.ous.content -->
 <!-- bascis from  http://www.manning.com/skeie/ ; thank you :-) -->
-<script type="text/x-handlebars" data-template-name='_ouSelection'>  
-  {{#if controllers.ou.ous.content}}
-    {{#each node in controllers.ou.ous.content}}
+<script type="text/x-handlebars" data-template-name='_ouSelection'> 
+  {{#if controllers.ous.ous.content}}
+    {{#each node in controllers.ous.ous.content}}
       {{#if node.isRootLevel}}
           {{tree-menu-node node=node action="selectNode" selectedNode=selectedNode}}
       {{/if}}
@@ -768,7 +768,7 @@
         <th>Optionset</th>
       </tr>
     </thead>
-    {{#each controllers.ou.ous.content}}
+    {{#each controllers.ous.content}}
       <tr>
         <td>{{#link-to 'ou' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
         <td>{{#link-to 'ou' this}}{{ou_path}}{{/link-to}}</td>
@@ -817,8 +817,8 @@
       </div>
       <div class="form-group">
         <label for "optionset">Parent OU</label>
-        {{#if ous.content}}
-        {{view Ember.Select content=ous.content
+        {{#if controllers.ous.content}}
+        {{view Ember.Select content=controllers.ous.content
                             class="form-control"
                             value=parent_id.id
                             selection=parent_id
@@ -830,8 +830,8 @@
       </div>
       <div class="form-group">
         <label for "optionset">AMT option set</label>
-        {{#if controllers.optionsets.optionsets}}
-        {{view Ember.Select content=controllers.optionsets.optionsets
+        {{#if controllers.optionsets.optionsets.content}}
+        {{view Ember.Select content=controllers.optionsets.optionsets.content
                             class="form-control"
                             value=optionsetid.id
                             selection=optionset_id

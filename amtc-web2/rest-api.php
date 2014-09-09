@@ -20,6 +20,7 @@ $app->notFound(function () use ($app) {
 $app->error(function (\Exception $e) use ($app) {
   echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') ); // to much / insecure?
 });
+$app->expires('+1 minutes');
 
 // this hack lets the ember GUI clearly detect a unconfigured system. redir->setup.php.
 if ( !defined('AMTC_PDOSTRING') && $app->request->getResourceUri() == '/ou-tree' ) {
