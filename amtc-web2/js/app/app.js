@@ -114,7 +114,7 @@ App.ApplicationRoute = Ember.Route.extend({
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
         }
       );
-  }
+  },
 });
 App.PageRoute = Ember.Route.extend({
   model: function(params) {
@@ -133,7 +133,7 @@ App.OusRoute = Ember.Route.extend({
   model: function(params) {
     console.log("App.OusRoute model(), FETCH OUS");
     return this.store.find('ou');
-  },
+  }
 });
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
@@ -272,7 +272,11 @@ App.ApplicationController = Ember.Controller.extend({
       this.transitionToRoute('monitor', node.get('id') )
     }
 
-  }
+  },
+  /*ous: function() {
+    console.log("ApplicationController model() - fetching OUs");
+    return this.get('store').find('ou');
+  }.property()*/
 });
 App.IndexController = Ember.ObjectController.extend({
   needs: ["Notifications"],
@@ -285,18 +289,23 @@ App.IndexController = Ember.ObjectController.extend({
 App.NotificationsController = Ember.ObjectController.extend({
 });
 App.OuController = Ember.ObjectController.extend({
-  needs: ["optionsets","ous"],
+  needs: ["optionsets","ous","ou"],
   currentOU: null,
   isEditing: false,
   ouTree: null,
 
   actions: {
-    removeOu: function (device) {
-      if (confirm("Really delete this device?")) {
-        console.log('FINALLY Remove it');
+    removeOu: function () {
+      if (confirm("Really delete this OU?")) {
+        console.log('FINALLY Remove it' + this.get('controllers.ous.ous'));
         var device = this.get('model');
+        console.log("DEV id: "+device.id);
+        console.log("DEL: "+device.get('isDeleted'));
         device.deleteRecord();
-        device.save().then(function() {
+        console.log("DEL: "+device.get('isDeleted'));
+
+        device.save().then(function(x) {
+          console.log('DELETE SUCCESS');
           humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
@@ -307,6 +316,7 @@ App.OuController = Ember.ObjectController.extend({
                     'Check console, please.' : res.exceptionMessage;
           humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
+          device.rollback();
         });
       }
     },
@@ -328,12 +338,15 @@ App.OuController = Ember.ObjectController.extend({
     }
   } 
 });
+
 App.OusController = Ember.ObjectController.extend({
-  ous: function() {
+  /// FIXME GRRR. Breaks ous/1
+  /*ous: function() {
     console.log("OusController model() - fetching OUs");
     return this.get('store').find('ou');
-  }.property(),
+  }.property()*/
 });
+
 App.OusIndexController = Ember.ObjectController.extend({
   needs: ["ous"],
 });

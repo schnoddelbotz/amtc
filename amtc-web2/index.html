@@ -702,8 +702,8 @@
 <!-- OUs / Rooms #if controller.ous.content -->
 <!-- bascis from  http://www.manning.com/skeie/ ; thank you :-) -->
 <script type="text/x-handlebars" data-template-name='_ouSelection'> 
-  {{#if controllers.ous.ous.content}}
-    {{#each node in controllers.ous.ous.content}}
+  {{#if controllers.ous.content}}
+    {{#each node in controllers.ous.content}}
       {{#if node.isRootLevel}}
           {{tree-menu-node node=node action="selectNode" selectedNode=selectedNode}}
       {{/if}}
