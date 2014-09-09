@@ -81,10 +81,6 @@ Ember.Route.reopen({
 });
 
 App.ApplicationRoute = Ember.Route.extend({
-  model: function() {
-    console.log("ApplicationRoute model() fetching ous");
-    return this.store.find('ou');
-  },
   setupController: function(controller,model) {
     console.log('ApplicationRoute setupController() triggering load of ou-tree');    
     this._super(controller,model);
@@ -134,12 +130,6 @@ App.OuRoute = Ember.Route.extend({
   },
 });
 App.OusRoute = Ember.Route.extend({
-/*
-  model: function() {
-    console.log("OusRoute model() fetching ous");
-    return this.store.find('ou');
-  },
-*/ // already done by AppRoute, as OUs are required for menu
 });
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
@@ -262,11 +252,7 @@ App.IndexView = Ember.View.extend({
 
 App.ApplicationController = Ember.Controller.extend({
   appName: 'amtc-web', // available as {{appName}} throughout app template
-  needs: ["ous"],
-
-  ous: function() {
-    return this.get('store').find('ou');
-  }.property(),
+  needs: ["ou"],
 
   // the initial value of the `search` property
   search: '',
@@ -345,10 +331,7 @@ App.OuController = Ember.ObjectController.extend({
 App.OusController = Ember.ObjectController.extend({
 });
 App.OusIndexController = Ember.ObjectController.extend({
-  needs: ["ous"],
-  ous: function() {
-    return this.get('store').find('ou');
-  }.property(),
+  needs: ["ou"],
 });
 App.OusNewController = App.OuController; // FIXME: evil?
 App.OptionsetController = Ember.ObjectController.extend({
