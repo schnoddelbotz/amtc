@@ -143,7 +143,11 @@ $app->delete('/ous/:id', function ($id) {
   if ($dev = OU::find_by_id($id)) {
     OU::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
-    echo json_encode( array('ou'=> $dev->to_array()) );
+    // "Note: Although after destroyRecord or deleteRecord/save the adapter 
+    // expects an empty object e.g. {} to be returned from the server after
+    //  destroying a record."
+    // http://emberjs.com/guides/models/the-rest-adapter/
+    echo '{}';
   }
 });
 
@@ -185,9 +189,9 @@ $app->put('/optionsets/:id', function ($id) {
 });
 $app->delete('/optionsets/:id', function ($id) {
   if ($dev = Optionset::find_by_id($id)) {
-    OU::query('PRAGMA foreign_keys = ON;');
+    Optionset::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
-    echo json_encode( array('optionset'=> $dev->to_array()) );
+    echo '{}';
   }
 });
 $app->post('/optionsets', function () use ($app) {
