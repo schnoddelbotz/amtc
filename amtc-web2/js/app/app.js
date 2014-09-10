@@ -34,7 +34,7 @@ var App = Ember.Application.create({
     });
 
     // AMTCWEB_IS_CONFIGURED gets defined via included script rest-api.php/rest-config.js
-    if (typeof AMTCWEB_IS_CONFIGURED != 'undefined' && AMTCWEB_IS_CONFIGURED===false) {
+    if (typeof AMTCWEB_IS_CONFIGURED != 'undefined' && AMTCWEB_IS_CONFIGURED===false && !window.location.hash.match('#/pages')) {
       // unconfigured system detected. inform user and relocate to setup.php
       humane.log('<i class="glyphicon glyphicon-fire"></i> '+
                  'Unconfigured system detected!<br>warping into setup...', { timeout: 3000 });

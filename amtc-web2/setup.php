@@ -88,9 +88,9 @@
                 <li>
                     <a href="#"><i class="fa fa-ambulance fa-fw"></i> Help<span class="fa arrow"></span></a>
                     <ul class="nav nav-second-level">
-                        <li> <a href="index.html#/pages/1"><i class="fa fa-wrench fa-fw"></i> Configuring AMT</a> </li>
-                        <li> <a href="index.html#/pages/2"><i class="fa fa-child fa-fw"></i> {{appName}} First Steps</a> </li>
-                        <li> <a href="index.html#/pages/3"><i class="fa fa-github fa-fw"></i> About, Feedback, ...</a> </li>
+                        <li> <a href="index.html#/pages/configure-amt"><i class="fa fa-wrench fa-fw"></i> Configuring AMT</a> </li>
+                        <li> <a href="index.html#/pages/first-steps"><i class="fa fa-child fa-fw"></i> {{appName}} First Steps</a> </li>
+                        <li> <a href="index.html#/pages/about"><i class="fa fa-github fa-fw"></i> About, Feedback, ...</a> </li>
                     </ul>
                     <!-- /.nav-second-level -->
                 </li>
