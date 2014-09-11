@@ -37,9 +37,9 @@ var App = Ember.Application.create({
     if (typeof AMTCWEB_IS_CONFIGURED != 'undefined' && AMTCWEB_IS_CONFIGURED===false && !window.location.hash.match('#/pages')) {
       // unconfigured system detected. inform user and relocate to setup.php
       humane.log('<i class="glyphicon glyphicon-fire"></i> '+
-                 'Unconfigured system detected!<br>warping into setup...', { timeout: 3000 });
+                 'No configuration file found!<br>warping into setup ...', { timeout: 3000 });
       window.setTimeout( function(){
-        window.location.href = 'setup.php';
+        window.location.href = '#setup'; // how to use transitionToRoute here?
       }, 3100);
     }
 
@@ -58,11 +58,11 @@ var App = Ember.Application.create({
   }
 });
 
+ 
+ // Routes 
 
-/*
- * Routes 
- */
 App.Router.map(function() {
+  this.resource('setup');
   this.resource('logs');
   this.resource('energy');
   this.resource('schedule');
@@ -133,7 +133,6 @@ App.OusRoute = Ember.Route.extend({
     return this.store.find('ou');
   }
 });
-
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
     console.log("OusNewRoute model() creating new OU");
@@ -168,9 +167,8 @@ App.MonitorRoute = Ember.Route.extend({
 }); 
 
 
-/*
- * Views
- */
+// Views
+
 
 App.ApplicationView = Ember.View.extend({
   didInsertElement: function() {
@@ -246,9 +244,9 @@ App.IndexView = Ember.View.extend({
   }   
 });
 
-/*
- * Controller
- */
+
+ // Controllers
+
 
 App.ApplicationController = Ember.Controller.extend({
   appName: 'amtc-web', // available as {{appName}} throughout app template
@@ -288,7 +286,7 @@ App.NotificationsController = Ember.ObjectController.extend({
   }.property()
 });
 App.OuController = Ember.ObjectController.extend({
-  needs: ["optionsets","ous","ou"],
+  needs: ["optionsets","ous"],
   currentOU: null,
   isEditing: false,
   ouTree: null,
@@ -409,9 +407,85 @@ App.OptionsetsController = Ember.ObjectController.extend({
   }.property()
 });
 
-/*
- * DS Models
- */
+
+ // DS Models
+
+App.SetupController = Ember.ObjectController.extend({  
+  // Controller used for initial installation page #setup
+  selectedDB: null,
+  sqlitePath: null,
+  mysqlUser: null,
+  mysqlHost: null,
+  mysqlPassword: null,
+  mysqlDB: null,
+  importDemo: true,
+  installHtaccess: null,
+
+  dbs: [
+    "SQLite",
+    "MySQL",
+    "Oracle",
+    "PostgreSQL"
+  ],
+  
+  isMySQL: function() {
+    return (this.get('selectedDB')=='MySQL') ? true : false;
+  }.property('selectedDB'),    
+  isSQLite: function() {
+    return (this.get('selectedDB')=='SQLite') ? true : false;
+  }.property('selectedDB'),
+  isOracle: function() {
+    return (this.get('selectedDB')=='Oracle') ? true : false;
+  }.property('selectedDB'),
+  isPostgreSQL: function() {
+    return (this.get('selectedDB')=='PostgreSQL') ? true : false;
+  }.property('selectedDB'),
+
+  pdoString: function() {
+    if (this.get('selectedDB')=='MySQL') {
+      return 'mysql://' + this.get('mysqlUser') + ':' + this.get('mysqlPassword') + "@" + this.get('mysqlHost') + "/" + this.get('mysqlDB');
+    } else {
+      return 'sqlite:' + this.get('sqlitePath');
+    }
+  }.property('selectedDB','sqlitePath','mysqlUser','mysqlPassword','mysqlHost','mysqlDB'),
+
+  doneEditing: function() {
+    var d = {
+      selectedDB: this.get('selectedDB'),
+      sqlitePath: this.get('sqlitePath'),
+      mysqlUser: this.get('mysqlUser'),
+      mysqlHost: this.get('mysqlHost'),
+      mysqlPassword: this.get('mysqlPassword'),
+      mysqlDB: this.get('mysqlDB'),
+      importDemo: this.get('importDemo'),
+      installHtaccess: this.get('installHtaccess'),
+      pdoString: this.get('pdoString')
+    };
+    $.ajax({type:"POST", url:"setup.php", data:jQuery.param(d), dataType:"json"}).then(function(response) {
+      console.log(response);
+      if (typeof response.errorMsg != "undefined")
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Save failed: '+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
+      else {
+        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully! Warping into amtc-web!', { timeout: 1500 });
+        window.setTimeout( function(){
+          window.location.href = 'index.html';
+        }, 2000);
+      }
+    }, function(response){
+      console.log("what happened?");
+      console.log(response.responseText);
+      if (response.responseText=='INSTALLTOOL_LOCKED') {
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Setup is LOCKED!<br>'+
+          'Setup is intended for initial installation only.<br>'+
+          'Remove <code>data/siteconfig.php</code> to re-enable setup.',
+          { timeout: 0, clickToClose: true, addnCls: 'humane-error' });  
+      } else {
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.'+response.responseText,
+          { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+      }
+    });
+  }
+}); 
 
 // Organizational Unit
 App.Ou = DS.Model.extend({
@@ -500,9 +574,9 @@ App.Optionset = DS.Model.extend({
   opt_cacertfile: attr('string')
 });
 
-/*
- * Components (menu tree...)
- */
+
+// Components (menu tree...)
+
 
 App.TreeMenuNodeComponent = Ember.Component.extend({
   classNames: ['pointer','nav'],
@@ -525,9 +599,9 @@ App.TreeMenuNodeComponent = Ember.Component.extend({
   }.property('selectedNode', 'node.id')
 });
 
-/*
- * Handlebars helpers
- */
+
+ // Handlebars helpers
+
 
 // markdown to html conversion
 var showdown = new Showdown.converter();
