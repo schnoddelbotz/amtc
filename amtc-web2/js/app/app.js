@@ -417,10 +417,10 @@ App.OptionsetsController = Ember.ObjectController.extend({
 App.Ou = DS.Model.extend({
   name: attr('string'),
   description: attr('string'),
-  parent_id: DS.belongsTo('ou'),
+  parent_id: DS.belongsTo('ou', {inverse: 'children'}),
   optionset_id: DS.belongsTo('optionset'),
   ou_path: attr('string'),
-  children: DS.hasMany('ou'), // NEW XXX ou-tree ...
+  children: DS.hasMany('ou', {inverse: 'parent_id'}),
  
   /// FIXME FIXME ... still feels hackish, but makes the dropdown+save work...
   optionsetid: function(key,value) {

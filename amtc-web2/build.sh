@@ -5,9 +5,7 @@ JQUERY=2.1.1
 BOOTSTRAP=3.2.0
 HANDLEBARS=1.3.0
 EMBERJS=1.7.0
-EMBERDATA=1.0.0-beta.9
-# breaks menu :-(
-#EMBERDATA=1.0.0-beta.10
+EMBERDATA=1.0.0-beta.10
 FONTAWESOME=4.2.0
 
 function FetchIfNotExists {
