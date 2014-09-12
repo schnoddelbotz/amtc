@@ -65,6 +65,7 @@ App.Router.map(function() {
   this.resource('logs');
   this.resource('energy');
   this.resource('schedule');
+
   this.resource('ous', function() {
     this.route('new');
   });
@@ -76,10 +77,14 @@ App.Router.map(function() {
       
     });
   });
+
   this.resource('optionsets', function() {
-    this.resource('optionset', { path: ':id' });
     this.route('new');
   });
+  this.resource('optionset', { path: '/optionset/:id' }, function() {
+    this.route('edit');
+  });
+  
   this.resource('pages', function() {
     this.resource('page', { path: ':id' });
   });
@@ -100,25 +105,6 @@ App.PageRoute = Ember.Route.extend({
   }
 });
 
-/*
- * http://emberjs.com/guides/routing/defining-your-routes/ :
- *
- * App.PostRoute = Ember.Route.extend({
- *  model: function(params) {
- *    return this.store.find('post', params.post_id);
- *  }
- * });
- *
- * "Because this pattern is so common, the above model hook is the default behavior." ?!
- *
-  App.OptionsetRoute = Ember.Route.extend({
-    model: function(params) {
-      console.log("OptionsetRoute model() for id " + params.id);
-      //this.set('currentOU', params.id); // hmm, unneeded? better...how?
-      return this.store.find('optionset', params.id);
-    },
-  });
-*/
 App.OuRoute = Ember.Route.extend({
   model: function(params) {
     console.log("App.OuRoute model(), find and set currentOU -> " + params.id);
@@ -148,6 +134,13 @@ App.HostsRoute = Ember.Route.extend({
   }
 }); 
 
+App.OptionsetRoute = Ember.Route.extend({
+  model: function(params) {
+    console.log("OptionsetRoute model() for id " + params.id);
+    //this.set('currentOU', params.id); // hmm, unneeded? better...how?
+    return this.store.find('optionset', params.id);
+  },
+});
 App.OptionsetsRoute = Ember.Route.extend({
   model: function() {
     console.log("OptionsetsRoute model() fetching optionsets");
@@ -365,6 +358,7 @@ App.HostsController = Ember.ArrayController.extend({
 //});
 // AMT Optionsets
 App.OptionsetController = Ember.ObjectController.extend({
+  needs: ["optionsets"],
   currentOU: null,
   isEditing: false,
   ouTree: null,
