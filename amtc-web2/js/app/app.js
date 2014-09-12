@@ -349,13 +349,9 @@ App.HostsController = Ember.ArrayController.extend({
     return this.get('store').find('host');
   }.property()
 });
-//App.OuMonitorController = Ember.ArrayController.extend({
-  //needs: ["ou","ous","hosts"],
-  /*hosts: function() {
-    console.log("HostsController hosts() - fetching.");
-    return this.get('store').find('host');
-  }.property()*/
-//});
+App.OuMonitorController = Ember.ObjectController.extend({
+  needs: ["hosts","ous"]
+});
 // AMT Optionsets
 App.OptionsetController = Ember.ObjectController.extend({
   needs: ["optionsets"],

@@ -691,12 +691,21 @@
 
 <script type="text/x-handlebars" id="optionset">
   {{! Display a single OU edit form using partial _deviceEdit }}
-  <h1 class="page-header">Edit Optionset {{name}}</h1>
-  {{partial "optionsetEdit"}}
-  <div id="editbutton">
-    <button {{action "removeOptionset"}} class="btn"><span class="glyphicon glyphicon-trash"></span> Delete Option set</button>
-    <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
-    {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
+    {{! Display a single OU }}
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Edit Optionset {{name}}</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      {{partial "optionsetEdit"}}
+      <div id="editbutton">
+        <button {{action "removeOptionset"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete Option set</button>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+        {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
+      </div>
+    </div>
   </div>
 </script>
 
@@ -938,15 +947,13 @@
   </div>
 </script>
 
-
 <script type="text/x-handlebars" data-template-name='ou/monitor'>
   {{! amtc-web ... live view mode }}
-  <h2 class="page-header">Live view and control</h1>
-  <div class="row">
-     {{controller.hosts}}
-     {{#each controller.hosts}}
-        {{hostname}}
-     {{/each}}
+  <div class="row" id="hosts">
+    <span style="display:none">FIXME - this triggers loading all hosts: {{controllers.hosts.hosts}} How to trigger it the right way?</span>
+    {{#each controller.hosts}}
+        <div class="pc">{{hostname}}</div>
+    {{/each}}
   </div>
 </script>
 

@@ -16,6 +16,28 @@ ul.nav li.is-selected {
     background:#eee;
 }
 
+/* amtc-web1 CSS for hosts */
+/* hosts in live viewmode */
+#hosts {
+  border:1px solid #eee; margin:5px 0px; padding:15px;
+}
+.pc  {
+  width:130px; float:left; margin:0px 5px 5px 0px; padding:2px; overflow:hidden;
+  box-shadow: 2px 2px 3px #ccc;
+  cursor:pointer;
+}
+#hosts .ui-selecting {
+  background:black; color:gray;
+}
+#hosts .ui-selected, .isActive  {
+  background:black; color:white;
+}
+.addr { 
+  font-weight:bold; margin:0; 
+}
+
+
+
 /* 
  *  Implements the flashing bolt
  *  http://stackoverflow.com/questions/275931/how-do-you-make-an-element-flash-in-jquery
