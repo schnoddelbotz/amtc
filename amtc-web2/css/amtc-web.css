@@ -16,6 +16,12 @@ ul.nav li.is-selected {
     background:#eee;
 }
 
+/* increase header height for 'logo' */
+div.sidebar { margin-top: 60px; }
+.navbar-header { padding-bottom: 10px; }
+a.navbar-brand { padding-top: 10px;}
+.lightgrey { color:#ececec; }
+
 /* amtc-web1 CSS for hosts */
 /* hosts in live viewmode */
 #hosts {
@@ -43,7 +49,7 @@ ul.nav li.is-selected {
  *  http://stackoverflow.com/questions/275931/how-do-you-make-an-element-flash-in-jquery
  *  Any server request should time out after a minute, so don't flash longer than that
  */
-.grey { color:#444; }
+.grey { color:#666; }
 
 .flash {
   -moz-animation: flash 1s ease-out;
