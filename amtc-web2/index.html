@@ -286,9 +286,9 @@
                     <li>
                         <a href="#"><i class="fa fa-ambulance fa-fw"></i> Help<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
-                            <li> <a href="#/pages/configure-amt"><i class="fa fa-wrench fa-fw"></i> Configuring AMT</a> </li>
-                            <li> <a href="#/pages/first-steps"><i class="fa fa-child fa-fw"></i> {{appName}} First Steps</a> </li>
-                            <li> <a href="#/pages/about"><i class="fa fa-github fa-fw"></i> About, Feedback, ...</a> </li>
+                            <li> <a href="#/page/configure-amt"><i class="fa fa-wrench fa-fw"></i> Configuring AMT</a> </li>
+                            <li> <a href="#/page/first-steps"><i class="fa fa-child fa-fw"></i> {{appName}} First Steps</a> </li>
+                            <li> <a href="#/page/about"><i class="fa fa-github fa-fw"></i> About, Feedback, ...</a> </li>
                         </ul>
                         <!-- /.nav-second-level -->
                     </li>
@@ -951,9 +951,13 @@
   {{! amtc-web ... live view mode }}
   <div class="row" id="hosts">
     <span style="display:none">FIXME - this triggers loading all hosts: {{controllers.hosts.hosts}} How to trigger it the right way?</span>
-    {{#each controller.hosts}}
-        <div class="pc">{{hostname}}</div>
-    {{/each}}
+    {{#if controller.hosts}}
+        {{#each controller.hosts}}
+            <div class="pc">{{hostname}}</div>
+        {{/each}}
+    {{else}}
+        No hosts found in this room.
+    {{/if}}
   </div>
 </script>
 

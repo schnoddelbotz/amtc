@@ -85,9 +85,7 @@ App.Router.map(function() {
     this.route('edit');
   });
   
-  this.resource('pages', function() {
-    this.resource('page', { path: ':id' });
-  });
+  this.resource('page', { path: '/page/:id' });
 });
 
 Ember.Route.reopen({
@@ -107,7 +105,7 @@ App.PageRoute = Ember.Route.extend({
 
 App.OuRoute = Ember.Route.extend({
   model: function(params) {
-    console.log("App.OuRoute model(), find and set currentOU -> " + params.id);
+    //console.log("App.OuRoute model(), find and set currentOU -> " + params.id);
     this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('ou', params.id);
   },
@@ -252,7 +250,7 @@ App.ApplicationController = Ember.Controller.extend({
       this.transitionToRoute('search', { query: query });
     },
     selectNode: function(node) {
-      console.log('TreeMenuComponent node: ' + node);
+      //console.log('TreeMenuComponent node: ' + node);
       this.set('selectedNode', node.get('id'));
       this.transitionToRoute('ou.monitor', node.get('id') )
     }
@@ -528,7 +526,7 @@ App.Ou = DS.Model.extend({
     return this.get('children').get('length') == 0;
   }.property('children').cacheable(),
   isExpandedObserver: function() {
-    console.log('isExpanded: ' + this.get('id'));
+    //console.log('isExpanded: ' + this.get('id'));
     if (this.get('isExpanded')) {
       var children = this.get('children.content');
       if (children) {
