@@ -12,6 +12,9 @@ ul.nav.ember-view {
   padding-left: 20px;
 }
 
+ul.nav li.is-selected {
+    background:#eee;
+}
 
 /* 
  *  Implements the flashing bolt

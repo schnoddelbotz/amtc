@@ -58,17 +58,23 @@ var App = Ember.Application.create({
   }
 });
 
- 
- // Routes 
+// Routes 
 
 App.Router.map(function() {
-  this.resource('setup');
+  this.route('setup');
   this.resource('logs');
   this.resource('energy');
   this.resource('schedule');
   this.resource('ous', function() {
-    this.resource('ou', { path: ':id' });
     this.route('new');
+  });
+  this.resource('ou', { path: '/ou/:id' }, function() {
+    this.route('edit');
+    this.route('newhost');
+    this.route('monitor');
+    this.resource('hosts', function() {
+      
+    });
   });
   this.resource('optionsets', function() {
     this.resource('optionset', { path: ':id' });
@@ -77,30 +83,23 @@ App.Router.map(function() {
   this.resource('pages', function() {
     this.resource('page', { path: ':id' });
   });
-  this.resource('monitors', function() {
-    this.resource('monitor', { path: ':id' });
-  });
 });
 
-// http://stackoverflow.com/questions/13120474/emberjs-scroll-to-top-when-changing-view
 Ember.Route.reopen({
+  // http://stackoverflow.com/questions/13120474/emberjs-scroll-to-top-when-changing-view
   render: function(controller, model) {
     this._super();
     window.scrollTo(0, 0);
   }
 });
 
-App.Route = Ember.Route.extend({
-  enter: function() {
-    console.log("ENTER App.Route");
-  }
-});
 App.PageRoute = Ember.Route.extend({
   model: function(params) {
     console.log("PageRoute model() fetching single page");
     return this.store.find('page', params.id);
   }
 });
+
 /*
  * http://emberjs.com/guides/routing/defining-your-routes/ :
  *
@@ -139,6 +138,15 @@ App.OusNewRoute = Ember.Route.extend({
     return this.store.createRecord('ou');
   }
 });
+App.HostsRoute = Ember.Route.extend({
+  model: function(params) {
+    // the monitor needs the hosts. hmmmm. am i doing right here? :-/
+    console.log("HostRoute model(): fetch hosts");
+    console.log(params);
+    return this.store.find('host', params.id); /*  FIXME: + , this.get('ou.id') ??? */
+    // FIXME ember-inspector shows one nulled record
+  }
+}); 
 
 App.OptionsetsRoute = Ember.Route.extend({
   model: function() {
@@ -158,17 +166,9 @@ App.NotificationsRoute = Ember.Route.extend({
     return this.store.find('notification');
   }
 });
-App.MonitorRoute = Ember.Route.extend({
-  model: function(params) {
-    console.log("MonitorRoute model(): set currentOU -> " + params.id + " and fetch ou data");
-    this.set('currentOU', params.id); // hmm, unneeded? better...how?
-    return this.store.find('ou', params.id);
-  }
-}); 
 
 
 // Views
-
 
 App.ApplicationView = Ember.View.extend({
   didInsertElement: function() {
@@ -244,10 +244,8 @@ App.IndexView = Ember.View.extend({
   }   
 });
 
-
- // Controllers
-
-
+// Controllers
+// see http://emberjs.com/guides/routing/generated-objects/
 App.ApplicationController = Ember.Controller.extend({
   appName: 'amtc-web', // available as {{appName}} throughout app template
   needs: ["ou","ous"],
@@ -263,7 +261,7 @@ App.ApplicationController = Ember.Controller.extend({
     selectNode: function(node) {
       console.log('TreeMenuComponent node: ' + node);
       this.set('selectedNode', node.get('id'));
-      this.transitionToRoute('monitor', node.get('id') )
+      this.transitionToRoute('ou.monitor', node.get('id') )
     }
 
   },
@@ -278,19 +276,22 @@ App.IndexController = Ember.ObjectController.extend({
   */
   ouTree: null, // fixme. remove.
 });
-
-App.NotificationsController = Ember.ObjectController.extend({
+// Index page notification messages ('job completed') et al
+App.NotificationsController = Ember.ArrayController.extend({
   notifications: function() {
     console.log("NotificationsController notifications() - fetching.");
     return this.get('store').find('notification');
   }.property()
 });
+// Organizational Units
 App.OuController = Ember.ObjectController.extend({
   needs: ["optionsets","ous"],
   currentOU: null,
   isEditing: false,
   ouTree: null,
-
+});
+App.OuEditController = Ember.ObjectController.extend({
+  needs: ["optionsets","ous"],
   actions: {
     removeOu: function () {
       if (confirm("Really delete this OU?")) {
@@ -338,20 +339,32 @@ App.OuController = Ember.ObjectController.extend({
     }
   } 
 });
-
-App.OusController = Ember.ObjectController.extend({
+App.OusController = Ember.ArrayController.extend({
   ous: function() {
     console.log("OusController ous() - fetching.");
     return this.get('store').find('ou');
   }.property()
 });
-
 App.OusIndexController = Ember.ObjectController.extend({
   needs: ["ous"],
 });
 App.OusNewController = App.OuController; // FIXME: evil?
+// Client PCs
+App.HostsController = Ember.ArrayController.extend({
+  hosts: function() {
+    console.log("HostsController hosts() - fetching.");
+    return this.get('store').find('host');
+  }.property()
+});
+//App.OuMonitorController = Ember.ArrayController.extend({
+  //needs: ["ou","ous","hosts"],
+  /*hosts: function() {
+    console.log("HostsController hosts() - fetching.");
+    return this.get('store').find('host');
+  }.property()*/
+//});
+// AMT Optionsets
 App.OptionsetController = Ember.ObjectController.extend({
-
   currentOU: null,
   isEditing: false,
   ouTree: null,
@@ -390,26 +403,27 @@ App.OptionsetController = Ember.ObjectController.extend({
       console.log(this.get('model'));
       this.get('model').save().then(function() {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
-            { timeout: 800 });
+          { timeout: 800 });
         window.location.href = '#/optionsets';
-      }/*, function(device){
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please reload page.',
-            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      }*/);
+      }, function(response){
+        var res = jQuery.parseJSON(response.responseText);
+        var msg = (typeof res.exceptionMessage=='undefined') ? 
+                   'Check console, please.' : res.exceptionMessage;
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                   '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
+        device.rollback();
+        }
+      );
     }
   }  
 });
 App.OptionsetsNewController = App.OptionsetController; // FIXME: evil?
-App.OptionsetsController = Ember.ObjectController.extend({
-  //needs: ["optionsets"],
+App.OptionsetsController = Ember.ArrayController.extend({
   optionsets: function() {
     return this.get('store').find('optionset');
   }.property()
 });
-
-
- // DS Models
-
+// Controller for /#setup (Installer)
 App.SetupController = Ember.ObjectController.extend({  
   // Controller used for initial installation page #setup
   selectedDB: null,
@@ -487,6 +501,8 @@ App.SetupController = Ember.ObjectController.extend({
   }
 }); 
 
+// Models
+
 // Organizational Unit
 App.Ou = DS.Model.extend({
   name: attr('string'),
@@ -495,6 +511,7 @@ App.Ou = DS.Model.extend({
   optionset_id: DS.belongsTo('optionset'),
   ou_path: attr('string'),
   children: DS.hasMany('ou', {inverse: 'parent_id'}),
+  hosts: DS.hasMany('host'),
  
   /// FIXME FIXME ... still feels hackish, but makes the dropdown+save work...
   optionsetid: function(key,value) {
@@ -540,6 +557,12 @@ App.Ou.reopenClass({
     return 0;
   }
 });
+// Clients/Hosts
+App.Host = DS.Model.extend({
+  ou_id: DS.belongsTo('ou'),
+  hostname: attr('string')
+  // add isSelected et al
+});
 // Markdown help / documentation pages
 App.Page = DS.Model.extend({
   page_name: attr('string'),
@@ -574,9 +597,7 @@ App.Optionset = DS.Model.extend({
   opt_cacertfile: attr('string')
 });
 
-
 // Components (menu tree...)
-
 
 App.TreeMenuNodeComponent = Ember.Component.extend({
   classNames: ['pointer','nav'],
@@ -599,9 +620,7 @@ App.TreeMenuNodeComponent = Ember.Component.extend({
   }.property('selectedNode', 'node.id')
 });
 
-
- // Handlebars helpers
-
+// Handlebars helpers
 
 // markdown to html conversion
 var showdown = new Showdown.converter();

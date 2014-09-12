@@ -32,3 +32,20 @@ INSERT INTO "ous" VALUES(11,3,1,'E 27','');
 INSERT INTO "ous" VALUES(12,4,4,'D 11','');
 INSERT INTO "ous" VALUES(13,4,4,'D 12','');
 INSERT INTO "ous" VALUES(14,4,4,'D 13','');
+
+-- put some hosts into two of the rooms
+INSERT INTO "hosts" VALUES(1,11,'labpc-e27-160');
+INSERT INTO "hosts" VALUES(2,11,'labpc-e27-161');
+INSERT INTO "hosts" VALUES(3,11,'labpc-e27-162');
+INSERT INTO "hosts" VALUES(4,11,'labpc-e27-163');
+INSERT INTO "hosts" VALUES(5,11,'labpc-e27-164');
+INSERT INTO "hosts" VALUES(6,11,'labpc-e27-165');
+INSERT INTO "hosts" VALUES(7,11,'labpc-e27-166');
+INSERT INTO "hosts" VALUES(8,11,'labpc-e27-167');
+INSERT INTO "hosts" VALUES(9,11,'labpc-e27-168');
+INSERT INTO "hosts" VALUES(10,11,'labpc-e27-169');
+INSERT INTO "hosts" VALUES(11,8,'labpc-e19-18');
+INSERT INTO "hosts" VALUES(12,8,'labpc-e19-19');
+INSERT INTO "hosts" VALUES(13,8,'labpc-e19-20');
+INSERT INTO "hosts" VALUES(14,8,'labpc-e19-21');
+INSERT INTO "hosts" VALUES(15,8,'labpc-e19-22');

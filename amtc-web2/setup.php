@@ -1,6 +1,7 @@
 <?php
 
-// this thing should provide useful info to the #setup page
+// this thing should provide useful test results to the #setup page 
+// (tests: supported PDO drivers, writable directory, chk cfg provided...).
 // it currently, quite blindly, only accepts submitted config data.
 // YEAH!!! neeeds cleanup/fix!!
 

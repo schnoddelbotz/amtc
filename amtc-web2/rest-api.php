@@ -151,6 +151,17 @@ $app->delete('/ous/:id', function ($id) {
   }
 });
 
+/**************** Hosts ******************************************************/
+
+$app->get('/hosts', function () {
+  $result = array('hosts'=>array());
+  foreach (Host::all(array("order" => "hostname asc")) as $record) {
+    $r = $record->to_array();
+    $result['hosts'][] = $r;
+  }
+  echo json_encode( $result );
+});
+
 /**************** AMT Optionsets *********************************************/
 
 $app->get('/optionsets', function () {

@@ -21,8 +21,8 @@ CREATE TABLE "ous" (
   FOREIGN KEY(parent_id) REFERENCES ous(id) ON DELETE RESTRICT
 );
 
--- hosts to be placed into ous
-CREATE TABLE "pcs" (
+-- clients to be placed into ous
+CREATE TABLE "hosts" (
   "id"                INTEGER      PRIMARY KEY AUTOINCREMENT,
   "ou_id"             INTEGER      NOT NULL,
   "hostname"          VARCHAR(64)  NOT NULL,
