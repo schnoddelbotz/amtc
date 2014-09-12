@@ -694,7 +694,7 @@
   <h1 class="page-header">Edit Optionset {{name}}</h1>
   {{partial "optionsetEdit"}}
   <div id="editbutton">
-    <button {{action "removeOptionset"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete Option set</button>
+    <button {{action "removeOptionset"}} class="btn"><span class="glyphicon glyphicon-trash"></span> Delete Option set</button>
     <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
     {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
   </div>
@@ -928,16 +928,14 @@
         <p class="help-block">Optionsets may be created ...here... They will NOT be inherited.</p>
       </div>
    </fieldset>
-
+  </form>
+  <div class="clearboth"></div><br>
   <div id="editbutton">
     <button {{action "removeOu"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete OU</button>
       <!-- fixme use #if isDirty, currently breaks with drop downs... why? -->
       <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
       {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
   </div>
-
-  </form>
-  <div class="clearboth"></div><br>
 </script>
 
 
