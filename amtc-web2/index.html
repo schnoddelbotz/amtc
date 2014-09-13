@@ -18,7 +18,7 @@
 <div class="modal fade in" id="splash" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="false" style="display:block">
   <div class="modal-dialog">
     <div class="modal-content" style="text-align:center; margin:20px; font-size:8em; background-color:transparent; border:0; box-shadow:none; text-shadow: 2px 2px #444;">
-        <span style="color:white; font-weight:bold">AMTC</span><br>
+        <span style="color:white; font-weight:bold">amtc</span><br>
         <div class="modal-body" >
           <span class="fa-stack fa-lg">
             <i class="fa fa-circle fa-stack-2x grey"></i>
@@ -987,7 +987,27 @@
         {{controllers.hosts.hosts}} 
         How to trigger it the right way?
       </span>
-      {{controller.selectedHostsCount}} &lt;- fixme... unbound. check console. Actions: [ ] powerup [ ] powerdown ... more to come.
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <div id="livectrl">
+        <h5>Select hosts above like files in Finder/Explorer or by state below</h5>
+        <p id="hselect"></p>
+        {{#if selectedHostsCount}}
+        <div id="ctrl">
+          <h5>Action for selected <span id="numselected">{{selectedHostsCount}}</span>&nbsp;hosts</h5>
+          <form>
+           <input type="radio" name="cmd" id="powerdown" value="D"><label for="powerdown">powerdown</label>
+           <input type="radio" name="cmd" id="powerup" value="U"><label for="powerup">powerup</label>
+           <input type="radio" name="cmd" id="powercycle" value="C"><label for="powercycle">powercycle</label>
+           <input type="radio" name="cmd" id="reset" value="R"><label for="reset">reset</label>
+           ... using a inter-command-delay of <input id="delay" type="text"  name="delay" value="5" size=3> seconds
+           <input type="button" id="ctrlSubmit" value="Do it" name="bar">
+          </form>
+        </div>
+        {{/if}}
+      </div>
     </div>
   </div>
 </script>

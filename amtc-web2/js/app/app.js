@@ -61,6 +61,11 @@ var App = Ember.Application.create({
   }
 });
 
+// fixme: old evil globals, get em away...
+var powerstates = {"pc":"any", "S0":"on", "S3":"sleep", "S4":"hibernate", "S5":"soft-off", "S16":"no-reply", "ssh":"SSH","rdp":"RDP","none":"No-OS"};
+var osicons = {'SSH':'<i class="fa fa-linux"></i> ', 'RDP':'<i class="fa fa-windows"></i> '};
+
+
 // Routes 
 
 App.Router.map(function() {
@@ -133,7 +138,11 @@ App.HostsRoute = Ember.Route.extend({
     return this.store.find('host', params.id); /*  FIXME: + , this.get('ou.id') ??? */
     // FIXME ember-inspector shows one nulled record
   }
-}); 
+});
+App.PowerstatesRoute = Ember.Route.extend({
+  /// RETURN live powerstates via AMTC
+});
+
 
 App.OptionsetRoute = Ember.Route.extend({
   model: function(params) {
@@ -170,13 +179,27 @@ App.ApplicationView = Ember.View.extend({
   }
 });
 App.OuMonitorView = Ember.View.extend({
+  //selectedHostsCountBinding: 'controller.selectedHostsCount',
   didInsertElement: function() {
-    //$('#side-menu').metisMenu(); // initialize metisMenu 
-    //alert('x');
     $("#hosts").selectable({
-      stop: this.get('controller').selectionChanged,
+      stop: function(){
+        // trigger controller -- selection was modified
+        var controller = App.__container__.lookup("controller:ouMonitor");
+        controller.send('updateSelectedHosts');
+      },
       filter: '.pc'
     });
+    //
+    $("#hselect").html("");
+    $.each(powerstates, function(key, value) {
+      var icon = osicons[value] ? osicons[value] : '';
+      $("#hselect").append('<span id="'+value+'" class="'+key+' ui-corner-all">'+icon+value+'</span>');
+      $("#"+value).click(function() {
+        console.log('modifySelection ....');
+        modifySelection(value,$(this).attr("class").split(' ')[0]);
+      });
+    });
+    $("#hselect span").css( 'cursor', 'pointer' );
   }
 });
 App.IndexView = Ember.View.extend({
@@ -351,6 +374,11 @@ App.OusController = Ember.ArrayController.extend({
 });
 App.OusIndexController = Ember.ObjectController.extend({
   needs: ["ous"],
+  // needs: ['application'],
+  // currentUser: Ember.computed.alias('controllers.application.currentUser'),
+  //  addPost: function() {
+  //  console.log('Adding a post for ', this.get('currentUser.name'));
+  // }
 });
 App.OusNewController = App.OuController; // FIXME: evil?
 // Client PCs
@@ -363,16 +391,21 @@ App.HostsController = Ember.ArrayController.extend({
 App.OuMonitorController = Ember.ObjectController.extend({
   needs: ["hosts","ous"],
 
+  selectedAction: null,
   selectedHosts: {},
   selectedHostsCount: 0,
 
-  selectionChanged: function(){
-    selectedHosts = $('#hosts .ui-selected');
-    selectedHostsCount = $(".ui-selected").length;
-
-    console.log('... FIXME ... and now? '+selectedHostsCount+' hosts selected: ');
-    console.log(selectedHosts);
+  actions: {
+    updateSelectedHosts: function() {
+      this.set('selectedHosts', $('#hosts .ui-selected'));
+      this.set('selectedHostsCount', $(".ui-selected").length);
+    },
+    setActionPowerup:    function() { this.set('selectedAction', 'U'); },
+    setActionPowerdown:  function() { this.set('selectedAction', 'D'); },
+    setActionReset:      function() { this.set('selectedAction', 'R'); },
+    setActionPowercycle: function() { this.set('selectedAction', 'C'); },
   }
+
 });
 // AMT Optionsets
 App.OptionsetController = Ember.ObjectController.extend({
@@ -659,3 +692,25 @@ Ember.Handlebars.helper('check-mark', function(input) {
 Ember.Handlebars.helper('format-from-now', function(date) {
   return moment.unix(date).fromNow();
 });
+
+// Legacy amtc-web1 needs-cleanup-stuff
+
+//// FIXME
+/* called when group-by-powerstate-selection is done. */
+function modifySelection(buttonid, pclass) {
+  if ($("#"+buttonid).hasClass("isActive")) {
+    $("#hosts ."+pclass).removeClass("ui-selected");
+    $("#"+buttonid).removeClass("isActive");
+    if (buttonid=="any") {
+      $("#hosts .pc").removeClass("ui-selected");
+      $("#hselect span").removeClass("isActive");
+    }
+  } else {
+    $("#hosts ."+pclass).addClass("ui-selected");
+    $("#"+buttonid).addClass("isActive");
+  }
+  //updatePowerController();
+  var controller = App.__container__.lookup("controller:ouMonitor");
+  controller.send('updateSelectedHosts')
+}
+/////// FIXME
