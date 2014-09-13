@@ -34,6 +34,7 @@ included in my github repository, but fetched during the build process
 of amtc-web. Complete list of thirdparty components used in amtc-web:
 
  * [jQuery](http://jquery.com)
+ * [jQuery](http://jqueryui.com)
  * [emberJS](http://emberjs.com)
  * [handlebars](http://handlebarsjs.com)
  * [showdown](https://github.com/coreyti/showdown)

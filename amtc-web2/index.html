@@ -954,7 +954,6 @@
 <script type="text/x-handlebars" data-template-name='ou/monitor'>
   {{! amtc-web ... live view mode }}
   <div class="row" id="hosts">
-    <span style="display:none">FIXME - this triggers loading all hosts: {{controllers.hosts.hosts}} How to trigger it the right way?</span>
     {{#if controller.hosts}}
         {{#each controller.hosts}}
             <div class="pc">{{hostname}}</div>
@@ -962,6 +961,16 @@
     {{else}}
         No hosts found in this room.
     {{/if}}
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <span style="display:none">
+        FIXME - this triggers loading all hosts: 
+        {{controllers.hosts.hosts}} 
+        How to trigger it the right way?
+      </span>
+      {{controller.selectedHostsCount}} &lt;- fixme... unbound. check console. Actions: [ ] powerup [ ] powerdown ... more to come.
+    </div>
   </div>
 </script>
 

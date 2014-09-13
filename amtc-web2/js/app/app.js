@@ -166,6 +166,16 @@ App.ApplicationView = Ember.View.extend({
     $('#side-menu').metisMenu(); // initialize metisMenu 
   }
 });
+App.OuMonitorView = Ember.View.extend({
+  didInsertElement: function() {
+    //$('#side-menu').metisMenu(); // initialize metisMenu 
+    //alert('x');
+    $("#hosts").selectable({
+      stop: this.get('controller').selectionChanged,
+      filter: '.pc'
+    });
+  }
+});
 App.IndexView = Ember.View.extend({
   templateName: 'index',
   didInsertElement: function() {
@@ -348,7 +358,18 @@ App.HostsController = Ember.ArrayController.extend({
   }.property()
 });
 App.OuMonitorController = Ember.ObjectController.extend({
-  needs: ["hosts","ous"]
+  needs: ["hosts","ous"],
+
+  selectedHosts: {},
+  selectedHostsCount: 0,
+
+  selectionChanged: function(){
+    selectedHosts = $('#hosts .ui-selected');
+    selectedHostsCount = $(".ui-selected").length;
+
+    console.log('... FIXME ... and now? '+selectedHostsCount+' hosts selected: ');
+    console.log(selectedHosts);
+  }
 });
 // AMT Optionsets
 App.OptionsetController = Ember.ObjectController.extend({
