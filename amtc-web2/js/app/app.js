@@ -14,6 +14,7 @@ var hasMany = DS.hasMany;
 var App = Ember.Application.create({
   // http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
   ready: function() {
+    $('#splash').hide();
     // actual sb-admin-2.js page/template initialization
     $(window).bind("load resize", function() {
       topOffset = 50;
