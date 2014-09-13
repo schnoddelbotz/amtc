@@ -14,7 +14,9 @@ var hasMany = DS.hasMany;
 var App = Ember.Application.create({
   // http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
   ready: function() {
-    $('#splash').hide();
+    // turn off splash screen
+    $('#splash').fadeOut(1200);
+    $('#backdrop').hide();
     // actual sb-admin-2.js page/template initialization
     $(window).bind("load resize", function() {
       topOffset = 50;
@@ -649,8 +651,8 @@ Ember.Handlebars.helper('format-markdown', function(input) {
 // print fontAwesome checkmarks for input true/false
 Ember.Handlebars.helper('check-mark', function(input) {
   return input ?
-    new Handlebars.SafeString(showdown.makeHtml('<i class="fa fa-check-square-o"></i> ')) :
-    new Handlebars.SafeString(showdown.makeHtml('<i class="fa fa-square-o"></i> '));
+    new Handlebars.SafeString(showdown.makeHtml('<i class="fa grey fa-check-square-o"></i> ')) :
+    new Handlebars.SafeString(showdown.makeHtml('<i class="fa grey fa-square-o"></i> '));
 });
 
 // moment.js PRETTY timestamps

@@ -13,15 +13,21 @@
 </head>
 <body>
 
-<div id="splash" class="jumbotron">
-    <h1>    
-      <span class="label label-primary">amtc-web</span>
-      <span class="fa-stack fa-lg">
-        <i class="fa fa-circle fa-stack-2x grey"></i>
-        <i class="fa fa-bolt fa-fw fa-stack-1x flash"></i> 
-      </span>
-    </h1>
-    <p><br>... is coming up. at least it should... try waiting :)</p>
+<!-- startup splash screen -->
+<div id="backdrop" class="modal-backdrop fade in"></div>
+<div class="modal fade in" id="splash" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="false" style="display:block">
+  <div class="modal-dialog">
+    <div class="modal-content" style="text-align:center; margin:20px; font-size:8em; background-color:transparent; border:0; box-shadow:none; text-shadow: 2px 2px #444;">
+        <span style="color:white; font-weight:bold">AMTC</span><br>
+        <div class="modal-body" >
+          <span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x grey"></i>
+            <i class="fa fa-bolt fa-fw fa-stack-1x flash"></i> 
+          </span>
+        </div>
+        <span style="color:white; font-weight:bold">web</span>
+    </div>
+  </div>
 </div>
 
 <script type="text/x-handlebars">

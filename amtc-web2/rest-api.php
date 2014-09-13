@@ -57,6 +57,7 @@ ActiveRecord\Config::initialize(function($cfg){
  
 // provide URI for ember-data REST adapter, based on this php script's location
 $app->get('/rest-config.js', function () use ($app,$amtcwebConfigFile) {    
+  sleep(1); // oh boy, just to have the splashscreen have its fun. nuts.
   $app->response->header('Content-Type', 'application/javascript;charset=utf-8');
   $path = substr($_SERVER['SCRIPT_NAME'],1);
   echo "DS.RESTAdapter.reopen({\n";
@@ -86,7 +87,6 @@ $app->get('/pages/:id', function ($id) use ($app) {
 /**************** Notifications / Short user messages for dashboard **********/
 
 $app->get('/notifications', function () {
-  sleep(1); // just to test the spinner ...
   $result = array('notifications'=>array());
   foreach (Notification::all(array("order" => "tstamp desc", 'limit' => 50)) as $record) { $result['notifications'][] = $record->to_array(); }
   echo json_encode( $result );
