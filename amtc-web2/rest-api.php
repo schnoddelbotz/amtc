@@ -46,14 +46,24 @@ ActiveRecord\Config::initialize(function($cfg){
 // ^ needed for sqlite to respect constraints
 // see http://www.sqlite.org/pragma.html#pragma_foreign_keys
 
+$phptests = array(
+  //'id'   => array('description',      'test to execute, ret true/false',   'how-to-fix if failed'),
+  'pdo'       => array('Check for pdo',              'return phpversion("pdo")?true:false;' , 'install php pdo module'),
+  'pdo_mysql' => array('Check for MySQL support',    'return phpversion("pdo_mysql")?true:false;' , 'install php pdo mysql module'),
+  'pdo_oci'   => array('Check for Oracle support',   'return phpversion("pdo_mysql")?true:false;' , 'install php pdo orcale module'),
+  'pdo_pgsql' => array('Check for Postgres support', 'return phpversion("pdo_mysql")?true:false;' , 'install php pdo postgres module'),
+  'pdo_sqlite'=> array('Check for SQLite support',   'return phpversion("pdo_mysql")?true:false;' , 'install php pdo sqlite module'),
+  'php53'     => array('php 5.3+',                   '$v=explode(".",PHP_VERSION);return $v[0]>5||($v[0]==5&&$v[1]>2);', 'upgrade'),
+  'data'      => array('data/ writable',             'return is_writable(data);',    'run chmod 777 on data/ directory'),
+  //'dbconnect' => array('',   '', ''),
+  //'dbwrite'   => array('',   '', ''),
+);
 
 /*****************************************************************************/
 /**************** Only SLIM request handling below ***************************/
 /*****************************************************************************/
 
-/* 
- *  Non-DB-Model requests 
- */
+//  Non-DB-Model requests 
  
 // provide URI for ember-data REST adapter, based on this php script's location
 $app->get('/rest-config.js', function () use ($app,$amtcwebConfigFile) {    
@@ -80,9 +90,27 @@ $app->get('/pages/:id', function ($id) use ($app) {
   )));  
 });
 
-/* 
- *  DB-Model requests 
- */
+$app->get('/phptests', function () use ($app, $phptests) {
+  $test=Array();
+  foreach ($phptests as $tid=>$test) {
+    $t=array();
+    $t['id'] = $tid;
+    $t['description'] = $test[0];
+    $tests[] = $t;
+  }
+  $result = array('phptests'=>$tests);
+  echo json_encode( $result );
+});
+$app->get('/phptest/:id', function ($id) use ($app, $phptests) {
+  $r=array();
+  $phptests[$id] || $app->notFound();
+  $r['id'] = $id;
+  $t['description'] = $phptests[$id][0];
+  $r['result'] = eval($phptests[$id][1]);
+  echo json_encode( array('phptest'=>$r ));
+});
+
+// DB-Model requests 
 
 /**************** Notifications / Short user messages for dashboard **********/
 

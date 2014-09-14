@@ -384,7 +384,7 @@
           </div>
       </div>
       <div class="col-lg-3 col-md-6">
-          <div class="panel panel-yellow">
+          <div class="panel" style="background-color:#aaa">
               <div class="panel-heading">
                   <div class="row">
                       <div class="col-xs-3">
@@ -879,6 +879,7 @@
         <th>Name</th>
         <th>Description</th>
         <th>Optionset</th>
+        <th>Hosts</th>
       </tr>
     </thead>
     {{#each controllers.ous.content}}
@@ -888,6 +889,7 @@
         <td>{{name}}</td>
         <td>{{description}}</td>
         <td>{{optionset_id.name}}</td>
+        <td>{{#link-to 'ou.hosts' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
       </td></tr>
     {{/each}}
   </table>
@@ -909,10 +911,12 @@
 
 <script type="text/x-handlebars" id="ous/new">    
   <h1 class="page-header">Create a new OU / room</h1>
-  {{partial "ouEdit"}}
-  <button class="btn btn-default" {{action 'doneEditingReturn'}}>
-    <span class="glyphicon glyphicon-floppy-disk"></span> Save new OU
-  </button>
+  {{partial "ou/edit"}}
+  {{#if parent_id}}
+    <button class="btn btn-default" {{action 'doneEditingReturn'}}>
+      <span class="glyphicon glyphicon-floppy-disk"></span> Save new OU
+    </button>
+  {{/if}}
 </script>
 
 <script type="text/x-handlebars" data-template-name='ou/edit'>
@@ -961,24 +965,28 @@
    </fieldset>
   </form>
   <div class="clearboth"></div><br>
+  {{#unless isNew}}
   <div id="editbutton">
     <button {{action "removeOu"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete OU</button>
       <!-- fixme use #if isDirty, currently breaks with drop downs... why? -->
       <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
       {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
   </div>
+  {{/unless}}
 </script>
 
 <script type="text/x-handlebars" data-template-name='ou/monitor'>
-  {{! amtc-web ... live view mode }}
-  <div class="row" id="hosts">
-    {{#if controller.hosts}}
-        {{#each controller.hosts}}
-            <div class="pc">{{hostname}}</div>
-        {{/each}}
-    {{else}}
-        No hosts found in this room.
-    {{/if}}
+{{! amtc-web ... live view / monitor + control mode }}
+  <div class="row">
+    <div class="col-lg-12" id="hosts">
+      {{#if controller.hosts}}
+          {{#each controller.hosts}}
+              <div class="pc">{{hostname}}</div>
+          {{/each}}
+      {{else}}
+          No hosts found in this room.
+      {{/if}}
+    </div>
   </div>
   <div class="row">
     <div class="col-lg-12">
@@ -1012,6 +1020,24 @@
   </div>
 </script>
 
+<script type="text/x-handlebars" data-template-name='ou/hosts'>
+  <div class="row">
+    <div class="col-lg-12" id="cfghosts">
+      {{#if controllers.hosts.hosts.content}}
+          {{#each controller.hosts}}
+              <div class="pc">{{hostname}}</div>
+          {{/each}}
+      {{else}}
+          No hosts found in this room.
+      {{/if}}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <input type="button" id="fooobdddddd" value="Add hosts ..." name="bar">
+    </div>
+  </div>    
+</script>
 
 <script src="js/jslibs.js"></script>
 <script src="js/app/app.js"></script>

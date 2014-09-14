@@ -79,11 +79,8 @@ App.Router.map(function() {
   });
   this.resource('ou', { path: '/ou/:id' }, function() {
     this.route('edit');
-    this.route('newhost');
+    this.route('hosts');
     this.route('monitor');
-    this.resource('hosts', function() {
-      
-    });
   });
 
   this.resource('optionsets', function() {
@@ -130,15 +127,6 @@ App.OusNewRoute = Ember.Route.extend({
     return this.store.createRecord('ou');
   }
 });
-App.HostsRoute = Ember.Route.extend({
-  model: function(params) {
-    // the monitor needs the hosts. hmmmm. am i doing right here? :-/
-    console.log("HostRoute model(): fetch hosts");
-    console.log(params);
-    return this.store.find('host', params.id); /*  FIXME: + , this.get('ou.id') ??? */
-    // FIXME ember-inspector shows one nulled record
-  }
-});
 App.PowerstatesRoute = Ember.Route.extend({
   /// RETURN live powerstates via AMTC
 });
@@ -179,7 +167,6 @@ App.ApplicationView = Ember.View.extend({
   }
 });
 App.OuMonitorView = Ember.View.extend({
-  //selectedHostsCountBinding: 'controller.selectedHostsCount',
   didInsertElement: function() {
     $("#hosts").selectable({
       stop: function(){
@@ -200,6 +187,20 @@ App.OuMonitorView = Ember.View.extend({
       });
     });
     $("#hselect span").css( 'cursor', 'pointer' );
+  }
+});
+App.OuHostsView = Ember.View.extend({
+  // add/remove hosts view
+  didInsertElement: function() {
+    console.log('OuHostsView making hosts selectable');
+    $("#cfghosts").selectable({
+      stop: function(){
+        // trigger controller -- selection was modified
+        //var controller = App.__container__.lookup("controller:ouHosts");
+        //controller.send('updateSelectedHosts');
+      },
+      filter: '.pc'
+    });
   }
 });
 App.IndexView = Ember.View.extend({
@@ -380,7 +381,7 @@ App.OusIndexController = Ember.ObjectController.extend({
   //  console.log('Adding a post for ', this.get('currentUser.name'));
   // }
 });
-App.OusNewController = App.OuController; // FIXME: evil?
+App.OusNewController = App.OuEditController; // FIXME: evil?
 // Client PCs
 App.HostsController = Ember.ArrayController.extend({
   hosts: function() {
@@ -388,6 +389,9 @@ App.HostsController = Ember.ArrayController.extend({
     return this.get('store').find('host');
   }.property()
 });
+App.OuHostsController = Ember.ObjectController.extend({
+  needs: ["hosts"]
+}); 
 App.OuMonitorController = Ember.ObjectController.extend({
   needs: ["hosts","ous"],
 
