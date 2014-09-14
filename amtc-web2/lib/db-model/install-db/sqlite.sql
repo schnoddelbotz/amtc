@@ -5,8 +5,11 @@
 CREATE TABLE "notifications" (
   "id"                INTEGER      PRIMARY KEY,
   "tstamp"            INTEGER(4)   DEFAULT (strftime('%s','now')),
+  "user_id"           INT          NOT NULL,
   "ntype"             VARCHAR(12),
-  "message"           VARCHAR(64)
+  "message"           VARCHAR(64),
+
+  FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
 -- organizational units / rooms
@@ -16,9 +19,24 @@ CREATE TABLE "ous" (
   "optionset_id"      INT,
   "name"              VARCHAR(128) NOT NULL,
   "description"       VARCHAR(255),
+  "idle_power"        REAL,
+  "logging"           INT          DEFAULT 1,
   
   FOREIGN KEY(optionset_id) REFERENCES optionsets(id),
   FOREIGN KEY(parent_id) REFERENCES ous(id) ON DELETE RESTRICT
+);
+
+-- clients to be placed into ous
+CREATE TABLE "users" (
+  "id"                INTEGER      PRIMARY KEY AUTOINCREMENT,
+  "ou_id"             INTEGER      NOT NULL,    -- currently only one related (top) OU; no distinct permissions
+  "is_enabled"        INTEGER      DEFAULT 1,
+  "is_admin"          INTEGER      DEFAULT 0,
+  "can_control"       INTEGER      DEFAULT 1,
+  "name"              VARCHAR(64)  NOT NULL,
+  "fullname"          VARCHAR(64)  NOT NULL,
+
+  FOREIGN KEY(ou_id) REFERENCES ous(id)
 );
 
 -- clients to be placed into ous
@@ -26,6 +44,7 @@ CREATE TABLE "hosts" (
   "id"                INTEGER      PRIMARY KEY AUTOINCREMENT,
   "ou_id"             INTEGER      NOT NULL,
   "hostname"          VARCHAR(64)  NOT NULL,
+  "enabled"           INTEGER      DEFAULT 1,
 
   FOREIGN KEY(ou_id) REFERENCES ous(id)
 );

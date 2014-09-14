@@ -15,8 +15,10 @@ var App = Ember.Application.create({
   // http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
   ready: function() {
     // turn off splash screen
-    $('#splash').fadeOut(1200);
-    $('#backdrop').hide();
+    window.setTimeout( function(){
+      $('#splash').fadeOut(1200);
+      $('#backdrop').fadeOut(1000);
+    }, 750);
     // actual sb-admin-2.js page/template initialization
     $(window).bind("load resize", function() {
       topOffset = 50;
@@ -62,8 +64,17 @@ var App = Ember.Application.create({
 });
 
 // fixme: old evil globals, get em away...
-var powerstates = {"pc":"any", "S0":"on", "S3":"sleep", "S4":"hibernate", "S5":"soft-off", "S16":"no-reply", "ssh":"SSH","rdp":"RDP","none":"No-OS"};
-var osicons = {'SSH':'<i class="fa fa-linux"></i> ', 'RDP':'<i class="fa fa-windows"></i> '};
+var powerstates = { 
+  "pc":"any",       "S0":"on",        "S3":"sleep", 
+  "S4":"hibernate", "S5":"soft-off",  "S16":"no-reply", 
+  "ssh":"SSH",      "rdp":"RDP",      "none":"No-OS"
+};
+var osicons = { 
+  'SSH'     :'<i class="fa fa-linux"></i> ', 
+  'RDP'     :'<i class="fa fa-windows"></i> ', 
+  'soft-off':'<i class="fa fa-power-off"></i> ',
+  'No-OS'   :'<i class="fa fa-ban"></i> ',
+};
 
 
 // Routes 
@@ -81,6 +92,13 @@ App.Router.map(function() {
     this.route('edit');
     this.route('hosts');
     this.route('monitor');
+  });
+
+  this.resource('users', function() {
+    this.route('new');
+  });
+  this.resource('user', { path: '/user/:id' }, function() {
+    this.route('edit');
   });
 
   this.resource('optionsets', function() {
@@ -129,6 +147,24 @@ App.OusNewRoute = Ember.Route.extend({
 });
 App.PowerstatesRoute = Ember.Route.extend({
   /// RETURN live powerstates via AMTC
+});
+
+App.UserRoute = Ember.Route.extend({
+  model: function(params) {
+    return this.store.find('user', params.id);
+  },
+});
+App.UsersRoute = Ember.Route.extend({
+  model: function() {
+    console.log("UsersRoute model() fetching users");
+    return this.store.find('user');
+  }
+});
+App.UsersNewRoute = Ember.Route.extend({
+  model: function() {
+    console.log("UsersNewRoute model() creating new user");
+    return this.store.createRecord('user');
+  }
 });
 
 
@@ -188,7 +224,16 @@ App.SetupRoute = Ember.Route.extend({
 });
 
 // Views
-
+/*
+// http://emberjs.com/api/classes/Ember.View.html
+MyView = Ember.View.extend({
+  classNameBindings: ['propertyA', 'propertyB'],
+  propertyA: 'from-a',
+  propertyB: function() {
+    if (someLogic) { return 'from-b'; }
+  }.property()
+});
+*/
 App.ApplicationView = Ember.View.extend({
   didInsertElement: function() {
     $('#side-menu').metisMenu(); // initialize metisMenu 
@@ -341,6 +386,52 @@ App.NotificationsController = Ember.ArrayController.extend({
     return this.get('store').find('notification');
   }.property()
 });
+// Users
+// Organizational Units
+App.UserEditController = Ember.ObjectController.extend({
+  needs: ["ous"],
+
+  actions: {
+    removeUser: function () {
+      if (confirm("Really delete this user?")) {
+        console.log('FINALLY Remove it');
+        var device = this.get('model');
+        device.deleteRecord();
+        device.save().then(function() {
+          humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
+            { timeout: 1500, clickToClose: false });
+          console.log("FIXME - transtionToRoute doesnt work here...");
+          window.location.href = '#/users';
+        }, function(response){
+          var res = jQuery.parseJSON(response.responseText);
+          var msg = (typeof res.exceptionMessage=='undefined') ?
+                    'Check console, please.' : res.exceptionMessage;
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
+        }
+      )};
+    },
+
+    doneEditingReturn: function() {
+      console.log(this.get('model'));
+      this.get('model').save().then(function() {
+        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
+          { timeout: 800 });
+        window.location.href = '#/users';
+      }, function(response){
+        var res = jQuery.parseJSON(response.responseText);
+        var msg = (typeof res.exceptionMessage=='undefined') ? 
+                   'Check console, please.' : res.exceptionMessage;
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                   '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
+        device.rollback();
+        }
+      );
+    }
+  }  
+
+});
+App.UsersNewController = App.UserEditController;
 // Organizational Units
 App.OuController = Ember.ObjectController.extend({
   needs: ["optionsets","ous"],
@@ -671,6 +762,15 @@ App.Optionset = DS.Model.extend({
   opt_timeout: attr('string'),
   opt_passfile: attr('string'),
   opt_cacertfile: attr('string')
+});
+// Users
+App.User = DS.Model.extend({
+  ou_id: DS.belongsTo('ou'),
+  name: attr('string'),
+  fullname: attr('string'),
+  is_enabled: attr('boolean'),
+  is_admin: attr('boolean'),
+  can_control: attr('boolean')
 });
 
 // Components (menu tree...)

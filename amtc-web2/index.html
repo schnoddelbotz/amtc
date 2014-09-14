@@ -292,12 +292,11 @@
                     <li>
                         <a href="#"><i class="fa fa-wrench fa-fw"></i> Administration<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
-                            <li>
-                                <a href="#/ous"><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>
-                            </li>
-                            <li>
-                                <a href="#/usermanagement"><i class="fa fa-users fa-fw"></i> Users and Groups</a>
-                            </li>
+
+                            {{#linkTo 'ous' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>{{/linkTo}}
+
+                            {{#linkTo 'users' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-users fa-fw"></i> Users</a>{{/linkTo}}
+
                             <li>
                                 <a href="#/systemhealth"><i class="fa fa-plug fa-fw"></i> Scheduler Log and Status</a>
                             </li>
@@ -674,12 +673,139 @@
   </div>
 </script>
 
+<!-- Users -->
+<script type="text/x-handlebars" id="users">
+{{! Display /users page: tabular room list view plus actions:add/remove/edit menu  }}
+  <div class="row">
+    <div class="col-lg-10">
+      {{outlet}} <!-- see users/index : big table view of rooms -->
+    </div>
+    <div class="col-lg-2">
+      <h3>Actions</h3>
+      <ul>
+          <li>{{#link-to 'users'}}List users{{/link-to}}</li>
+          <li>{{#link-to 'users.new'}}Add user{{/link-to}}</li>
+      </ul>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="users/index">
+  {{! Display a table with all users }}
+  <h1 class="page-header">Users</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Fullname</th>
+        <th>Enabled?</th>
+        <th>Admin?</th>
+        <th>May control?</th>
+      </tr>
+    </thead>
+    {{#each model}}
+      <tr>
+        <td>{{#link-to 'user.edit' this}}{{name}}{{/link-to}}</td>
+        <td>{{fullname}}</td>
+        <td>{{check-mark is_enabled}}</td>
+        <td>{{check-mark is_admin}}</td>
+        <td>{{check-mark can_control}}</td>
+      </td></tr>
+    {{/each}}
+  </table>
+</script>
+
+<script type="text/x-handlebars" id="users/new">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Create User <b>{{name}}</b></h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      
+      {{partial "userEdit"}}
+
+      <div>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}>
+          <span class="glyphicon glyphicon-floppy-disk"></span> Create user
+        </button>
+      </div>
+
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="user/edit">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Edit User <b>{{name}}</b></h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      
+      {{partial "userEdit"}}
+
+      <div>
+        <button {{action "removeUser"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete User</button>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+        {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
+      </div>
+
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" data-template-name='_userEdit'>
+  <form id="userEditForm">
+   <fieldset>
+      <div class="form-group">
+        <label for "name">Username</label>
+        {{input class="form-control" type="text" value=name insert-newline="doneEditingReturn" placeholder="username"}}
+      </div>
+      <div class="form-group">
+        <label for "name">Full name</label>
+        {{input class="form-control" type="text" value=fullname insert-newline="doneEditingReturn" placeholder="John Doe"}}
+      </div>
+      <div class="form-group">
+        <label for "optionset">Root OU</label>
+        {{#if controllers.ous.ous.content}}
+        {{view Ember.Select content=controllers.ous.ous.content
+                            class="form-control"
+                            value=ou_id.id
+                            selection=ou_id
+                            prompt="Choose OU"
+                            optionValuePath="content.id"
+                            optionLabelPath="content.name" }}
+        {{/if}}
+        <p class="help-block">Toplevel OU user may access (only one supported atm)</p>
+      </div>
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=is_admin}} User has admin privileges
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=is_enabled}} Enable account
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=can_control}} Has permission to power-control (view only otherwise)
+        </label>
+      </div>
+   </fieldset>
+  </form>
+</script>
+
 <!-- OptionSets -->
 <script type="text/x-handlebars" id="optionsets">
 {{! Display /optionsets page: tabular room list view plus actions:add/remove/edit menu  }}
   <div class="row">
     <div class="col-lg-10">
-      {{outlet}} <!-- see rooms/index : big table view of rooms -->
+      {{outlet}} <!-- see optionsets/index : big table view of rooms -->
     </div>
     <!-- fixme partial ...: -->
     <div class="col-lg-2">
@@ -733,7 +859,7 @@
 </script>
 
 <script type="text/x-handlebars" id="optionset">
-  {{! Display a single OU edit form using partial _deviceEdit }}
+  {{! Display a single OU edit form using partial _optionsetEdit }}
     {{! Display a single OU }}
   <div class="row">
     <div class="col-lg-12">

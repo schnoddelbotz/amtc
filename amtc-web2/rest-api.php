@@ -50,7 +50,6 @@ ActiveRecord\Config::initialize(function($cfg){
  
 // provide URI for ember-data REST adapter, based on this php script's location
 $app->get('/rest-config.js', function () use ($app,$amtcwebConfigFile) {    
-  sleep(1); // oh boy, just to have the splashscreen have its fun. nuts.
   $app->response->header('Content-Type', 'application/javascript;charset=utf-8');
   $path = substr($_SERVER['SCRIPT_NAME'],1);
   echo "DS.RESTAdapter.reopen({\n";
@@ -169,6 +168,60 @@ $app->get('/hosts', function () {
     $result['hosts'][] = $r;
   }
   echo json_encode( $result );
+});
+
+/**************** Users ******************************************************/
+// ACL control: undone. intension is to do auth via apache / external source...
+
+$app->get('/users', function () {
+  $result = array('users'=>array());
+  foreach (User::all(array("order" => "name asc")) as $record) {
+    $r = $record->to_array();
+    $result['users'][] = $r;
+  }
+  echo json_encode( $result );
+});
+$app->get('/users/:id', function ($uid) use ($app) {
+  if ($user = User::find($uid)) {
+    echo json_encode( array('user'=> $user->to_array()) );
+  }
+});
+$app->put('/users/:id', function ($id) {
+  $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
+  $udev = $put['user'];
+  if ($dev = User::find_by_id($id)) {
+    $dev->name = $udev->name;
+    $dev->fullname = $udev->fullname;
+    $dev->ou_id = $udev->ou_id;
+    // this gets boring. improve.
+    $dev->is_enabled = $udev->is_enabled;
+    $dev->is_admin = $udev->is_admin;
+    $dev->can_control = $udev->can_control;
+    $dev->save();
+    echo json_encode( array('user'=> $dev->to_array()) );
+  }
+});
+$app->post('/users', function () {
+  $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
+  $udev = $put['user'];
+  if ($dev = new User) {
+    $dev->name = $udev->name;
+    $dev->fullname = $udev->fullname;
+    $dev->ou_id = $udev->ou_id;
+    // this gets boring. improve.
+    $dev->is_enabled = $udev->is_enabled;
+    $dev->is_admin = $udev->is_admin;
+    $dev->can_control = $udev->can_control;
+    $dev->save();
+    echo json_encode( array('user'=> $dev->to_array()) );
+  }
+});
+$app->delete('/users/:id', function ($id) {
+  if ($dev = User::find_by_id($id)) {
+    Optionset::query('PRAGMA foreign_keys = ON;');
+    $dev->delete();
+    echo '{}';
+  }
 });
 
 /**************** AMT Optionsets *********************************************/
