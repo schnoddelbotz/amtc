@@ -21,6 +21,8 @@ div.sidebar { margin-top: 60px; }
 .navbar-header { padding-bottom: 10px; }
 a.navbar-brand { padding-top: 10px;}
 .lightgrey { color:#ececec; }
+#phptests { padding-left:5px; margin-bottom:5px;}
+#phptests li { list-style: none; padding:0;}
 
 #ctrl {clear:both; padding-top:10px;}
 #hselect { font-size:0.8em;}

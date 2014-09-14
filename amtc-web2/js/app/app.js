@@ -158,6 +158,34 @@ App.NotificationsRoute = Ember.Route.extend({
   }
 });
 
+App.SetupRoute = Ember.Route.extend({
+  setupController: function(controller,model) {
+    console.log('ApplicationRoute setupController() triggering /phptests');    
+    this._super(controller,model);
+      var p=this;
+      $.ajax( { url: "rest-api.php/phptests", type: "GET" }).then(
+        function(response) {          
+          var index;
+          var supported = [];
+          var a = response.phptests;
+          for (index = 0; index < a.length; ++index) {
+              var e = a[index];
+              (e.id=='pdo_sqlite') && (e.result==true) && supported.push('SQLite');
+              (e.id=='pdo_mysql')  && (e.result==true) && supported.push('MySQL');
+              (e.id=='pdo_pgsql')  && (e.result==true) && supported.push('PostgreSQL');
+              (e.id=='pdo_oci')    && (e.result==true) && supported.push('Oracle');
+          }
+          controller.set('phptests', response.phptests);
+          controller.set('dbs', supported);
+          controller.set('pdoSupported', supported.length>0 ? true : false);
+        },
+        function(response){
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Fatal error:'+
+                     '<p>webserver seems to lack PHP support!</p>', { timeout: 0, clickToClose: true });
+        }
+      );
+  }
+});
 
 // Views
 
@@ -483,13 +511,10 @@ App.SetupController = Ember.ObjectController.extend({
   mysqlDB: null,
   importDemo: true,
   installHtaccess: null,
+  phptests: null,
 
-  dbs: [
-    "SQLite",
-    "MySQL",
-    "Oracle",
-    "PostgreSQL"
-  ],
+  dbs: null, // Array of supported DBs; gets set in SetupRoute
+  pdoSupported: false,
   
   isMySQL: function() {
     return (this.get('selectedDB')=='MySQL') ? true : false;
@@ -688,8 +713,8 @@ Ember.Handlebars.helper('format-markdown', function(input) {
 // print fontAwesome checkmarks for input true/false
 Ember.Handlebars.helper('check-mark', function(input) {
   return input ?
-    new Handlebars.SafeString(showdown.makeHtml('<i class="fa grey fa-check-square-o"></i> ')) :
-    new Handlebars.SafeString(showdown.makeHtml('<i class="fa grey fa-square-o"></i> '));
+    new Handlebars.SafeString('<i class="fa grey fa-fw fa-check-square-o"></i> ') :
+    new Handlebars.SafeString('<i class="fa grey fa-fw fa-square-o"></i> ');
 });
 
 // moment.js PRETTY timestamps

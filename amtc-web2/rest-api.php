@@ -41,23 +41,6 @@ ActiveRecord\Config::initialize(function($cfg){
   );
   $cfg->set_default_connection('production');
 });
-// fixme: how-to...
-// PRAGMA foreign_keys = ON;
-// ^ needed for sqlite to respect constraints
-// see http://www.sqlite.org/pragma.html#pragma_foreign_keys
-
-$phptests = array(
-  //'id'   => array('description',      'test to execute, ret true/false',   'how-to-fix if failed'),
-  'pdo'       => array('Check for pdo',              'return phpversion("pdo")?true:false;' , 'install php pdo module'),
-  'pdo_mysql' => array('Check for MySQL support',    'return phpversion("pdo_mysql")?true:false;' , 'install php pdo mysql module'),
-  'pdo_oci'   => array('Check for Oracle support',   'return phpversion("pdo_mysql")?true:false;' , 'install php pdo orcale module'),
-  'pdo_pgsql' => array('Check for Postgres support', 'return phpversion("pdo_mysql")?true:false;' , 'install php pdo postgres module'),
-  'pdo_sqlite'=> array('Check for SQLite support',   'return phpversion("pdo_mysql")?true:false;' , 'install php pdo sqlite module'),
-  'php53'     => array('php 5.3+',                   '$v=explode(".",PHP_VERSION);return $v[0]>5||($v[0]==5&&$v[1]>2);', 'upgrade'),
-  'data'      => array('data/ writable',             'return is_writable(data);',    'run chmod 777 on data/ directory'),
-  //'dbconnect' => array('',   '', ''),
-  //'dbwrite'   => array('',   '', ''),
-);
 
 /*****************************************************************************/
 /**************** Only SLIM request handling below ***************************/
@@ -90,24 +73,22 @@ $app->get('/pages/:id', function ($id) use ($app) {
   )));  
 });
 
+// installation precondition tests
 $app->get('/phptests', function () use ($app, $phptests) {
-  $test=Array();
-  foreach ($phptests as $tid=>$test) {
-    $t=array();
-    $t['id'] = $tid;
-    $t['description'] = $test[0];
-    $tests[] = $t;
-  }
+  $v=explode(".",PHP_VERSION);
+  $tests = array(
+    array('id'=>'php53',     'description'=>'PHP version 5.3+',         'result'=>$v[0]>5||($v[0]==5&&$v[1]>2),       'remedy'=>'upgrade PHP to 5.3+'),
+    array('id'=>'data',      'description'=>'data/ directory writable', 'result'=>is_writable('data'),                'remedy'=>'run chmod 777 on data/ directory'),
+    array('id'=>'pdo',       'description'=>'PHP PDO support',          'result'=>phpversion("pdo")?true:false,       'remedy'=>'install PHP PDO module'),
+    array('id'=>'pdo_sqlite','description'=>'PDO SQLite support',       'result'=>phpversion("pdo_sqlite")?true:false,'remedy'=>'install PHP PDO sqlite module'),
+    array('id'=>'pdo_mysql', 'description'=>'PDO MySQL support',        'result'=>phpversion("pdo_mysql")?true:false, 'remedy'=>'install PHP PDO mysql module'),
+    array('id'=>'pdo_oci',   'description'=>'PDO Oracle support',       'result'=>phpversion("pdo_oci8")?true:false,  'remedy'=>'install PHP PDO orcale module'),
+    array('id'=>'pdo_pgsql', 'description'=>'PDO Postgres support',     'result'=>phpversion("pdo_pgsql")?true:false, 'remedy'=>'install PHP PDO postgres module'),
+    //'dbconnect' => array('',   '', ''),
+    //'dbwrite'   => array('',   '', ''), --> /testdb?
+  );
   $result = array('phptests'=>$tests);
   echo json_encode( $result );
-});
-$app->get('/phptest/:id', function ($id) use ($app, $phptests) {
-  $r=array();
-  $phptests[$id] || $app->notFound();
-  $r['id'] = $id;
-  $t['description'] = $phptests[$id][0];
-  $r['result'] = eval($phptests[$id][1]);
-  echo json_encode( array('phptest'=>$r ));
 });
 
 // DB-Model requests 

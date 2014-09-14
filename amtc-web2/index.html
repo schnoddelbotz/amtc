@@ -554,8 +554,28 @@
 <script type="text/x-handlebars" id="setup">
   <div class="row">
     <div class="col-lg-12">
-        <h1 class="page-header">Basic {{appName}} setup</h1>
+        <h1 class="page-header">{{appName}} Installation</h1>
     </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+        <h3>Installation precondition tests</h3>
+        At least one PHP PDO driver is required.
+        <ul id="phptests">
+          {{#if phptests}}
+          {{#each phptests}}
+            <li>
+              {{check-mark result}} {{description}}
+              {{#unless result}}(potential fix: {{remedy}}){{/unless}}
+            </li>
+          {{/each}}
+          {{else}}
+            <i class="fa fa-spinner fa-spin"></i> <i>running tests...</i>
+          {{/if}}
+        </ul>        
+    </div>
+  </div>
+  <div class="row">
     <div class="col-lg-12">
         <form role="form">
             
@@ -595,8 +615,9 @@
             {{#if isSQLite}}
               <div class="form-group">
                   <label>SQLite database file</label>
-                  {{input type="text" value=sqlitePath class="form-control" placeholder="/path/to/dbfile.sqlite"}}
-                  <p class="help-block">Note that the directory containing the file must be writable, too.</p>
+                  {{input type="text" value=sqlitePath class="form-control" placeholder="data/amtc-web.db"}}
+                  <p class="help-block">Choose a (application-)relative path like <code>data/amtc-web.db</code> or 
+                  use an absolute path. Note that the directory containing the file must be writable.</p>
               </div>
             {{/if}}
 
