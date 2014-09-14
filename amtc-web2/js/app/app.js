@@ -495,7 +495,7 @@ App.OusController = Ember.ArrayController.extend({
   }.property()
 });
 App.OusIndexController = Ember.ObjectController.extend({
-  needs: ["ous"],
+  needs: ["ous","optionsets"],
   // needs: ['application'],
   // currentUser: Ember.computed.alias('controllers.application.currentUser'),
   //  addPost: function() {
@@ -677,6 +677,10 @@ App.Ou = DS.Model.extend({
   parent_id: DS.belongsTo('ou', {inverse: 'children'}),
   optionset_id: DS.belongsTo('optionset'),
   ou_path: attr('string'),
+  idle_power: attr('number'),
+  logging: attr('boolean'),
+
+
   children: DS.hasMany('ou', {inverse: 'parent_id'}),
   hosts: DS.hasMany('host'),
  
@@ -727,7 +731,8 @@ App.Ou.reopenClass({
 // Clients/Hosts
 App.Host = DS.Model.extend({
   ou_id: DS.belongsTo('ou'),
-  hostname: attr('string')
+  hostname: attr('string'),
+  enabled: attr('boolean')
   // add isSelected et al
 });
 // Markdown help / documentation pages
@@ -740,6 +745,7 @@ App.Page = DS.Model.extend({
 App.Notification = DS.Model.extend({
   ntype: attr('string'),
   tstamp: attr('string'),
+  user_id: DS.belongsTo('user'),
   message: attr('string'),
   cssClass: function(key,value) {
     if (!value) {

@@ -1018,6 +1018,7 @@
 <script type="text/x-handlebars" id="ous/index">
   {{! Display a table with all rooms }}
   <h1 class="page-header">List of rooms</h1>
+  {{#if controllers.optionsets.optionsets}}
   <table class="table">
     <thead>
       <tr>
@@ -1026,6 +1027,8 @@
         <th>Name</th>
         <th>Description</th>
         <th>Optionset</th>
+        <th>Log</th>
+        <th>idle P [W]</th>
         <th>Hosts</th>
       </tr>
     </thead>
@@ -1036,10 +1039,13 @@
         <td>{{name}}</td>
         <td>{{description}}</td>
         <td>{{optionset_id.name}}</td>
+        <td>{{check-mark logging}}</td>
+        <td>{{idle_power}}</td>
         <td>{{#link-to 'ou.hosts' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
       </td></tr>
     {{/each}}
   </table>
+  {{/if}}
 </script>
 
 <script type="text/x-handlebars" id="ou">
@@ -1108,6 +1114,16 @@
             {{/if}}
             <p class="help-block">Optionsets may be created ...here... They will NOT be inherited.</p>
           </div>
+          <div class="form-group">
+            <label for "description">PC idle power rating</label>
+            {{input class="form-control" type="text" value=idle_power insert-newline="doneEditingReturn"}}
+            <p class="help-block">Provide idle power rating to allow generation of approximate energy consumption charts</p>
+          </div>
+          <div class="checkbox">
+            <label>
+              {{input type="checkbox" checked=logging}} Allow PC state logging via scheduler
+            </label>
+          </div>       
        </fieldset>
       </form>
       <div class="clearboth"></div><br>
