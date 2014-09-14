@@ -922,12 +922,9 @@
     <div class="col-lg-12">
         <h1 class="page-header">Room {{name}}</h1>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-lg-12">
-        {{outlet}} <!-- see rooms/index : big table view of rooms -->
-    </div>
-  </div>
+  </div>  
+  {{outlet}}
+  <!-- see ou/edit, ou/monitor, ou/hosts -->
 </script>
 
 <script type="text/x-handlebars" id="ous/new">    
@@ -941,59 +938,63 @@
 </script>
 
 <script type="text/x-handlebars" data-template-name='ou/edit'>
-  {{! Edit/Display EXISTING display form (only) }}
-  {{! http://emberjs.com/api/classes/Ember.Select.html }}
-  <h3>Edit OU / Room</h3>
+  <div class="row">
+    <div class="col-lg-12">
+      {{! Edit/Display EXISTING display form (only) }}
+      {{! http://emberjs.com/api/classes/Ember.Select.html }}
+      <h3>Edit OU / Room</h3>
 
-  <form id="ouEditForm">
-   <fieldset>
-      <div class="form-group">
-        <label for "name">OU / room name</label>
-        {{input class="form-control" type="text" value=name insert-newline="doneEditingReturn"}}
-        <p class="help-block">e.g. D 23.2</p>
+      <form id="ouEditForm">
+       <fieldset>
+          <div class="form-group">
+            <label for "name">OU / room name</label>
+            {{input class="form-control" type="text" value=name insert-newline="doneEditingReturn"}}
+            <p class="help-block">e.g. D 23.2</p>
+          </div>
+          <div class="form-group">
+            <label for "description">OU description</label>
+            {{input class="form-control" type="text" value=description insert-newline="doneEditingReturn"}}
+            <p class="help-block"></p>
+          </div>
+          <div class="form-group">
+            <label for "optionset">Parent OU</label>
+            {{#if controllers.ous.ous.content}}
+            {{view Ember.Select content=controllers.ous.ous.content
+                                class="form-control"
+                                value=parent_id.id
+                                selection=parent_id
+                                prompt="Choose OU"
+                                optionValuePath="content.id"
+                                optionLabelPath="content.name" }}
+            {{/if}}
+            <p class="help-block">Choose the parent OU (or "folder") for this room</p>
+          </div>
+          <div class="form-group">
+            <label for "optionset">AMT option set</label>
+            {{#if controllers.optionsets.optionsets.content}}
+            {{view Ember.Select content=controllers.optionsets.optionsets.content
+                                class="form-control"
+                                value=optionsetid.id
+                                selection=optionset_id
+                                prompt="Choose AMT Option set"
+                                optionValuePath="content.id"
+                                optionLabelPath="content.name" }}
+            {{/if}}
+            <p class="help-block">Optionsets may be created ...here... They will NOT be inherited.</p>
+          </div>
+       </fieldset>
+      </form>
+      <div class="clearboth"></div><br>
+      {{#unless isNew}}
+      <div id="editbutton">
+        <button {{action "removeOu"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete OU</button>
+          <!-- fixme use #if isDirty, currently breaks with drop downs... why? -->
+          <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+          {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
       </div>
-      <div class="form-group">
-        <label for "description">OU description</label>
-        {{input class="form-control" type="text" value=description insert-newline="doneEditingReturn"}}
-        <p class="help-block"></p>
-      </div>
-      <div class="form-group">
-        <label for "optionset">Parent OU</label>
-        {{#if controllers.ous.ous.content}}
-        {{view Ember.Select content=controllers.ous.ous.content
-                            class="form-control"
-                            value=parent_id.id
-                            selection=parent_id
-                            prompt="Choose OU"
-                            optionValuePath="content.id"
-                            optionLabelPath="content.name" }}
-        {{/if}}
-        <p class="help-block">Choose the parent OU (or "folder") for this room</p>
-      </div>
-      <div class="form-group">
-        <label for "optionset">AMT option set</label>
-        {{#if controllers.optionsets.optionsets.content}}
-        {{view Ember.Select content=controllers.optionsets.optionsets.content
-                            class="form-control"
-                            value=optionsetid.id
-                            selection=optionset_id
-                            prompt="Choose AMT Option set"
-                            optionValuePath="content.id"
-                            optionLabelPath="content.name" }}
-        {{/if}}
-        <p class="help-block">Optionsets may be created ...here... They will NOT be inherited.</p>
-      </div>
-   </fieldset>
-  </form>
-  <div class="clearboth"></div><br>
-  {{#unless isNew}}
-  <div id="editbutton">
-    <button {{action "removeOu"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete OU</button>
-      <!-- fixme use #if isDirty, currently breaks with drop downs... why? -->
-      <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
-      {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
+      {{/unless}}
+    </div>
   </div>
-  {{/unless}}
 </script>
 
 <script type="text/x-handlebars" data-template-name='ou/monitor'>

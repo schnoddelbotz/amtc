@@ -195,6 +195,8 @@ App.ApplicationView = Ember.View.extend({
   }
 });
 App.OuMonitorView = Ember.View.extend({
+  tagName: '',
+  classNames: ['row'],
   didInsertElement: function() {
     $("#hosts").selectable({
       stop: function(){

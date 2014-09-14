@@ -31,6 +31,7 @@ a.navbar-brand { padding-top: 10px;}
 /* hosts in live viewmode */
 #hosts {
   border:0px solid #eee; margin:0px 0px; padding:0px;
+  margin-left:15px;
 }
 .pc  {
   width:130px; float:left; margin:0px 5px 5px 0px; padding:2px; overflow:hidden;
