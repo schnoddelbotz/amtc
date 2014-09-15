@@ -597,7 +597,8 @@ App.OptionsetsController = Ember.ArrayController.extend({
 App.SetupController = Ember.ObjectController.extend({  
   // Controller used for initial installation page #setup
   selectedDB: null,
-  sqlitePath: null,
+  sqlitePath: 'data/amtc-web.db',
+  timezone: 'Europe/Berlin',
   mysqlUser: null,
   mysqlHost: null,
   mysqlPassword: null,
@@ -605,6 +606,7 @@ App.SetupController = Ember.ObjectController.extend({
   importDemo: true,
   installHtaccess: null,
   phptests: null,
+  datadir: 'data',
 
   dbs: null, // Array of supported DBs; gets set in SetupRoute
   pdoSupported: false,
@@ -622,16 +624,10 @@ App.SetupController = Ember.ObjectController.extend({
     return (this.get('selectedDB')=='PostgreSQL') ? true : false;
   }.property('selectedDB'),
 
-  pdoString: function() {
-    if (this.get('selectedDB')=='MySQL') {
-      return 'mysql://' + this.get('mysqlUser') + ':' + this.get('mysqlPassword') + "@" + this.get('mysqlHost') + "/" + this.get('mysqlDB');
-    } else {
-      return 'sqlite:' + this.get('sqlitePath');
-    }
-  }.property('selectedDB','sqlitePath','mysqlUser','mysqlPassword','mysqlHost','mysqlDB'),
-
   doneEditing: function() {
     var d = {
+      datadir: this.get('datadir'),
+      timezone: this.get('timezone'),
       selectedDB: this.get('selectedDB'),
       sqlitePath: this.get('sqlitePath'),
       mysqlUser: this.get('mysqlUser'),
@@ -640,9 +636,9 @@ App.SetupController = Ember.ObjectController.extend({
       mysqlDB: this.get('mysqlDB'),
       importDemo: this.get('importDemo'),
       installHtaccess: this.get('installHtaccess'),
-      pdoString: this.get('pdoString')
     };
-    $.ajax({type:"POST", url:"setup.php", data:jQuery.param(d), dataType:"json"}).then(function(response) {
+    $.ajax({type:"POST", url:"rest-api.php/submit-configuration", 
+            data:jQuery.param(d), dataType:"json"}).then(function(response) {
       console.log(response);
       if (typeof response.errorMsg != "undefined")
         humane.log('<i class="glyphicon glyphicon-fire"></i> Save failed: '+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
@@ -654,11 +650,11 @@ App.SetupController = Ember.ObjectController.extend({
       }
     }, function(response){
       console.log("what happened?");
-      console.log(response.responseText);
+      console.log(response);
       if (response.responseText=='INSTALLTOOL_LOCKED') {
         humane.log('<i class="glyphicon glyphicon-fire"></i> Setup is LOCKED!<br>'+
           'Setup is intended for initial installation only.<br>'+
-          'Remove <code>data/siteconfig.php</code> to re-enable setup.',
+          'Remove <code>config/siteconfig.php</code> to re-enable setup.',
           { timeout: 0, clickToClose: true, addnCls: 'humane-error' });  
       } else {
         humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.'+response.responseText,

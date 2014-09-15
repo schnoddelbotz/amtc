@@ -576,10 +576,24 @@
   </div>
   <div class="row">
     <div class="col-lg-12">
+      {{#if pdoSupported}}
         <form role="form">
-            
             <div class="form-group">
-                <label>Select your desired PHP <a target="new" href="http://php.net/manual/en/intro.pdo.php">PDO DB Driver</a></label>
+              <label>Data directory</label>
+              {{input type="text" value=datadir class="form-control"}}
+              <p class="help-block">Defaults to <code>data</code> subdirectory, relative to
+              index.html. Alternatively, an absolute path may be specified. The directory
+              will contain locks and logs. It may also contain an SQLite DB, if selected below.</p>
+            </div>
+
+            <div class="form-group">
+              <label>Timezone</label>
+              {{input type="text" value=timezone class="form-control"}}
+              <p class="help-block">Defaults to <code>Europe/Berlin</code>. Select yours.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Select desired PHP <a target="new" href="http://php.net/manual/en/intro.pdo.php">PDO DB Driver</a></label>
                 {{view Ember.Select
                               class="form-control"
                               content=dbs
@@ -613,19 +627,11 @@
 
             {{#if isSQLite}}
               <div class="form-group">
+
                   <label>SQLite database file</label>
                   {{input type="text" value=sqlitePath class="form-control" placeholder="data/amtc-web.db"}}
                   <p class="help-block">Choose a (application-)relative path like <code>data/amtc-web.db</code> or 
                   use an absolute path. Note that the directory containing the file must be writable.</p>
-              </div>
-            {{/if}}
-
-            {{#if selectedDB}}
-              <div class="form-group">
-                <fieldset disabled>
-                  <label>Resulting PDO connection string</label>
-                  {{input type="text" value=pdoString class="form-control" placeholder="/path/to/dbfile.sqlite"}}
-                </fieldset>
               </div>
             {{/if}}
 
@@ -654,12 +660,17 @@
               <div class="alert alert-danger">
                 <em>Warning!</em> This setup tool currently offers no way yet to check config before writing it.<br>
                 Once the configuration is submitted, this tool will be locked.<br> You will have
-                to delete the configuration file (<code>data/siteconfig.php</code>) manually to re-enable it.<br>
+                to delete the configuration file (<code>config/siteconfig.php</code>) manually to re-enable it.<br>
                 <em>Currently, only SQLite is supported!</em>
               </div>
               <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Write configuration</button>
             </div>
         </form>
+      {{else}}
+        <div class="alert alert-danger">
+          No supported PHP PDO database drivers found!<br> Cannot continue. <a href="http://php.net/pdo" class="alert-link">More about PDO</a>.
+        </div>
+      {{/if}}
     </div>
   </div>
 </script>

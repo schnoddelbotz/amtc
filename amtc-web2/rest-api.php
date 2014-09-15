@@ -3,8 +3,8 @@
 // do this to trigger async REST issues...:
 // sleep(2);
 
-$amtcwebConfigFile = 'data/siteconfig.php';
-@include $amtcwebConfigFile; // to let static ember help pages work event without DB
+$amtcwebConfigFile = 'config/siteconfig.php';
+@include $amtcwebConfigFile; // to let static ember help pages work even if unconfigured
 date_default_timezone_set( defined('AMTC_TZ') ? AMTC_TZ : 'Europe/Berlin');
 
 require 'lib/php-activerecord/ActiveRecord.php';
@@ -72,17 +72,72 @@ $app->get('/pages/:id', function ($id) use ($app) {
   )));  
 });
 
+// Installer
+$app->post('/submit-configuration', function () use ($app) {
+  $cfgFile = "config/siteconfig.php"; // config maybe symlink /etc/amtc-web
+
+  if (file_exists($cfgFile)) {
+    echo 'INSTALLTOOL_LOCKED';
+    exit(1);
+  }
+
+  $wanted = array(
+    'TIMEZONE'   => preg_replace('/[^A-Za-z\/]/', '',  $_POST['timezone']),
+    'DBTYPE'     => preg_replace('/[^A-Za-z]/', '',    $_POST['selectedDB']),
+    'DATADIR'    => realpath($_POST['datadir'])
+  );
+
+  if ($wanted['TIMEZONE'] && $wanted['DATADIR'] && $wanted['DBTYPE']) {
+    $x = array("message"=>"Configuration written successfully");
+    $cfgTpl = "<?php\n\n".
+              "define('AMTC_PDOSTRING', '%s');\n".
+              "define('AMTC_TZ', '%s');\n".
+              "define('AMTC_DATADIR', '%s');\n";
+
+    if ($wanted['DBTYPE'] == 'SQLite') {
+      // create db if non-existant
+      @touch($_POST['sqlitePath']); // grr should be called sqlitefile not path
+      $wanted['SQLITEPATH'] = realpath($_POST['sqlitePath']);
+      $wanted['PDOSTRING'] = sprintf('sqlite:%s', $wanted['SQLITEPATH']);
+      $wanted['PHPARSTRING'] = sprintf('sqlite://unix(%s)', $wanted['SQLITEPATH']);
+    }
+
+    $cfg = sprintf($cfgTpl, $wanted['PHPARSTRING'], $wanted['TIMEZONE'], $wanted['DATADIR']);
+
+    if (!is_writable(dirname($cfgFile))) {
+      $x = array("errorMsg"=>"Config directory not writable!");
+    } elseif (false === file_put_contents($cfgFile, $cfg)) {
+      $x = array("errorMsg"=>"Could not write config file!");
+    } else {
+      $dbh = new PDO($wanted['PDOSTRING']);
+      $selectedDB = strtolower($wanted['DBTYPE']);
+      $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'.sql'));
+      $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-minimal.sql')); 
+      
+      if ($_POST['importDemo']=='true'/* yes, a string. fixme */)
+        $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-exampledata.sql')); 
+        
+      // fixme: add _htaccess thing ... and some sanitization ... and error checking ... and stuff.
+    }
+  } else {
+    $x = array("errorMsg"=>"Insufficient parameters!");
+  }
+
+  echo json_encode($x);
+});
+
 // installation precondition tests
 $app->get('/phptests', function () use ($app, $phptests) {
   $v=explode(".",PHP_VERSION);
   $tests = array(
-    array('id'=>'php53',     'description'=>'PHP version 5.3+',         'result'=>$v[0]>5||($v[0]==5&&$v[1]>2),       'remedy'=>'upgrade PHP to 5.3+'),
-    array('id'=>'data',      'description'=>'data/ directory writable', 'result'=>is_writable('data'),                'remedy'=>'run chmod 777 on data/ directory'),
-    array('id'=>'pdo',       'description'=>'PHP PDO support',          'result'=>phpversion("pdo")?true:false,       'remedy'=>'install PHP PDO module'),
-    array('id'=>'pdo_sqlite','description'=>'PDO SQLite support',       'result'=>phpversion("pdo_sqlite")?true:false,'remedy'=>'install PHP PDO sqlite module'),
-    array('id'=>'pdo_mysql', 'description'=>'PDO MySQL support',        'result'=>phpversion("pdo_mysql")?true:false, 'remedy'=>'install PHP PDO mysql module'),
-    array('id'=>'pdo_oci',   'description'=>'PDO Oracle support',       'result'=>phpversion("pdo_oci8")?true:false,  'remedy'=>'install PHP PDO orcale module'),
-    array('id'=>'pdo_pgsql', 'description'=>'PDO Postgres support',     'result'=>phpversion("pdo_pgsql")?true:false, 'remedy'=>'install PHP PDO postgres module'),
+    array('id'=>'php53',     'description'=>'PHP version 5.3+',          'result'=>$v[0]>5||($v[0]==5&&$v[1]>2),       'remedy'=>'upgrade PHP to 5.3+'),
+    array('id'=>'data',      'description'=>'data/ directory writable',  'result'=>is_writable('data'),                'remedy'=>'run chmod 777 on data/ directory'),
+    array('id'=>'config',    'description'=>'config/ directory writable','result'=>is_writable('config'),              'remedy'=>'run chmod 777 on config/ directory'),
+    array('id'=>'pdo',       'description'=>'PHP PDO support',           'result'=>phpversion("pdo")?true:false,       'remedy'=>'install PHP PDO module'),
+    array('id'=>'pdo_sqlite','description'=>'PDO SQLite support',        'result'=>phpversion("pdo_sqlite")?true:false,'remedy'=>'install PHP PDO sqlite module'),
+    array('id'=>'pdo_mysql', 'description'=>'PDO MySQL support',         'result'=>phpversion("pdo_mysql")?true:false, 'remedy'=>'install PHP PDO mysql module'),
+    array('id'=>'pdo_oci',   'description'=>'PDO Oracle support',        'result'=>phpversion("pdo_oci8")?true:false,  'remedy'=>'install PHP PDO orcale module'),
+    array('id'=>'pdo_pgsql', 'description'=>'PDO Postgres support',      'result'=>phpversion("pdo_pgsql")?true:false, 'remedy'=>'install PHP PDO postgres module'),
     //'dbconnect' => array('',   '', ''),
     //'dbwrite'   => array('',   '', ''), --> /testdb?
   );
