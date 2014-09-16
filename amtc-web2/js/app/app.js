@@ -617,6 +617,7 @@ App.SetupController = Ember.ObjectController.extend({
   freshsetup: false,
   datadir: 'data',
   preconditionsMet: false,
+  amtcbin: '/usr/bin/amtc',
 
   dbs: null, // Array of supported DBs; gets set in SetupRoute
   pdoSupported: false,
@@ -644,6 +645,7 @@ App.SetupController = Ember.ObjectController.extend({
       mysqlHost: this.get('mysqlHost'),
       mysqlPassword: this.get('mysqlPassword'),
       mysqlDB: this.get('mysqlDB'),
+      amtcbin: this.get('amtcbin'),
       importDemo: this.get('importDemo'),
       installHtaccess: this.get('installHtaccess'),
     };
@@ -651,7 +653,7 @@ App.SetupController = Ember.ObjectController.extend({
             data:jQuery.param(d), dataType:"json"}).then(function(response) {
       console.log(response);
       if (typeof response.errorMsg != "undefined")
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Save failed: '+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Save failed: <br>'+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
       else {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully! Warping into amtc-web!', { timeout: 1500 });
         window.setTimeout( function(){

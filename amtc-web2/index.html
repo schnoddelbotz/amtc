@@ -590,12 +590,23 @@
             </div>
 
             <form role="form">
+
                 <div class="form-group">
-                  <label>Data directory</label>
+                  <label>Data directory for amtc-web</label>
                   {{input type="text" value=datadir class="form-control"}}
                   <p class="help-block">Defaults to <code>data</code> subdirectory, relative to
                   index.html. Alternatively, an absolute path may be specified. The directory
                   will contain locks and logs. It may also contain an SQLite DB, if selected below.</p>
+                </div>
+
+                <div class="form-group">
+                  <label>Path to <code>amtc</code> binary</label>
+                  {{input type="text" value=amtcbin class="form-control"}}
+                  <p class="help-block">
+                    Defaults to <code>/usr/bin/amtc</code>.
+                    For testing amtc-web without amtc installed, cheat by using s.th. 
+                    like <code>/usr/bin/who</code>.
+                  </p>
                 </div>
 
                 <div class="form-group">
@@ -670,10 +681,10 @@
 
                 <div class="form-group">
                   <div class="alert alert-danger">
-                    <em>Warning!</em> This setup tool currently offers no way yet to check config before writing it.<br>
+                    <b>Warning!</b><br> This setup tool currently offers no way yet to check DB config before writing the configuration file.<br>
                     Once the configuration is submitted, this tool will be locked.<br> You will have
                     to delete the configuration file (<code>config/siteconfig.php</code>) manually to re-enable it.<br>
-                    <em>Currently, only SQLite is supported!</em>
+                    <em>Currently, only SQLite is supported by amtc-web!</em>
                   </div>
                   {{#if selectedDB}}
                   <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Write configuration</button>

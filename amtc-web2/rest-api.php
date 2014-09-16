@@ -79,14 +79,16 @@ $app->post('/submit-configuration', function () use ($app) {
 
   $wanted = array(
     'TIMEZONE'   => preg_replace('/[^A-Za-z\/]/', '',  $_POST['timezone']),
+    'AMTCBIN'    => realpath($_POST['amtcbin']),
     'DBTYPE'     => preg_replace('/[^A-Za-z]/', '',    $_POST['selectedDB']),
     'DATADIR'    => realpath($_POST['datadir'])
   );
 
-  if ($wanted['TIMEZONE'] && $wanted['DATADIR'] && $wanted['DBTYPE']) {
+  if ($wanted['TIMEZONE'] && $wanted['DATADIR'] && $wanted['DBTYPE'] && $wanted['AMTCBIN']) {
     $x = array("message"=>"Configuration written successfully");
     $cfgTpl = "<?php\n\n".
               "define('AMTC_PDOSTRING', '%s');\n".
+              "define('AMTC_BIN', '%s');\n".
               "define('AMTC_TZ', '%s');\n".
               "define('AMTC_DATADIR', '%s');\n";
 
@@ -98,7 +100,8 @@ $app->post('/submit-configuration', function () use ($app) {
       $wanted['PHPARSTRING'] = sprintf('sqlite://unix(%s)', $wanted['SQLITEPATH']);
     }
 
-    $cfg = sprintf($cfgTpl, $wanted['PHPARSTRING'], $wanted['TIMEZONE'], $wanted['DATADIR']);
+    $cfg = sprintf($cfgTpl, $wanted['PHPARSTRING'], $wanted['AMTCBIN'], 
+                            $wanted['TIMEZONE'],    $wanted['DATADIR']);
 
     if (!is_writable(dirname(AMTC_CFGFILE))) {
       $x = array("errorMsg"=>"Config directory ".AMTC_CFGFILE." not writable!");
@@ -116,7 +119,8 @@ $app->post('/submit-configuration', function () use ($app) {
       // fixme: add _htaccess thing ... and some sanitization ... and error checking ... and stuff.
     }
   } else {
-    $x = array("errorMsg"=>"Insufficient parameters!");
+    $x = $wanted['AMTCBIN'] ? array("errorMsg"=>"Insufficient parameters!") :
+                              array("errorMsg"=>"amtc binary not found at path provided");
   }
 
   echo json_encode($x);
