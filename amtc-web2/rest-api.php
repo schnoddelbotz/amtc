@@ -1,16 +1,22 @@
 <?php
-// this might to be split into /display/api.php, /admin/api.php ...?
-// do this to trigger async REST issues...:
+/*
+ * rest-api.php - part of amtc-web, part of amtc
+ * https://github.com/schnoddelbotz/amtc
+ *
+ * Use http://www.slimframework.com/ and http://www.phpactiverecord.org/
+ * to provide a REST backend for amtc-web (ember-data, installer, amtc ...)
+ */
+
 // sleep(2);
 
-$amtcwebConfigFile = 'config/siteconfig.php';
-@include $amtcwebConfigFile; // to let static ember help pages work even if unconfigured
+define('AMTC_CFGFILE', 'config/siteconfig.php');
+@include AMTC_CFGFILE; // to let static ember help pages work even if unconfigured
 date_default_timezone_set( defined('AMTC_TZ') ? AMTC_TZ : 'Europe/Berlin');
 
 require 'lib/php-activerecord/ActiveRecord.php';
 require 'lib/Slim/Slim.php';
 
-// Initialize http://www.slimframework.com/
+// Initialize SLIM
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
 $app->config('debug', false); // ... and enables custom $app->error() handler
@@ -21,15 +27,6 @@ $app->notFound(function () use ($app) {
 $app->error(function (\Exception $e) use ($app) {
   echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') ); // to much / insecure?
 });
-//$app->expires('+1 minutes'); // seems to be a bad idea ... :-/
-
-// this hack lets the ember GUI clearly detect a unconfigured system. redir->setup.php.
-if ( !defined('AMTC_PDOSTRING') && $app->request->getResourceUri() == '/ou-tree' ) {
-  header('Content-Type: application/json;charset=utf-8');
-  // index.html/ember looks for this 'special' exception/message:
-  echo json_encode( array('exceptionMessage'=> 'unconfigured') ); 
-  return 1; // will make it return a 200 OK anyway
-}
 
 // Initialize http://www.phpactiverecord.org/
 ActiveRecord\Config::initialize(function($cfg){
@@ -49,14 +46,14 @@ ActiveRecord\Config::initialize(function($cfg){
 //  Non-DB-Model requests 
  
 // provide URI for ember-data REST adapter, based on this php script's location
-$app->get('/rest-config.js', function () use ($app,$amtcwebConfigFile) {    
+$app->get('/rest-config.js', function () use ($app) {    
   $app->response->header('Content-Type', 'application/javascript;charset=utf-8');
   $path = substr($_SERVER['SCRIPT_NAME'],1);
   echo "DS.RESTAdapter.reopen({\n";
   echo " namespace: '$path'\n";
   echo "});\n";
   printf("var AMTCWEB_IS_CONFIGURED = %s;\n", 
-            file_exists($amtcwebConfigFile) ? 'true' : 'false');
+            file_exists(AMTC_CFGFILE) ? 'true' : 'false');
 });
 
 // Return static markdown help pages, json encoded
@@ -74,9 +71,8 @@ $app->get('/pages/:id', function ($id) use ($app) {
 
 // Installer
 $app->post('/submit-configuration', function () use ($app) {
-  $cfgFile = "config/siteconfig.php"; // config maybe symlink /etc/amtc-web
 
-  if (file_exists($cfgFile)) {
+  if (file_exists(AMTC_CFGFILE)) {
     echo 'INSTALLTOOL_LOCKED';
     exit(1);
   }
@@ -104,9 +100,9 @@ $app->post('/submit-configuration', function () use ($app) {
 
     $cfg = sprintf($cfgTpl, $wanted['PHPARSTRING'], $wanted['TIMEZONE'], $wanted['DATADIR']);
 
-    if (!is_writable(dirname($cfgFile))) {
-      $x = array("errorMsg"=>"Config directory not writable!");
-    } elseif (false === file_put_contents($cfgFile, $cfg)) {
+    if (!is_writable(dirname(AMTC_CFGFILE))) {
+      $x = array("errorMsg"=>"Config directory ".AMTC_CFGFILE." not writable!");
+    } elseif (false === file_put_contents(AMTC_CFGFILE, $cfg)) {
       $x = array("errorMsg"=>"Could not write config file!");
     } else {
       $dbh = new PDO($wanted['PDOSTRING']);
@@ -131,6 +127,7 @@ $app->get('/phptests', function () use ($app, $phptests) {
   $v=explode(".",PHP_VERSION);
   $tests = array(
     array('id'=>'php53',     'description'=>'PHP version 5.3+',          'result'=>$v[0]>5||($v[0]==5&&$v[1]>2),       'remedy'=>'upgrade PHP to 5.3+'),
+    array('id'=>'freshsetup','description'=>'No config file present yet','result'=>!file_exists(AMTC_CFGFILE),         'remedy'=>'remove config/siteconfig.php'),
     array('id'=>'data',      'description'=>'data/ directory writable',  'result'=>is_writable('data'),                'remedy'=>'run chmod 777 on data/ directory'),
     array('id'=>'config',    'description'=>'config/ directory writable','result'=>is_writable('config'),              'remedy'=>'run chmod 777 on config/ directory'),
     array('id'=>'pdo',       'description'=>'PHP PDO support',           'result'=>phpversion("pdo")?true:false,       'remedy'=>'install PHP PDO module'),

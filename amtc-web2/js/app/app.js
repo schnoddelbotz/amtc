@@ -1,13 +1,13 @@
 /*
+ * js/app.js - part of amtc-web, part of amtc
+ * https://github.com/schnoddelbotz/amtc
  *
+ * Use emberjs and ember-data to create our ambitious website
  *
- * amtc-web EmberJS app
- *
- * http://emberjs.com/guides/concepts/naming-conventions/
- * http://ember-addons.github.io/bootstrap-for-ember/ ?
- *
- */ 
-
+ * Bookmarks...
+ *  http://emberjs.com/guides/concepts/naming-conventions/
+ *  http://ember-addons.github.io/bootstrap-for-ember/
+ */
 
 var attr = DS.attr;
 var hasMany = DS.hasMany;
@@ -204,16 +204,24 @@ App.SetupRoute = Ember.Route.extend({
           var index;
           var supported = [];
           var a = response.phptests;
+          var config_writable = false;
+          var data_writable = false;
           for (index = 0; index < a.length; ++index) {
               var e = a[index];
               (e.id=='pdo_sqlite') && (e.result==true) && supported.push('SQLite');
               (e.id=='pdo_mysql')  && (e.result==true) && supported.push('MySQL');
               (e.id=='pdo_pgsql')  && (e.result==true) && supported.push('PostgreSQL');
               (e.id=='pdo_oci')    && (e.result==true) && supported.push('Oracle');
+              (e.id=='freshsetup') && (e.result==true) && controller.set('freshsetup', true);
+              (e.id=='data')       && (e.result==true) && (data_writable = true);
+              (e.id=='config')     && (e.result==true) && (config_writable = true);
           }
           controller.set('phptests', response.phptests);
           controller.set('dbs', supported);
           controller.set('pdoSupported', supported.length>0 ? true : false);
+          controller.set('preconditionsMet', 
+            (controller.get('pdoSupported') && controller.get('freshsetup') &&
+               config_writable && data_writable) ? true : false);
         },
         function(response){
           humane.log('<i class="glyphicon glyphicon-fire"></i> Fatal error:'+
@@ -606,7 +614,9 @@ App.SetupController = Ember.ObjectController.extend({
   importDemo: true,
   installHtaccess: null,
   phptests: null,
+  freshsetup: false,
   datadir: 'data',
+  preconditionsMet: false,
 
   dbs: null, // Array of supported DBs; gets set in SetupRoute
   pdoSupported: false,
