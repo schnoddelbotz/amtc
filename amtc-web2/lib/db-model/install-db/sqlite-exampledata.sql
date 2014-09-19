@@ -16,22 +16,19 @@ INSERT INTO "optionsets" VALUES(4,'EOI / No TLS - AMT v5','For old hardware with
 INSERT INTO "optionsets" VALUES(5,'EOI / No TLS - AMT v6-8','EOI + No TLS = the fastest. But only does digest auth via http.',0,0,1,1,0,0,250,6,'/tmp/test1.pass','');
 
 -- example OUs ...
--- comes in via minimal already: 
+-- comes in via minimal already:
 -- INSERT INTO "ous" VALUES(1,NULL,NULL,'ROOT','root');
 -- INSERT INTO "ous" VALUES(2,1,NULL,'Student labs','Computer rooms');
 INSERT INTO "ous" VALUES(3,2,NULL,'E Floor','All rooms on E floor',0,0);
 INSERT INTO "ous" VALUES(4,2,NULL,'D Floor','All rooms on D floor',0,0);
 INSERT INTO "ous" VALUES(5,1,NULL,'Course rooms','Playground',0,0);
-INSERT INTO "ous" VALUES(6,5,NULL,'Room A1','No optionset yet',0,0);
-INSERT INTO "ous" VALUES(7,5,NULL,'Room A2','Testing ... No optionset, too',0,0);
+INSERT INTO "ous" VALUES(6,5,NULL,'WOS D 12.1','No optionset yet',0,0);
+INSERT INTO "ous" VALUES(7,5,NULL,'WIT G 14','Testing ... No optionset, too',0,0);
 -- and some real rooms
 INSERT INTO "ous" VALUES(8,3,3,'E 19','',24.5,1);
-INSERT INTO "ous" VALUES(9,3,2,'E 26.1','',32.3,0);
-INSERT INTO "ous" VALUES(10,3,2,'E 26.3','',32.3,0);
+INSERT INTO "ous" VALUES(9,3,2,'E 20','',32.3,0);
+INSERT INTO "ous" VALUES(10,4,4,'D 11','',24.5,0);
 INSERT INTO "ous" VALUES(11,3,1,'E 27','',32.3,1);
-INSERT INTO "ous" VALUES(12,4,4,'D 11','',24.5,0);
-INSERT INTO "ous" VALUES(13,4,4,'D 12','',24.5,0);
-INSERT INTO "ous" VALUES(14,4,4,'D 13','',32.3,0);
 
 -- put some hosts into two of the rooms
 INSERT INTO "hosts" VALUES(1,11,'labpc-e27-160',1);
@@ -49,3 +46,44 @@ INSERT INTO "hosts" VALUES(12,8,'labpc-e19-19',1);
 INSERT INTO "hosts" VALUES(13,8,'labpc-e19-20',1);
 INSERT INTO "hosts" VALUES(14,8,'labpc-e19-21',0);
 INSERT INTO "hosts" VALUES(15,8,'labpc-e19-22',0);
+INSERT INTO "hosts" VALUES(16,9,'labpc-e20-01',0);
+INSERT INTO "hosts" VALUES(17,9,'labpc-e20-02',0);
+INSERT INTO "hosts" VALUES(18,9,'labpc-e20-03',0);
+INSERT INTO "hosts" VALUES(19,9,'labpc-e20-04',0);
+INSERT INTO "hosts" VALUES(20,9,'labpc-e20-05',0);
+INSERT INTO "hosts" VALUES(21,9,'labpc-e20-06',0);
+INSERT INTO "hosts" VALUES(22,9,'labpc-e20-07',0);
+INSERT INTO "hosts" VALUES(23,9,'labpc-e20-08',0);
+INSERT INTO "hosts" VALUES(24,9,'labpc-e20-09',0);
+INSERT INTO "hosts" VALUES(25,9,'labpc-e20-10',0);
+
+-- have some statelogs for example pcs
+-- ... in the past ...
+INSERT INTO "statelogs" VALUES(1,1410818494,0,4,200);
+INSERT INTO "statelogs" VALUES(2,1410818493,0,16,0);
+INSERT INTO "statelogs" VALUES(3,1410818453,0,3,200);
+INSERT INTO "statelogs" VALUES(3,1410818494,0,5,200); -- two entries for id 3
+-- none for id 4
+INSERT INTO "statelogs" VALUES(5,1410818493,0,3,200);
+INSERT INTO "statelogs" VALUES(6,1410818493,0,5,200);
+INSERT INTO "statelogs" VALUES(7,1410818729,3389,0,200);
+INSERT INTO "statelogs" VALUES(8,1410818494,0,3,200);
+INSERT INTO "statelogs" VALUES(9,1410818493,0,16,0);
+INSERT INTO "statelogs" VALUES(10,1410818486,0,16,0);
+INSERT INTO "statelogs" VALUES(11,1410818493,0,4,200);
+INSERT INTO "statelogs" VALUES(12,1410818494,22,0,200);
+INSERT INTO "statelogs" VALUES(13,1410818493,22,0,200);
+INSERT INTO "statelogs" VALUES(14,1410818486,0,16,0);
+INSERT INTO "statelogs" VALUES(15,1410818493,0,16,0);
+INSERT INTO "statelogs" VALUES(15,1410818494,0,0,200);
+-- ... and some current ones ...
+INSERT INTO "statelogs" (host_id,open_port,state_amt,state_http) VALUES (16,22,0,200);
+INSERT INTO "statelogs" (host_id,open_port,state_amt,state_http) VALUES (17,22,0,200);
+INSERT INTO "statelogs" (host_id,open_port,state_amt,state_http) VALUES (18,22,0,200);
+INSERT INTO "statelogs" (host_id,open_port,state_amt,state_http) VALUES (19,22,0,200);
+INSERT INTO "statelogs" (host_id,open_port,state_amt,state_http) VALUES (20,22,0,200);
+INSERT INTO "statelogs" (host_id,open_port,state_amt,state_http) VALUES (21,22,0,200);
+INSERT INTO "statelogs" (host_id,open_port,state_amt,state_http) VALUES (22,0,0,200);
+INSERT INTO "statelogs" (host_id,open_port,state_amt,state_http) VALUES (23,22,0,200);
+INSERT INTO "statelogs" (host_id,open_port,state_amt,state_http) VALUES (24,22,0,200);
+INSERT INTO "statelogs" (host_id,open_port,state_amt,state_http) VALUES (25,22,0,200);

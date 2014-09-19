@@ -1,5 +1,9 @@
-
--- amtc-web SQLite schema dump
+--
+-- sqlite.sql - part of amtc-web, part of amtc
+-- https://github.com/schnoddelbotz/amtc
+--
+-- amtc-web SQLite schema-only dump
+--
 
 -- notifications: Short messages for dashboard
 CREATE TABLE "notifications" (
@@ -51,15 +55,19 @@ CREATE TABLE "hosts" (
 
 -- state logging of hosts. log occurs upon state change.
 CREATE TABLE "statelogs" (
-  "pcid"              INTEGER      DEFAULT NULL,
-  "tstamp"            INTEGER(4)   DEFAULT (strftime('%s','now')),
+  "host_id"           INTEGER      NOT NULL,
+  "state_begin"       INTEGER(4)   DEFAULT (strftime('%s','now')),
   "open_port"         INTEGER      DEFAULT NULL,
-  "state_begin"       INTEGER      DEFAULT NULL,
-  "state_amt"         INTEGER, 
-  "state_http"        INTEGER
+  "state_amt"         INTEGER(1), 
+  "state_http"        INTEGER(2),
+
+  FOREIGN KEY(host_id) REFERENCES hosts(id)
 );
-CREATE INDEX "logdata_ld" ON "statelogs" ("tstamp");
-CREATE INDEX "logdata_pd" ON "statelogs" ("pcid");
+CREATE INDEX "logdata_ld" ON "statelogs" ("state_begin"); 
+CREATE INDEX "logdata_pd" ON "statelogs" ("host_id");
+CREATE VIEW  "laststates"  AS   -- ... including fake id column to make e-d happy
+  SELECT host_id AS id, host_id,max(state_begin) AS state_begin,open_port,state_amt,state_http 
+  FROM statelogs GROUP BY host_id;
 
 -- amt(c) option sets
 CREATE TABLE "optionsets" (

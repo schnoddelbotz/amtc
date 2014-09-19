@@ -9,12 +9,13 @@
 
 // sleep(2);
 
-define('AMTC_CFGFILE', 'config/siteconfig.php');
+define('AMTC_WEBROOT', dirname(__FILE__));
+define('AMTC_CFGFILE', AMTC_WEBROOT.'/config/siteconfig.php');
 @include AMTC_CFGFILE; // to let static ember help pages work even if unconfigured
 date_default_timezone_set( defined('AMTC_TZ') ? AMTC_TZ : 'Europe/Berlin');
 
-require 'lib/php-activerecord/ActiveRecord.php';
-require 'lib/Slim/Slim.php';
+require AMTC_WEBROOT.'/lib/php-activerecord/ActiveRecord.php';
+require AMTC_WEBROOT.'/lib/Slim/Slim.php';
 
 // Initialize SLIM
 \Slim\Slim::registerAutoloader();
@@ -22,7 +23,7 @@ $app = new \Slim\Slim();
 $app->config('debug', false); // ... and enables custom $app->error() handler
 $app->response()->header('Content-Type', 'application/json;charset=utf-8');
 $app->notFound(function () use ($app) {
-  echo json_encode(Array('error'=>'Not found')); 
+  echo json_encode(Array('error'=>'Not found'));
 });
 $app->error(function (\Exception $e) use ($app) {
   echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') ); // to much / insecure?
@@ -30,7 +31,7 @@ $app->error(function (\Exception $e) use ($app) {
 
 // Initialize http://www.phpactiverecord.org/
 ActiveRecord\Config::initialize(function($cfg){
-  $cfg->set_model_directory('lib/db-model');
+  $cfg->set_model_directory(AMTC_WEBROOT.'/lib/db-model');
   $cfg->set_connections(
      array(
       'production' => AMTC_PDOSTRING
@@ -43,17 +44,19 @@ ActiveRecord\Config::initialize(function($cfg){
 /**************** Only SLIM request handling below ***************************/
 /*****************************************************************************/
 
-//  Non-DB-Model requests 
- 
+//  Non-DB-Model requests
+
 // provide URI for ember-data REST adapter, based on this php script's location
-$app->get('/rest-config.js', function () use ($app) {    
+$app->get('/rest-config.js', function () use ($app) {
   $app->response->header('Content-Type', 'application/javascript;charset=utf-8');
   $path = substr($_SERVER['SCRIPT_NAME'],1);
   echo "DS.RESTAdapter.reopen({\n";
   echo " namespace: '$path'\n";
   echo "});\n";
-  printf("var AMTCWEB_IS_CONFIGURED = %s;\n", 
+  printf("var AMTCWEB_IS_CONFIGURED = %s;\n",
             file_exists(AMTC_CFGFILE) ? 'true' : 'false');
+  // what about rootURL ? http://emberjs.com/guides/routing/
+  // this response could be done statically if #/setup would write it to config/cfg.js?
 });
 
 // Return static markdown help pages, json encoded
@@ -66,7 +69,7 @@ $app->get('/pages/:id', function ($id) use ($app) {
     'page_name' => 'unused',
     'page_title' => 'unused',
     'page_content' => $contents
-  )));  
+  )));
 });
 
 // Installer
@@ -100,7 +103,7 @@ $app->post('/submit-configuration', function () use ($app) {
       $wanted['PHPARSTRING'] = sprintf('sqlite://unix(%s)', $wanted['SQLITEPATH']);
     }
 
-    $cfg = sprintf($cfgTpl, $wanted['PHPARSTRING'], $wanted['AMTCBIN'], 
+    $cfg = sprintf($cfgTpl, $wanted['PHPARSTRING'], $wanted['AMTCBIN'],
                             $wanted['TIMEZONE'],    $wanted['DATADIR']);
 
     if (!is_writable(dirname(AMTC_CFGFILE))) {
@@ -111,11 +114,11 @@ $app->post('/submit-configuration', function () use ($app) {
       $dbh = new PDO($wanted['PDOSTRING']);
       $selectedDB = strtolower($wanted['DBTYPE']);
       $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'.sql'));
-      $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-minimal.sql')); 
-      
+      $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-minimal.sql'));
+
       if ($_POST['importDemo']=='true'/* yes, a string. fixme */)
-        $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-exampledata.sql')); 
-        
+        $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-exampledata.sql'));
+
       // fixme: add _htaccess thing ... and some sanitization ... and error checking ... and stuff.
     }
   } else {
@@ -146,7 +149,7 @@ $app->get('/phptests', function () use ($app, $phptests) {
   echo json_encode( $result );
 });
 
-// DB-Model requests 
+// DB-Model requests
 
 /**************** Notifications / Short user messages for dashboard **********/
 
@@ -211,7 +214,7 @@ $app->delete('/ous/:id', function ($id) {
   if ($dev = OU::find_by_id($id)) {
     OU::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
-    // "Note: Although after destroyRecord or deleteRecord/save the adapter 
+    // "Note: Although after destroyRecord or deleteRecord/save the adapter
     // expects an empty object e.g. {} to be returned from the server after
     //  destroying a record."
     // http://emberjs.com/guides/models/the-rest-adapter/
@@ -229,6 +232,29 @@ $app->get('/hosts', function () {
   }
   echo json_encode( $result );
 });
+$app->post('/hosts', function () use ($app) {
+  $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
+  $ndev = $post['host'];
+  if ($dev = new Host) {
+    $dev->hostname = $ndev->hostname;
+    $dev->ou_id = $ndev->ou_id;
+    $dev->save();
+    echo json_encode( array('host'=> $dev->to_array()) );
+  }
+});
+// should better be side-loaded with hosts...?
+$app->get('/laststates', function () {
+  $result = array('laststates'=>array());
+  foreach (Laststate::all() as $record) {
+    $result['laststates'][] = $record->to_array();
+  }
+  echo json_encode( $result );
+});
+
+// TBD:
+// $app->get('/livestates', $ouid) -> AMTC_BIN + optionset ...
+// or... include it into '/laststates' if flag given: run amtc, update db, fetch db
+
 
 /**************** Users ******************************************************/
 // ACL control: undone. intension is to do auth via apache / external source...

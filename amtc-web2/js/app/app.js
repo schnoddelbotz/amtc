@@ -2,7 +2,7 @@
  * js/app.js - part of amtc-web, part of amtc
  * https://github.com/schnoddelbotz/amtc
  *
- * Use emberjs and ember-data to create our ambitious website
+ * Use emberjs and ember-data to create our ambitious website.
  *
  * Bookmarks...
  *  http://emberjs.com/guides/concepts/naming-conventions/
@@ -11,7 +11,13 @@
 
 var attr = DS.attr;
 var hasMany = DS.hasMany;
+var resizeHandler;
+
+// http://stackoverflow.com/questions/24222457
+// /ember-data-embedded-records-current-state/24224682#24224682
+
 var App = Ember.Application.create({
+  //LOG_TRANSITIONS: true,
   // http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
   ready: function() {
     // turn off splash screen
@@ -19,23 +25,9 @@ var App = Ember.Application.create({
       $('#splash').fadeOut(1200);
       $('#backdrop').fadeOut(1000);
     }, 750);
-    // actual sb-admin-2.js page/template initialization
-    $(window).bind("load resize", function() {
-      topOffset = 50;
-      width = (this.window.innerWidth > 0) ? this.window.innerWidth : this.screen.width;
-      if (width < 768) {
-        $('div.navbar-collapse').addClass('collapse');
-        topOffset = 100; // 2-row-menu
-      } else {
-        $('div.navbar-collapse').removeClass('collapse');
-      }
 
-      height = (this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height;
-      height = height - topOffset;
-      if (height < 1) height = 1;
-      if (height > topOffset) {
-        $("#page-wrapper").css("min-height", (height) + "px");
-      }
+    $(window).bind("load resize", function(){
+      App.windowResizeHandler();
     });
 
     // AMTCWEB_IS_CONFIGURED gets defined via included script rest-api.php/rest-config.js
@@ -64,20 +56,20 @@ var App = Ember.Application.create({
 });
 
 // fixme: old evil globals, get em away...
-var powerstates = { 
-  "pc":"any",       "S0":"on",        "S3":"sleep", 
-  "S4":"hibernate", "S5":"soft-off",  "S16":"no-reply", 
+var powerstates = {
+  "pc":"any",       "S0":"on",        "S3":"sleep",
+  "S4":"hibernate", "S5":"soft-off",  "S16":"no-reply",
   "ssh":"SSH",      "rdp":"RDP",      "none":"No-OS"
 };
-var osicons = { 
-  'SSH'     :'<i class="fa fa-linux"></i> ', 
-  'RDP'     :'<i class="fa fa-windows"></i> ', 
-  'soft-off':'<i class="fa fa-power-off"></i> ',
-  'No-OS'   :'<i class="fa fa-ban"></i> ',
+var osicons = {
+  'SSH'     :'<i class="fa fa-fw fa-linux"></i> ',
+  'RDP'     :'<i class="fa fa-fw fa-windows"></i> ',
+  'soft-off':'<i class="fa fa-fw fa-power-off"></i> ',
+  'No-OS'   :'<i class="fa fa-fw fa-ban red"></i> ',
 };
 
 
-// Routes 
+// Routes
 
 App.Router.map(function() {
   this.route('setup');
@@ -107,7 +99,7 @@ App.Router.map(function() {
   this.resource('optionset', { path: '/optionset/:id' }, function() {
     this.route('edit');
   });
-  
+
   this.resource('page', { path: '/page/:id' });
 });
 
@@ -145,9 +137,17 @@ App.OusNewRoute = Ember.Route.extend({
     return this.store.createRecord('ou');
   }
 });
-App.PowerstatesRoute = Ember.Route.extend({
+App.LivestatesRoute = Ember.Route.extend({
   /// RETURN live powerstates via AMTC
 });
+App.LaststatesRoute = Ember.Route.extend({
+  // RETURN last states via db view laststates (->table statelogs)
+  model: function(params) {
+    console.log("App.LaststatesRoute model(), fetch last state of pcs");
+    return this.store.find('laststate');
+  }
+});
+
 
 App.UserRoute = Ember.Route.extend({
   model: function(params) {
@@ -196,11 +196,11 @@ App.NotificationsRoute = Ember.Route.extend({
 
 App.SetupRoute = Ember.Route.extend({
   setupController: function(controller,model) {
-    console.log('ApplicationRoute setupController() triggering /phptests');    
+    console.log('ApplicationRoute setupController() triggering /phptests');
     this._super(controller,model);
       var p=this;
       $.ajax( { url: "rest-api.php/phptests", type: "GET" }).then(
-        function(response) {          
+        function(response) {
           var index;
           var supported = [];
           var a = response.phptests;
@@ -219,7 +219,7 @@ App.SetupRoute = Ember.Route.extend({
           controller.set('phptests', response.phptests);
           controller.set('dbs', supported);
           controller.set('pdoSupported', supported.length>0 ? true : false);
-          controller.set('preconditionsMet', 
+          controller.set('preconditionsMet',
             (controller.get('pdoSupported') && controller.get('freshsetup') &&
                config_writable && data_writable) ? true : false);
         },
@@ -244,13 +244,16 @@ MyView = Ember.View.extend({
 */
 App.ApplicationView = Ember.View.extend({
   didInsertElement: function() {
-    $('#side-menu').metisMenu(); // initialize metisMenu 
+    $('#side-menu').metisMenu(); // initialize metisMenu
+    App.windowResizeHandler(); // ensure full height white body bg
   }
 });
 App.OuMonitorView = Ember.View.extend({
   tagName: '',
   classNames: ['row'],
   didInsertElement: function() {
+    $("#livectrl").show();
+    $("#hosts").show();
     $("#hosts").selectable({
       stop: function(){
         // trigger controller -- selection was modified
@@ -263,13 +266,36 @@ App.OuMonitorView = Ember.View.extend({
     $("#hselect").html("");
     $.each(powerstates, function(key, value) {
       var icon = osicons[value] ? osicons[value] : '';
-      $("#hselect").append('<span id="'+value+'" class="'+key+' ui-corner-all">'+icon+value+'</span>');
+      $("#hselect").append('<div id="'+value+'" class="'+key+' pc">'+icon+value+'</div>');
       $("#"+value).click(function() {
         console.log('modifySelection ....');
         modifySelection(value,$(this).attr("class").split(' ')[0]);
       });
     });
     $("#hselect span").css( 'cursor', 'pointer' );
+  },
+
+  // fixme: only works when switching routes, but not for rooms
+  willClearRender: function() {
+    $("#livectrl").hide();
+    $("#hosts").hide();
+    $("#hosts").selectable("destroy");
+    $(".pc").removeClass("ui-selected");
+    var controller = App.__container__.lookup("controller:ouMonitor");
+    controller.send('updateSelectedHosts');
+  },
+
+
+  roomSwitched: (function(){
+    // http://madhatted.com/2013/6/8/lifecycle-hooks-in-ember-js-views
+    Ember.run.scheduleOnce('afterRender', this, this.roomSwitchCleanup);
+  }).observes('controller.hosts.@each'),
+
+  roomSwitchCleanup: function(){
+    $(".pc").removeClass("ui-selected");
+    var controller = App.__container__.lookup("controller:ouMonitor");
+    controller.send('updateSelectedHosts');
+    $("#hselect span").removeClass("isActive");
   }
 });
 App.OuHostsView = Ember.View.extend({
@@ -352,14 +378,25 @@ App.IndexView = Ember.View.extend({
     hideHover: 'auto',
     resize: true
     });
-  }   
+  }
+});
+App.NavigationView = Em.View.extend({
+    templateName: 'navigation',
+    selectedBinding: 'controller.selected',
+    NavItemView: Ember.View.extend({
+        tagName: 'li',
+        classNameBindings: 'isActive:active'.w(),
+        isActive: function() {
+            return this.get('item') === this.get('parentView.selected');
+        }.property('item', 'parentView.selected').cacheable()
+    })
 });
 
 // Controllers
 // see http://emberjs.com/guides/routing/generated-objects/
 App.ApplicationController = Ember.Controller.extend({
   appName: 'amtc-web', // available as {{appName}} throughout app template
-  needs: ["ou","ous"],
+  needs: ["ou","ous","notifications"],
 
   // the initial value of the `search` property
   search: '',
@@ -428,7 +465,7 @@ App.UserEditController = Ember.ObjectController.extend({
         window.location.href = '#/users';
       }, function(response){
         var res = jQuery.parseJSON(response.responseText);
-        var msg = (typeof res.exceptionMessage=='undefined') ? 
+        var msg = (typeof res.exceptionMessage=='undefined') ?
                    'Check console, please.' : res.exceptionMessage;
         humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
                    '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
@@ -436,7 +473,7 @@ App.UserEditController = Ember.ObjectController.extend({
         }
       );
     }
-  }  
+  }
 
 });
 App.UsersNewController = App.UserEditController;
@@ -467,7 +504,7 @@ App.OuEditController = Ember.ObjectController.extend({
           window.location.href = '#/ous';
         }, function(response){
           var res = jQuery.parseJSON(response.responseText);
-          var msg = (typeof res.exceptionMessage=='undefined') ? 
+          var msg = (typeof res.exceptionMessage=='undefined') ?
                     'Check console, please.' : res.exceptionMessage;
           humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
@@ -488,13 +525,13 @@ App.OuEditController = Ember.ObjectController.extend({
         window.location.href = '#/ous';
       }, function(response){
           var res = jQuery.parseJSON(response.responseText);
-          var msg = (typeof res.exceptionMessage=='undefined') ? 
+          var msg = (typeof res.exceptionMessage=='undefined') ?
                     'Check console, please.' : res.exceptionMessage;
           humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
       } );
     }
-  } 
+  }
 });
 App.OusController = Ember.ArrayController.extend({
   ous: function() {
@@ -519,14 +556,64 @@ App.HostsController = Ember.ArrayController.extend({
   }.property()
 });
 App.OuHostsController = Ember.ObjectController.extend({
-  needs: ["hosts"]
-}); 
+  needs: ["hosts"],
+  addMultiple: false,
+  numHosts: 5,
+  startNum: 20,
+  padNum:3,
+  hostname: null,
+  domainName: null,
+
+  padNumber: function(number, length) {
+   return (number+"").length >= length ?  number + "" : this.padNumber("0" + number, length);
+  },
+
+  hostsToAdd: function() {
+    if (!this.get('addMultiple')) {
+      return [this.get('hostname')];
+    } else {
+      var hosts = [];
+      if (this.get('numHosts') < 1)
+       return hosts;
+
+      var start = this.get('startNum');
+      var stop  = parseInt(this.get('startNum')) + parseInt(this.get('numHosts')) - 1;
+      for (var x=start; x<=stop; x++) {
+        var hostname = this.get('hostname') +
+                       this.padNumber( x, this.get('padNum')) +
+                       (this.get('domainName') ? ('.' + this.get('domainName')) : '');
+        hosts.push(hostname);
+      }
+      return hosts;
+    }
+  }.property('hostname','numHosts','domainName','padNum','startNum','addMultiple'),
+
+  actions: {
+    saveNewHosts: function() {
+      var ouid = this.get('id');
+      //var ou = this.store.find('ou', ouid); // async
+      var ou = this.store.getById('ou', ouid); // https://github.com/emberjs/data/issues/2150
+      var add = this.get('hostsToAdd');
+      var idx;
+      for (idx=0; idx<add.length; idx++) {
+        var host = add[idx];
+        var record = this.store.createRecord('host');
+        record.set('hostname', host);
+        record.set('ou_id', ou);
+        record.save(); // .then()
+        this.set('numHosts', (this.get('numHosts')-1));
+      }
+    }
+  }
+});
 App.OuMonitorController = Ember.ObjectController.extend({
-  needs: ["hosts","ous"],
+  needs: ["hosts","ous","laststates"],
 
   selectedAction: null,
   selectedHosts: {},
   selectedHostsCount: 0,
+
+  laststates: Ember.computed.alias("controllers.laststates"),
 
   actions: {
     updateSelectedHosts: function() {
@@ -538,7 +625,12 @@ App.OuMonitorController = Ember.ObjectController.extend({
     setActionReset:      function() { this.set('selectedAction', 'R'); },
     setActionPowercycle: function() { this.set('selectedAction', 'C'); },
   }
-
+});
+App.LaststatesController = Ember.ArrayController.extend({
+  laststates: function() {
+    console.log("laststatesController laststates() - fetching.");
+    return this.get('store').find('laststate');
+  }.property()
 });
 // AMT Optionsets
 App.OptionsetController = Ember.ObjectController.extend({
@@ -585,7 +677,7 @@ App.OptionsetController = Ember.ObjectController.extend({
         window.location.href = '#/optionsets';
       }, function(response){
         var res = jQuery.parseJSON(response.responseText);
-        var msg = (typeof res.exceptionMessage=='undefined') ? 
+        var msg = (typeof res.exceptionMessage=='undefined') ?
                    'Check console, please.' : res.exceptionMessage;
         humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
                    '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
@@ -593,7 +685,7 @@ App.OptionsetController = Ember.ObjectController.extend({
         }
       );
     }
-  }  
+  }
 });
 App.OptionsetsNewController = App.OptionsetController; // FIXME: evil?
 App.OptionsetsController = Ember.ArrayController.extend({
@@ -602,7 +694,7 @@ App.OptionsetsController = Ember.ArrayController.extend({
   }.property()
 });
 // Controller for /#setup (Installer)
-App.SetupController = Ember.ObjectController.extend({  
+App.SetupController = Ember.ObjectController.extend({
   // Controller used for initial installation page #setup
   selectedDB: null,
   sqlitePath: 'data/amtc-web.db',
@@ -621,10 +713,10 @@ App.SetupController = Ember.ObjectController.extend({
 
   dbs: null, // Array of supported DBs; gets set in SetupRoute
   pdoSupported: false,
-  
+
   isMySQL: function() {
     return (this.get('selectedDB')=='MySQL') ? true : false;
-  }.property('selectedDB'),    
+  }.property('selectedDB'),
   isSQLite: function() {
     return (this.get('selectedDB')=='SQLite') ? true : false;
   }.property('selectedDB'),
@@ -649,7 +741,7 @@ App.SetupController = Ember.ObjectController.extend({
       importDemo: this.get('importDemo'),
       installHtaccess: this.get('installHtaccess'),
     };
-    $.ajax({type:"POST", url:"rest-api.php/submit-configuration", 
+    $.ajax({type:"POST", url:"rest-api.php/submit-configuration",
             data:jQuery.param(d), dataType:"json"}).then(function(response) {
       console.log(response);
       if (typeof response.errorMsg != "undefined")
@@ -667,14 +759,14 @@ App.SetupController = Ember.ObjectController.extend({
         humane.log('<i class="glyphicon glyphicon-fire"></i> Setup is LOCKED!<br>'+
           'Setup is intended for initial installation only.<br>'+
           'Remove <code>config/siteconfig.php</code> to re-enable setup.',
-          { timeout: 0, clickToClose: true, addnCls: 'humane-error' });  
+          { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
       } else {
         humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.'+response.responseText,
           { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
       }
     });
   }
-}); 
+});
 
 // Models
 
@@ -687,26 +779,24 @@ App.Ou = DS.Model.extend({
   ou_path: attr('string'),
   idle_power: attr('number'),
   logging: attr('boolean'),
-
-
   children: DS.hasMany('ou', {inverse: 'parent_id'}),
-  hosts: DS.hasMany('host'),
- 
+  hosts: DS.hasMany('host'),//, {inverse: null}),
+
   /// FIXME FIXME ... still feels hackish, but makes the dropdown+save work...
   optionsetid: function(key,value) {
-    if (value) { 
+    if (value) {
        //this.set('optionset_id',value);
-      return value; 
+      return value;
     }
     else {
       console.log('get optionset -> ' + this.get('optionset_id.id'));
       return this.get('optionset_id');
     }
   }.property('optionset_id'),
-  
+
   // new ou-tree; 1:1 from https://github.com/joachimhs/Montric/blob/master/Montric.View/src/main/webapp/js/app/models/MainMenuModel.js
   isSelected: false,
-  isExpanded: false,
+  isExpanded: true, // make this user/cookie/whatever optional
   isRootLevel: function() {
     return this.get('parent_id.id')==1 ? true : false; /// OH SOOOO HACKISH
   }.property('children').cacheable(),
@@ -722,7 +812,7 @@ App.Ou = DS.Model.extend({
       var children = this.get('children.content');
       if (children) {
         //console.log('Sorting children');
-        children.sort(App.Ou.compareNodes);
+        //children.sort(App.Ou.compareNodes);
       }
     }
   }.observes('isExpanded')
@@ -738,9 +828,10 @@ App.Ou.reopenClass({
 });
 // Clients/Hosts
 App.Host = DS.Model.extend({
-  ou_id: DS.belongsTo('ou'),
+  ou_id: DS.belongsTo('ou', {async:false}),//, {inverse: null}),
   hostname: attr('string'),
-  enabled: attr('boolean')
+  enabled: attr('boolean'),
+  laststate: DS.belongsTo('laststate'),
   // add isSelected et al
 });
 // Markdown help / documentation pages
@@ -760,7 +851,7 @@ App.Notification = DS.Model.extend({
       var cc = "fa fa-"+this.get('ntype')+" fa-fw";
       return cc;
     }
-  }.property()
+  }.property('ntype')
 });
 // AMT Option sets
 App.Optionset = DS.Model.extend({
@@ -785,6 +876,43 @@ App.User = DS.Model.extend({
   is_enabled: attr('boolean'),
   is_admin: attr('boolean'),
   can_control: attr('boolean')
+});
+// Last power states
+App.Laststate = DS.Model.extend({
+  host_id: DS.belongsTo('host'),
+  state_begin: attr('number'),
+  open_port: attr('number'),
+  state_amt: attr('number'),
+  state_http: attr('number'),
+
+  lastScan: function() {
+    return moment.unix(this.get('state_begin')).fromNow();
+  }.property('state_begin'),
+  openPortIcon: function() {
+    var cc='fa fa-ban fa-fw';
+    this.get('state_http')== 200  && this.get('state_amt')==0 && (cc='fa fa-ban fa-fw red'); // AMT ok, powered up, no OS
+    this.get('state_http')== 200  && this.get('state_amt')==5 && (cc='fa fa-power-off fa-fw'); // AMT ok, powered down
+    this.get('open_port') == 22   && (cc = "fa fa-linux fa-fw");
+    this.get('open_port') == 3389 && (cc = "fa fa-windows fa-fw");
+    return new Handlebars.SafeString('<i class="'+cc+'"></i> ');
+  }.property('open_port','state_http','state_amt'),
+  openPortCssClass: function() {
+    var result = ''; // unreachable
+    switch(this.get('open_port')) {
+    case 22:
+        result = 'ssh';
+        break;
+    case 3389:
+        result = 'rdp';
+        break;
+    default:
+        this.get('state_http')==200 && this.get('state_amt')==0 && (result = 'none'); // AMT reachable, ON, but no OS
+    }
+    return result;
+  }.property('open_port','state_http','state_amt'),
+  amtStateCssClass: function() {
+    return 'S' + this.get('state_amt');
+  }.property('state_amt'),
 });
 
 // Components (menu tree...)
@@ -818,7 +946,7 @@ Ember.Handlebars.helper('format-markdown', function(input) {
   if (input) {
     var md = showdown.makeHtml(input);
     md = md.replace("<h1 id=",'<h1 class="page-header" id=');
-    var html = new Handlebars.SafeString(md);    
+    var html = new Handlebars.SafeString(md);
     return html;
   } else {
     console.log("Warning: empty input on showdown call.");
@@ -837,6 +965,26 @@ Ember.Handlebars.helper('check-mark', function(input) {
 Ember.Handlebars.helper('format-from-now', function(date) {
   return moment.unix(date).fromNow();
 });
+
+
+// Further helpers
+
+App.windowResizeHandler = function() {
+  topOffset = 50;
+  width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+  if (width < 768) {
+    $('div.navbar-collapse').addClass('collapse');
+    topOffset = 100; // 2-row-menu
+  } else {
+    $('div.navbar-collapse').removeClass('collapse');
+  }
+  height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
+  height = height - topOffset;
+  if (height < 1) height = 1;
+  if (height > topOffset) {
+    $("#page-wrapper").css("min-height", (height) + "px");
+  }
+};
 
 // Legacy amtc-web1 needs-cleanup-stuff
 

@@ -26,7 +26,7 @@
         <div class="modal-body" >
           <span class="fa-stack fa-lg">
             <i class="fa fa-circle fa-stack-2x grey"></i>
-            <i class="fa fa-bolt fa-fw fa-stack-1x flash"></i> 
+            <i class="fa fa-bolt fa-fw fa-stack-1x flash"></i>
           </span>
         </div>
         <span style="color:white; font-weight:bold">web</span>
@@ -45,64 +45,46 @@
                 <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="index.html">
-              {{appName}}
+              <span class="brand">{{appName}}</span>
               <span class="fa-stack fa-lg">
                 <i class="fa fa-circle fa-stack-2x lightgrey"></i>
-                <i id="bolt" class="fa fa-bolt fa-fw fa-stack-1x grey flash"></i> 
+                <i id="bolt" class="fa fa-bolt fa-fw fa-stack-1x grey flash"></i>
               </span>
-              <i>remote. power. management.</i>
+              <i class="hidden-xs">remote. power. management.</i>
             </a>
         </div>
         <!-- /.navbar-header -->
-         
+
         <ul class="nav navbar-top-links navbar-right">
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="fa fa-envelope fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                    <i class="fa fa-bell fa-fw"></i>  <i class="fa fa-caret-down"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-messages">
-                    <li>
+                  {{#if controllers.notifications.notifications}}
+                    {{#each msg in controllers.notifications.notifications.content}}
+                      <li>
                         <a href="#">
-                            <div>
-                                <strong>John Smith</strong>
-                                <span class="pull-right text-muted">
-                                    <em>Yesterday</em>
-                                </span>
-                            </div>
-                            <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
+                          <div>
+                            <strong>FIXME {{msg.user_id.fullname}}</strong>
+                            <span class="pull-right text-muted">
+                                <em>{{format-from-now msg.tstamp}}</em>
+                            </span>
+                          </div>
+                          <div><i {{bind-attr class=msg.cssClass}}></i> {{msg.message}}</div>
                         </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a href="#">
-                            <div>
-                                <strong>John Smith</strong>
-                                <span class="pull-right text-muted">
-                                    <em>Yesterday</em>
-                                </span>
-                            </div>
-                            <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                        </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a href="#">
-                            <div>
-                                <strong>John Smith</strong>
-                                <span class="pull-right text-muted">
-                                    <em>Yesterday</em>
-                                </span>
-                            </div>
-                            <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                        </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a class="text-center" href="#">
-                            <strong>Read All Messages</strong>
-                            <i class="fa fa-angle-right"></i>
-                        </a>
-                    </li>
+                      </li>
+                      <li class="divider"></li>
+                    {{/each}}
+                  {{else}}
+                    <i class="fa fa-spinner fa-spin"></i> Loading latest notifications ...
+                  {{/if}}
+                  <li>
+                      <a class="text-center" href="#">
+                          <strong>read all notifications</strong>
+                          <i class="fa fa-angle-right"></i>
+                      </a>
+                  </li>
                 </ul>
                 <!-- /.dropdown-messages -->
             </li>
@@ -188,66 +170,6 @@
             <!-- /.dropdown -->
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="fa fa-bell fa-fw"></i>  <i class="fa fa-caret-down"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-alerts">
-                    <li>
-                        <a href="#">
-                            <div>
-                                <i class="fa fa-comment fa-fw"></i> New Comment
-                                <span class="pull-right text-muted small">4 minutes ago</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a href="#">
-                            <div>
-                                <i class="fa fa-twitter fa-fw"></i> 3 New Followers
-                                <span class="pull-right text-muted small">12 minutes ago</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a href="#">
-                            <div>
-                                <i class="fa fa-envelope fa-fw"></i> Message Sent
-                                <span class="pull-right text-muted small">4 minutes ago</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a href="#">
-                            <div>
-                                <i class="fa fa-tasks fa-fw"></i> New Task
-                                <span class="pull-right text-muted small">4 minutes ago</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a href="#">
-                            <div>
-                                <i class="fa fa-upload fa-fw"></i> Server Rebooted
-                                <span class="pull-right text-muted small">4 minutes ago</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a class="text-center" href="#">
-                            <strong>See All Alerts</strong>
-                            <i class="fa fa-angle-right"></i>
-                        </a>
-                    </li>
-                </ul>
-                <!-- /.dropdown-alerts -->
-            </li>
-            <!-- /.dropdown -->
-            <li class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                     <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-user">
@@ -281,7 +203,7 @@
                     </li>
                     <li>
                         <a href="#"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
-                    </li>                    
+                    </li>
                     <li>
                         <a {{bindAttr href="view.href"}}>
                             <i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts<span class="fa arrow">
@@ -323,7 +245,7 @@
         </div>
         <!-- /.navbar-static-side -->
     </nav>
-    
+
     <div id="page-wrapper">
         {{outlet}}
     </div>
@@ -509,17 +431,6 @@
   <!-- /.row -->
 </script>
 
-<script type="text/x-handlebars" id="monitor">
-  <div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Monitor and Control {{name}}</h1>
-    </div>
-    <div class="col-lg-12">
-        <p>Hello world</p>
-    </div>
-  </div>
-</script>
-
 <script type="text/x-handlebars" id="logs">
   <div class="row">
     <div class="col-lg-12">
@@ -577,14 +488,14 @@
               {{else}}
                 <i class="fa fa-spinner fa-spin"></i> <i>running tests...</i>
               {{/if}}
-            </ul>        
+            </ul>
         </div>
       </div>
     {{/unless}}
 
     {{#if preconditionsMet}}
       <div class="row">
-        <div class="col-lg-12">          
+        <div class="col-lg-12">
             <div class="alert alert-success">
               All preconditions for amtc-web installtion are met!
             </div>
@@ -604,7 +515,7 @@
                   {{input type="text" value=amtcbin class="form-control"}}
                   <p class="help-block">
                     Defaults to <code>/usr/bin/amtc</code>.
-                    For testing amtc-web without amtc installed, cheat by using s.th. 
+                    For testing amtc-web without amtc installed, cheat by using s.th.
                     like <code>/usr/bin/who</code>.
                   </p>
                 </div>
@@ -653,7 +564,7 @@
 
                       <label>SQLite database file</label>
                       {{input type="text" value=sqlitePath class="form-control" placeholder="data/amtc-web.db"}}
-                      <p class="help-block">Choose a (application-)relative path like <code>data/amtc-web.db</code> or 
+                      <p class="help-block">Choose a (application-)relative path like <code>data/amtc-web.db</code> or
                       use an absolute path. Note that the directory containing the file must be writable.</p>
                   </div>
                 {{/if}}
@@ -696,14 +607,14 @@
     {{else}}
       <div class="form-group">
         <div class="alert alert-danger">
-          <em>Error!</em> 
+          <em>Error!</em>
           Not all preconditions met. Needs to be fixed to proceed with initial installation.<br>
         </div>
       </div>
     {{/if}}
   {{else}}
     <div class="row">
-      <div class="col-lg-12">          
+      <div class="col-lg-12">
           <div class="alert alert-danger">
             <h3>Installation tool locked</h3>
             <p>As a configuration file already exists at <code>config/siteconfig.php</code>,
@@ -712,7 +623,7 @@
       </div>
     </div>
   {{/if}}
-  
+
 </script>
 
 <script type="text/x-handlebars" id="page">
@@ -774,7 +685,7 @@
   </div>
   <div class="row">
     <div class="col-lg-12">
-      
+
       {{partial "userEdit"}}
 
       <div>
@@ -795,7 +706,7 @@
   </div>
   <div class="row">
     <div class="col-lg-12">
-      
+
       {{partial "userEdit"}}
 
       <div>
@@ -877,7 +788,7 @@
     <thead>
       <tr>
         <th>Edit</th>
-        <th>Name</th>          
+        <th>Name</th>
         <th>AMT v5</th>
         <th>DASH</th>
         <th>Scan SSH</th>
@@ -893,7 +804,7 @@
     {{#each model}}
       <tr>
         <td>{{#link-to 'optionset.edit' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
-        <td>{{#link-to 'optionset.edit' this}}{{name}}{{/link-to}}</td>          
+        <td>{{#link-to 'optionset.edit' this}}{{name}}{{/link-to}}</td>
         <td>{{check-mark sw_v5}}</td>
         <td>{{check-mark sw_dash}}</td>
         <td>{{check-mark sw_scan22}}</td>
@@ -1012,7 +923,7 @@
 
 <!-- OUs / Rooms #if controller.ous.content -->
 <!-- bascis from  http://www.manning.com/skeie/ ; thank you :-) -->
-<script type="text/x-handlebars" data-template-name='_ouSelection'> 
+<script type="text/x-handlebars" data-template-name='_ouSelection'>
   {{#if controllers.ous.ous.content}}
     {{#each node in controllers.ous.ous.content}}
       {{#if node.isRootLevel}}
@@ -1099,18 +1010,37 @@
   {{/if}}
 </script>
 
+<script type="text/x-handlebars" data-template-name="navigation">
+  <ul class="nav nav-pills viewmode">
+    {{#link-to "ou.monitor" tagName="li"}}
+      <a {{bind-attr href="view.href"}}>Control</a>
+    {{/link-to}}
+    <li><a href="#profile-pills" data-toggle="tab">State Log</a></li>
+    <li><a href="#messages-pills" data-toggle="tab">Energy</a></li>
+    {{#link-to "ou.edit" tagName="li"}}
+      <a {{bind-attr href="view.href"}}>Edit OU</a>
+    {{/link-to}}
+    {{#link-to "ou.hosts" tagName="li"}}
+      <a {{bind-attr href="view.href"}}>Edit Hosts</a>
+    {{/link-to}}
+  </ul>
+</script>
+
 <script type="text/x-handlebars" id="ou">
   {{! Display a single OU }}
   <div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Room {{name}}</h1>
+    <div class="col-lg-5">
+        <h1 class="page-header">{{name}}</h1>
     </div>
-  </div>  
+    <div class="col-lg-7">
+      {{view "navigation"}}
+    </div>
+  </div>
   {{outlet}}
   <!-- see ou/edit, ou/monitor, ou/hosts -->
 </script>
 
-<script type="text/x-handlebars" id="ous/new">    
+<script type="text/x-handlebars" id="ous/new">
   <h1 class="page-header">Create a new OU / room</h1>
   {{partial "ou/edit"}}
   {{#if parent_id}}
@@ -1125,7 +1055,7 @@
     <div class="col-lg-12">
       {{! Edit/Display EXISTING display form (only) }}
       {{! http://emberjs.com/api/classes/Ember.Select.html }}
-      <h3>Edit OU / Room</h3>
+      <!-- <h3>Edit OU / Room</h3> -->
 
       <form id="ouEditForm">
        <fieldset>
@@ -1174,7 +1104,7 @@
             <label>
               {{input type="checkbox" checked=logging}} Allow PC state logging via scheduler
             </label>
-          </div>       
+          </div>
        </fieldset>
       </form>
       <div class="clearboth"></div><br>
@@ -1193,42 +1123,59 @@
 <script type="text/x-handlebars" data-template-name='ou/monitor'>
 {{! amtc-web ... live view / monitor + control mode }}
   <div class="row">
-    <div class="col-lg-12" id="hosts">
-      {{#if controller.hosts}}
-          {{#each controller.hosts}}
-              <div class="pc">{{hostname}}</div>
-          {{/each}}
-      {{else}}
-          No hosts found in this room.
-      {{/if}}
-    </div>
+      <div class="col-lg-12" id="hosts">
+        {{#each host in controller.hosts}}
+          <div {{bind-attr class=":pc host.laststate.amtStateCssClass host.laststate.openPortCssClass"}}>
+            <div>
+              <span class="porticon">
+                {{#if host.laststate}}
+                  {{host.laststate.openPortIcon}}
+                {{else}}
+                  <i class="fa fa-fw fa-question"></i>
+                {{/if}}
+              </span>
+              <span class="hostname">{{host.hostname}}</span>
+            </div>
+            <div class="message">
+              {{#if host.laststate}}
+                {{host.laststate.lastScan}}
+              {{else}}
+                No logged data yet
+              {{/if}}
+            </div>
+          </div>
+        {{/each}}
+      </div>
   </div>
+
   <div class="row">
     <div class="col-lg-12">
       <span style="display:none">
-        FIXME - this triggers loading all hosts: 
-        {{controllers.hosts.hosts}} 
+        FIXME - this triggers loading all hosts:
+        {{controllers.hosts.hosts}}
+        {{controllers.laststates.laststates}}
         How to trigger it the right way?
       </span>
     </div>
   </div>
+
   <div class="row">
     <div class="col-lg-12">
       <div id="livectrl">
         <h5>Select hosts above like files in Finder/Explorer or by state below</h5>
         <p id="hselect"></p>
         {{#if selectedHostsCount}}
-        <div id="ctrl">
-          <h5>Action for selected <span id="numselected">{{selectedHostsCount}}</span>&nbsp;hosts</h5>
-          <form>
-           <input type="radio" name="cmd" id="powerdown" value="D"><label for="powerdown">powerdown</label>
-           <input type="radio" name="cmd" id="powerup" value="U"><label for="powerup">powerup</label>
-           <input type="radio" name="cmd" id="powercycle" value="C"><label for="powercycle">powercycle</label>
-           <input type="radio" name="cmd" id="reset" value="R"><label for="reset">reset</label>
-           ... using a inter-command-delay of <input id="delay" type="text"  name="delay" value="5" size=3> seconds
-           <input type="button" id="ctrlSubmit" value="Do it" name="bar">
-          </form>
-        </div>
+          <div id="ctrl">
+            <h5>Action for selected <span id="numselected">{{selectedHostsCount}}</span>&nbsp;hosts</h5>
+            <form>
+             <input type="radio" name="cmd" id="powerdown" value="D"><label for="powerdown">powerdown</label>
+             <input type="radio" name="cmd" id="powerup" value="U"><label for="powerup">powerup</label>
+             <input type="radio" name="cmd" id="powercycle" value="C"><label for="powercycle">powercycle</label>
+             <input type="radio" name="cmd" id="reset" value="R"><label for="reset">reset</label>
+             ... using a inter-command-delay of <input id="delay" type="text"  name="delay" value="5" size=3> seconds
+             <input type="button" id="ctrlSubmit" value="Do it" name="bar">
+            </form>
+          </div>
         {{/if}}
       </div>
     </div>
@@ -1236,6 +1183,16 @@
 </script>
 
 <script type="text/x-handlebars" data-template-name='ou/hosts'>
+  <div class="row">
+    <div class="col-lg-12">
+      <p>Add, remove or enable/disable hosts for this OU here.</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <h3>Existing hosts</h3>
+    </div>
+  </div>
   <div class="row">
     <div class="col-lg-12" id="cfghosts">
       {{#if controllers.hosts.hosts.content}}
@@ -1247,11 +1204,69 @@
       {{/if}}
     </div>
   </div>
+
+  {{partial "addHostsWizard"}}
+
+</script>
+
+<script type="text/x-handlebars" data-template-name="addHostsWizard">
   <div class="row">
-    <div class="col-lg-12">
-      <input type="button" id="fooobdddddd" value="Add hosts ..." name="bar">
+    <div class="col-lg-5">
+      <h3>Add hosts to OU {{name}}</h3>
+      <form id="addHostsWizardForm">
+        <fieldset>
+          <div class="form-group">
+            <label for "name">Hostname</label>
+            {{input class="form-control" type="text" placeholder="my-example" value=hostname insert-newline="saveNewHosts"}}
+            <p class="help-block">For a single host, provide the FQDN</p>
+          </div>
+          <div class="form-group">
+            <label>Add multiple hosts</label>
+            <div class="checkbox">
+              <label>
+                {{input type="checkbox" checked=addMultiple}} Add multiple hosts at once
+              </label>
+            </div>
+          </div>
+          {{#if addMultiple}}
+            <div class="form-group">
+              <label for "description">Number of hosts to add</label>
+              {{input class="form-control" type="number" value=numHosts insert-newline="saveNewHosts"}}
+            </div>
+            <div class="form-group">
+              <label for "description">Start at host number...</label>
+              {{input class="form-control" type="number" value=startNum insert-newline="saveNewHosts"}}
+            </div>
+            <div class="form-group">
+              <label for "description">Pad host number with this amount of zeros</label>
+              {{input class="form-control" type="number" value=padNum insert-newline="saveNewHosts"}}
+              <p class="help-block"></p>
+            </div>
+            <div class="form-group">
+              <label for "description">Domain name</label>
+              {{input class="form-control" type="text" placeholder="example.com" value=domainName insert-newline="saveNewHosts"}}
+              <p class="help-block"></p>
+            </div>
+          {{/if}}
+        </fieldset>
+      </form>
     </div>
-  </div>    
+    <div class="col-lg-7">
+      {{#if hostname}}
+        <h3>Preview</h3>
+        <div id="addHostsPreview">
+          {{#each host in hostsToAdd}}
+            <div class="pc preview">{{host}}</div>
+          {{/each}}
+          <div class="clearfix"><br><br></div>
+        </div>
+        <div class="clearfix"></div>
+        <br>
+
+        <button class="btn btn-default" {{action 'saveNewHosts'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save new host(s)</button>
+      {{/if}}
+    </div>
+  </div>
 </script>
 
 <script src="js/jslibs.js"></script>
