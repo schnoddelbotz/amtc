@@ -101,8 +101,21 @@ $app->post('/submit-configuration', function () use ($app) {
       $wanted['SQLITEPATH'] = realpath($_POST['sqlitePath']);
       $wanted['PDOSTRING'] = sprintf('sqlite:%s', $wanted['SQLITEPATH']);
       $wanted['PHPARSTRING'] = sprintf('sqlite://unix(%s)', $wanted['SQLITEPATH']);
+      $dbh = new PDO($wanted['PDOSTRING']);
+    }
+    if ($wanted['DBTYPE'] == 'MySQL') {
+      // mysql://user:pass@host[:port]/dbname)
+      $mUser = preg_replace('/[^A-Za-z]/', '',    $_POST['mysqlUser']);
+      $mPass = preg_replace('/[^A-Za-z]/', '',    $_POST['mysqlPassword']);
+      $mHost = preg_replace('/[^A-Za-z]/', '',    $_POST['mysqlHost']);
+      $mDB   = preg_replace('/[^A-Za-z]/', '',    $_POST['mysqlDB']);
+      $wanted['PDOSTRING'] = sprintf('mysql:host=%s;dbname=%s', $mHost, $mDB);
+      $wanted['PHPARSTRING'] = sprintf('mysql://%s:%s@%s/%s',
+                                          $mUser, $mPass, $mHost, $mDB);
+      $dbh = new PDO($wanted['PDOSTRING'], $mUser, $mPass);
     }
 
+    // will only happen if PDO connect was ok...
     $cfg = sprintf($cfgTpl, $wanted['PHPARSTRING'], $wanted['AMTCBIN'],
                             $wanted['TIMEZONE'],    $wanted['DATADIR']);
 
@@ -111,7 +124,6 @@ $app->post('/submit-configuration', function () use ($app) {
     } elseif (false === file_put_contents(AMTC_CFGFILE, $cfg)) {
       $x = array("errorMsg"=>"Could not write config file!");
     } else {
-      $dbh = new PDO($wanted['PDOSTRING']);
       $selectedDB = strtolower($wanted['DBTYPE']);
       $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'.sql'));
       $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-minimal.sql'));
@@ -204,8 +216,8 @@ $app->post('/ous', function () use ($app) {
     $dev->description = $ndev->description;
     $dev->parent_id = $ndev->parent_id;
     $dev->optionset_id = $ndev->optionset_id;
-    $dev->idle_power = $udev->idle_power;
-    $dev->logging = $udev->logging;
+    $dev->idle_power = $ndev->idle_power;
+    $dev->logging = $ndev->logging;
     $dev->save();
     echo json_encode( array('ou'=> $dev->to_array()) );
   }
