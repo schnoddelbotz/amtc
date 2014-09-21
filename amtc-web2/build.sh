@@ -4,7 +4,7 @@
 # https://github.com/schnoddelbotz/amtc
 #
 # couldn't fall in love with any build tool yet, so this
-# shell script shall serve the task of downloading required 
+# shell script shall serve the task of downloading required
 # JavaScript and CSS components during ... build.
 
 # define versions to fetch
@@ -21,11 +21,15 @@ RUNCURL="curl -Lso"
 function FetchIfNotExists {
   CheckFile=$1
   FileURL=$2
-  if [ ! -f "$CheckFile" ]; then 
+  if [ ! -f "$CheckFile" ]; then
     echo "Retreiving $FileURL ..."
     $RUNCURL "$CheckFile" "$FileURL"
   fi
 }
+
+pushd `dirname $0` > /dev/null
+SCRIPTPATH=`pwd`
+popd > /dev/null
 
 # JavaScript and CSS files to be concatenated in the end
 CSSFILES="bootstrap.min.css plugins/metisMenu/metisMenu.min.css \
@@ -58,7 +62,7 @@ FetchIfNotExists js/moment.js http://momentjs.com/downloads/moment.js
 FetchIfNotExists js/humane.min.js https://raw.githubusercontent.com/wavded/humane-js/master/humane.min.js
 FetchIfNotExists css/humane-original.css https://raw.githubusercontent.com/wavded/humane-js/master/themes/original.css
 
-if [ ! -f "js/bootstrap.min.js" ]; then 
+if [ ! -f "js/bootstrap.min.js" ]; then
   echo "Retreiving Twitter bootstrap ..."
   mkdir tmp_$$ && cd tmp_$$
   $RUNCURL bs.zip https://github.com/twbs/bootstrap/releases/download/v${BOOTSTRAP}/bootstrap-${BOOTSTRAP}-dist.zip
@@ -66,14 +70,14 @@ if [ ! -f "js/bootstrap.min.js" ]; then
   cd bootstrap-${BOOTSTRAP}-dist
   mv fonts ../..
   mv css/bootstrap.min.css ../../css
-  mv js/bootstrap.min.js ../../js 
+  mv js/bootstrap.min.js ../../js
   cd ../..
   rm -rf tmp_$$ bs.zip
 fi
 
 if [ ! -f "js/sb-admin-2.js" ]; then
   echo "Retreiving SB Admin 2"
-  mkdir tmp2_$$ && cd tmp2_$$ 
+  mkdir tmp2_$$ && cd tmp2_$$
   $RUNCURL sb.zip http://startbootstrap.com/downloads/sb-admin-2.zip
   unzip -q sb.zip
   cp sb-admin-2/css/sb-admin-2.css ../css
@@ -85,7 +89,7 @@ fi
 
 if [ ! -f "js/jquery-ui.min.js" ]; then
   echo "Retreiving jQuery UI"
-  mkdir tmp2_$$ && cd tmp2_$$ 
+  mkdir tmp2_$$ && cd tmp2_$$
   $RUNCURL ui.zip http://jqueryui.com/resources/download/jquery-ui-1.11.1.zip
   unzip -q ui.zip
   cp jquery-ui-${JQUERYUI}/jquery-ui.min.js ../js
@@ -105,7 +109,7 @@ if [ ! -f "fonts/fontawesome-webfont.woff" ]; then
   rm -rf fa.zip ${FA}
 fi
 
-# concat + gzip js and css for production ... 
+# concat + gzip js and css for production ...
 # (might want to add app.js... + amtc-web.css ... not yet / dev)
 ( cd css && cat $CSSFILES > styles.css  )
 ( cd js && cat $JSFILES > jslibs.js )
@@ -125,7 +129,7 @@ if [ ! -d "lib/Slim" ]; then
   $RUNCURL slim.zip https://github.com/codeguy/Slim/zipball/master
   unzip -q slim.zip
   mv codeguy-Slim-*/Slim lib
-  rm -rf codeguy-Slim-* slim.zip 
+  rm -rf codeguy-Slim-* slim.zip
 fi
 
 if [ ! -d "lib/php-activerecord" ]; then
@@ -138,3 +142,8 @@ if [ ! -d "lib/php-activerecord" ]; then
   rm -rf php-activerecord ar.tgz
 fi
 
+[ -f config/.htpasswd ] || cp config/_htpasswd.default config/.htpasswd
+if [ ! -f basic-auth/.htaccess ]; then
+  cp basic-auth/_htaccess.default basic-auth/.htaccess
+  perl -pi -e "s@AuthUserFile .*@AuthUserFile $SCRIPTPATH/config/.htpasswd@" basic-auth/.htaccess
+fi

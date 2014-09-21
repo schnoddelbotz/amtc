@@ -1,0 +1,16 @@
+
+#
+# amtc-web can be configured to authenticate through this access
+# protected resource. any user or group permitted here will
+# be able to log in to amtc-web.
+# ... AuthUserFile requires absoulte path names ...
+#
+
+AuthType Basic
+AuthName "amtc-web basic auth proxy"
+AuthUserFile /path/to/your/.htpasswd
+Require valid-user
+
+Order allow,deny
+Allow from all
+

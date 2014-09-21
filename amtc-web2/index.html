@@ -178,7 +178,8 @@
                     <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
                     </li>
                     <li class="divider"></li>
-                    <li><a href="#"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                    <li><a href="#/logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                    <!-- {{controllers.login}} -->
                     </li>
                 </ul>
                 <!-- /.dropdown-user -->
@@ -250,6 +251,50 @@
         {{outlet}}
     </div>
 
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="login">
+  <div class="row">
+    <div class="col-lg-12">
+
+    </div>
+    <div class="col-lg-4">
+    </div>
+    <div class="col-lg-4">
+      <h1 class="page-header">Login</h1>
+      {{#if isAuthenticated}}
+        Hi, {{username}} !
+        <button class="btn btn-default" {{action 'doLogout'}}><span class="fa fa-fw fa-sign-out"></span> Logout</button>
+      {{else}}
+       <p>
+        {{input id="username" type="text" value=username insert-newline="doLogin" class="form-control" placeholder="username"}}
+       </p>
+       <p>
+        {{input type="password" value=password insert-newline="doLogin" class="form-control" placeholder="password"}}
+       </p>
+        <button class="btn btn-default pull-right" {{action 'doLogin'}}><span class="fa fa-fw fa-sign-in"></span> sign in</button>
+      {{/if}}
+    </div>
+    <div class="col-lg-4">
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="logout">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Sign out</h1>
+    </div>
+    <div class="col-lg-12">
+        <p>
+          {{#if controllers.login.isLoggedIn}}
+              Thanks for logging out... See you soon!
+            {{else}}
+              You have not signed in yet. Why log out, eh?
+          {{/if}}
+        </p>
+    </div>
   </div>
 </script>
 
@@ -591,11 +636,23 @@
                 </div>
 
                 <div class="form-group">
+                  <label>HTTP Basic authentication URL</label>
+                  {{input type="text" value=authurl class="form-control"}}
+                  <p class="help-block">Defaults to <code>basic-auth</code> subdirectory, relative to
+                  index.html, but as full URL. The idea here is that you can specify any HTTP Basic Authentication
+                  protected resource as authentication source. By using the localhost URL, you may manage
+                  passwords by means of <code>htpasswd</code> locally -- or you may configure <code>basic-auth</code>
+                  subdirectory to use e.g. LDAP as authentication backend. Inside amtc-web s DB, only usernames and
+                  settings are stored.</p>
+                </div>
+
+                <div class="form-group">
                   <div class="alert alert-danger">
-                    <b>Warning!</b><br> This setup tool currently offers no way yet to check DB config before writing the configuration file.<br>
-                    Once the configuration is submitted, this tool will be locked.<br> You will have
-                    to delete the configuration file (<code>config/siteconfig.php</code>) manually to re-enable it.<br>
-                    <em>Currently, only SQLite is supported by amtc-web!</em>
+                    <b>Warning!</b><br>
+                    Once written via this setup tool, you have to delete the configuration file
+                    (<code>config/siteconfig.php</code>) manually to re-enable setup.<br>
+                    Default intial admin username is 'admin' with password 'amtc'.
+                    <em>Currently, only SQLite and MySQL are supported by amtc-web!</em>
                   </div>
                   {{#if selectedDB}}
                   <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Write configuration</button>

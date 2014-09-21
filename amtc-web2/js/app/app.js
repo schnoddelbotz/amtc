@@ -11,7 +11,6 @@
 
 var attr = DS.attr;
 var hasMany = DS.hasMany;
-var resizeHandler;
 
 // http://stackoverflow.com/questions/24222457
 // /ember-data-embedded-records-current-state/24224682#24224682
@@ -52,30 +51,60 @@ var App = Ember.Application.create({
     $(document).ajaxStop(function () {
       $('#bolt').removeClass('flash');
     });
+  },
+
+  // SB-Admin 2 responsiveness helper
+  windowResizeHandler: function() {
+    topOffset = 50;
+    width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+    if (width < 768) {
+      $('div.navbar-collapse').addClass('collapse');
+      topOffset = 100; // 2-row-menu
+    } else {
+      $('div.navbar-collapse').removeClass('collapse');
+    }
+    height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
+    height = height - topOffset;
+    if (height < 1) height = 1;
+    if (height > topOffset) {
+      $("#page-wrapper").css("min-height", (height) + "px");
+    }
+  },
+  // 1:1 copy, THANKS! https://github.com/joachimhs/Montric/blob/master/Montric.View/src/main/webapp/js/app.js
+  createCookie: function(name, value, days) {
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime()+(days*24*60*60*1000));
+      var expires = "; expires="+date.toGMTString();
+    }
+    else var expires = "";
+    document.cookie = name+"="+value+expires+"; path=/";
+  },
+  readCookie:function (name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  },
+  eraseCookie:function (name) {
+    this.createCookie(name, "", -1);
   }
 });
-
-// fixme: old evil globals, get em away...
-var powerstates = {
-  "pc":"any",       "S0":"on",        "S3":"sleep",
-  "S4":"hibernate", "S5":"soft-off",  "S16":"no-reply",
-  "ssh":"SSH",      "rdp":"RDP",      "none":"No-OS"
-};
-var osicons = {
-  'SSH'     :'<i class="fa fa-fw fa-linux"></i> ',
-  'RDP'     :'<i class="fa fa-fw fa-windows"></i> ',
-  'soft-off':'<i class="fa fa-fw fa-power-off"></i> ',
-  'No-OS'   :'<i class="fa fa-fw fa-ban red"></i> ',
-};
-
 
 // Routes
 
 App.Router.map(function() {
+  this.route('login');
+  this.route('logout');
   this.route('setup');
   this.resource('logs');
   this.resource('energy');
   this.resource('schedule');
+  this.resource('page', { path: '/page/:id' });
 
   this.resource('ous', function() {
     this.route('new');
@@ -99,8 +128,6 @@ App.Router.map(function() {
   this.resource('optionset', { path: '/optionset/:id' }, function() {
     this.route('edit');
   });
-
-  this.resource('page', { path: '/page/:id' });
 });
 
 Ember.Route.reopen({
@@ -117,7 +144,6 @@ App.PageRoute = Ember.Route.extend({
     return this.store.find('page', params.id);
   }
 });
-
 App.OuRoute = Ember.Route.extend({
   model: function(params) {
     //console.log("App.OuRoute model(), find and set currentOU -> " + params.id);
@@ -147,8 +173,6 @@ App.LaststatesRoute = Ember.Route.extend({
     return this.store.find('laststate');
   }
 });
-
-
 App.UserRoute = Ember.Route.extend({
   model: function(params) {
     return this.store.find('user', params.id);
@@ -166,8 +190,6 @@ App.UsersNewRoute = Ember.Route.extend({
     return this.store.createRecord('user');
   }
 });
-
-
 App.OptionsetRoute = Ember.Route.extend({
   model: function(params) {
     console.log("OptionsetRoute model() for id " + params.id);
@@ -193,7 +215,6 @@ App.NotificationsRoute = Ember.Route.extend({
     return this.store.find('notification');
   }
 });
-
 App.SetupRoute = Ember.Route.extend({
   setupController: function(controller,model) {
     console.log('ApplicationRoute setupController() triggering /phptests');
@@ -206,6 +227,7 @@ App.SetupRoute = Ember.Route.extend({
           var a = response.phptests;
           var config_writable = false;
           var data_writable = false;
+          var curl_supported = false;
           for (index = 0; index < a.length; ++index) {
               var e = a[index];
               (e.id=='pdo_sqlite') && (e.result==true) && supported.push('SQLite');
@@ -215,13 +237,15 @@ App.SetupRoute = Ember.Route.extend({
               (e.id=='freshsetup') && (e.result==true) && controller.set('freshsetup', true);
               (e.id=='data')       && (e.result==true) && (data_writable = true);
               (e.id=='config')     && (e.result==true) && (config_writable = true);
+              (e.id=='curl')       && (e.result==true) && (curl_supported = true);
           }
           controller.set('phptests', response.phptests);
+          controller.set('authurl', response.authurl);
           controller.set('dbs', supported);
           controller.set('pdoSupported', supported.length>0 ? true : false);
           controller.set('preconditionsMet',
             (controller.get('pdoSupported') && controller.get('freshsetup') &&
-               config_writable && data_writable) ? true : false);
+               config_writable && data_writable && curl_supported) ? true : false);
         },
         function(response){
           humane.log('<i class="glyphicon glyphicon-fire"></i> Fatal error:'+
@@ -242,6 +266,12 @@ MyView = Ember.View.extend({
   }.property()
 });
 */
+
+App.LoginView = Ember.View.extend({
+  didInsertElement: function() {
+    $('#username').focus();
+  }
+});
 App.ApplicationView = Ember.View.extend({
   didInsertElement: function() {
     $('#side-menu').metisMenu(); // initialize metisMenu
@@ -262,6 +292,18 @@ App.OuMonitorView = Ember.View.extend({
       },
       filter: '.pc'
     });
+    //
+    var powerstates = {
+      "pc":"any",       "S0":"on",        "S3":"sleep",
+      "S4":"hibernate", "S5":"soft-off",  "S16":"no-reply",
+      "ssh":"SSH",      "rdp":"RDP",      "none":"No-OS"
+    };
+    var osicons = {
+      'SSH'     :'<i class="fa fa-fw fa-linux"></i> ',
+      'RDP'     :'<i class="fa fa-fw fa-windows"></i> ',
+      'soft-off':'<i class="fa fa-fw fa-power-off"></i> ',
+      'No-OS'   :'<i class="fa fa-fw fa-ban red"></i> ',
+    };
     //
     $("#hselect").html("");
     $.each(powerstates, function(key, value) {
@@ -396,7 +438,7 @@ App.NavigationView = Em.View.extend({
 // see http://emberjs.com/guides/routing/generated-objects/
 App.ApplicationController = Ember.Controller.extend({
   appName: 'amtc-web', // available as {{appName}} throughout app template
-  needs: ["ou","ous","notifications"],
+  needs: ["ou","ous","notifications","login"],
 
   // the initial value of the `search` property
   search: '',
@@ -414,6 +456,162 @@ App.ApplicationController = Ember.Controller.extend({
 
   },
 });
+
+App.LoginController = Ember.ObjectController.extend({
+  needs: ["user"],
+
+  isLoggingIn: false,
+  isAuthenticated: false,
+  uuidToken: null,
+
+  sessionid: null,
+  username: null,
+  password: null,
+
+  init: function() {
+
+      var controller = this;
+
+      var cuser = App.readCookie("username");
+      var isL = App.readCookie("isLoggedIn");
+      this.set('username', cuser);
+      this.set('isLoggedIn', isL);
+      console.log('INIT UserCtrl with user ... ' + cuser);
+      //if (cuser=='' || isL!=1 ) {
+        //  this.transitionToRoute('login');
+      //}
+  },
+
+  isLoggedInObserver: function() {
+      console.log('Fetching user: ' + this.get('username'));
+
+      if (this.get('username')) {
+          this.set('content', this.store.find('user', this.get('username')));
+      } else {
+          this.set('content', null);
+          this.transitionToRoute('login');
+      }
+  }.observes('isLoggedIn').on('init'),
+/*
+  isLoggedIn: function() {
+      return this.get('content.id') != undefined && this.get('content.id') != null;
+  }.property('content.id'),
+
+  userRoleObserver: function() {
+      if (this.get('content.isNotAuthenticated')) {
+          console.log('user is not authenticated in Montric. Transitioning to Login');
+          this.transitionToRoute('login');
+      } else if (this.get('content.isNew')) {
+          this.transitionToRoute('login.activation');
+      } else if (this.get('content.isUnregistered')) {
+          console.log('user is not registered in Montric. Transitioning to Registration');
+          this.transitionToRoute('login.register');
+      } else if (this.get('content.isUser')) {
+          console.log('user is logged in and is a user.');
+
+
+          if (this.get('controllers.application.currentPath') === 'main.login.index' ||
+              this.get('controllers.application.currentPath') === 'main.login.register' ||
+              this.get('controllers.application.currentPath') === 'main.login.activation') {
+
+              console.log('resetting mainCharts controller');
+              this.set('controllers.mainCharts.content', null);
+              this.transitionToRoute('main.charts');
+          }
+      }
+  }.observes('content.userRole'),
+*/
+  actions: {
+    doLogin: function(assertion) {
+        this.set('isLoggingIn', true);
+        var u = this.get('username');
+        var p = this.get('password');
+        var self = this;
+
+        $.ajax({
+            type: 'POST',
+            url: 'rest-api.php/authenticate',
+            data: {username: u, password: p},
+
+            success: function(res, status, xhr) {
+                console.log(res);
+                if (res.exceptionMessage) {
+                  humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                   '<p>Bad username/password</p>', { timeout: 1000, clickToClose: false });
+                } else if (res.result=='success') {
+                    console.log('AUTH SUCCESS!');
+                    App.createCookie("username", u);
+                    App.createCookie("isLoggedIn", 1);
+                    self.set('isLoggingIn', false);
+                    self.set('password','no-longer-required');
+                    self.set('isAuthenticated', true);
+                    // self.transitionToRoute('index');
+                    // lazy way, retrigger ember-data loads...
+                    window.location.href = 'index.html';
+                }
+                /*
+                if (res.registered === true) {
+                    //login user
+                    console.log('user authenticated. Setting UUID Token');
+                    this.set('uuidToken', res.uuidToken);
+                    this.set('isLoggingIn', false);
+                } else {
+                    console.log('onLogin success. Not Registered');
+                    this.set('newUuidToken', res.uuidToken);
+                    this.transitionToRoute('login.register');
+                }*/
+            },
+            error: function(xhr, status, err) { console.log("error: " + status + " error: " + err); }
+        });
+    },
+    doLogout: function() {
+        //controller.set('content', null);
+        this.set('isAuthenticated', false);
+        //Montric.eraseCookie("uuidToken");
+        $.ajax({
+            type: 'GET',
+            url: 'rest-api.php/logout',
+            success: function(xhr, status, err) {
+                console.log('onlogout: ');
+                console.log(xhr);
+                App.eraseCookie("amtcweb");
+                App.eraseCookie("username");
+                App.eraseCookie("isLoggedIn");
+                humane.log('<i class="glyphicon glyphicon-fire"></i> Signed out successfully',
+                  { timeout: 1000, clickToClose: false });
+                window.setTimeout( function(){
+                  window.location.href='index.html'; // not nice ... but ok 4 now
+                }, 1100);
+            },
+            error: function(xhr, status, err) {
+                console.log(xhr);
+                console.log('Error while logging out: ' + err + " status: " + status);
+            }
+        });
+    }
+  },
+});
+var ccc = App.LoginController;
+App.LogoutController = Ember.ObjectController.extend({
+  needs: ["user", "login"],
+  init: function() {
+
+      var controller = this;
+
+      var cuser = App.readCookie("username");
+      var isL = App.readCookie("isLoggedIn");
+      //this.set('username', cuser);
+      //this.set('isLoggedIn', isL);
+      console.log('LOGOUT UserCtrl with user ... ' + cuser);
+      //ctrl = App.LoginController;
+      this.get('controllers.login').send('doLogout');
+      //
+      //if (cuser=='' || isL!=1 ) {
+        //  this.transitionToRoute('login');
+      //}
+  },
+});
+
 App.IndexController = Ember.ObjectController.extend({
   needs: ["notifications"],
   xxx: Ember.computed.alias("controllers.notifications"),
@@ -432,6 +630,67 @@ App.NotificationsController = Ember.ArrayController.extend({
   }.property()
 });
 // Users
+
+// https://raw.githubusercontent.com/joachimhs/Montric/9b9722bd475461be663967d03a3ea3ebfeb5678f/Montric.View/src/main/webapp/js/app/UserController.js
+/*
+App.UserController = Ember.Controller.extend({
+  //needs: ['application', 'mainCharts'],
+  username: null,
+  password: null,
+
+  init: function() {
+      console.log('INIT UserCtrl');
+      var controller = this;
+
+      var cookie = App.readCookie("amtcweb");
+      console.log('COOKIE UUID: ' + cookie);
+      if (cookie) {
+          this.set('uuidToken', cookie);
+      }
+  },
+
+  uuidTokenObserver: function() {
+      console.log('Fetching user: ' + this.get('uuidToken'));
+
+      if (this.get('uuidToken')) {
+          this.set('content', this.store.find('user', this.get('uuidToken')));
+      } else {
+          this.set('content', null);
+          this.transitionToRoute('login');
+      }
+
+  }.observes('uuidToken').on('init'),
+
+  isLoggedIn: function() {
+      return this.get('content.id') != undefined && this.get('content.id') != null;
+  }.property('content.id'),
+
+  userRoleObserver: function() {
+      if (this.get('content.isNotAuthenticated')) {
+          console.log('user is not authenticated in Montric. Transitioning to Login');
+          this.transitionToRoute('login');
+      } else if (this.get('content.isNew')) {
+          this.transitionToRoute('login.activation');
+      } else if (this.get('content.isUnregistered')) {
+          console.log('user is not registered in Montric. Transitioning to Registration');
+          this.transitionToRoute('login.register');
+      } else if (this.get('content.isUser')) {
+          console.log('user is logged in and is a user.');
+
+
+          if (this.get('controllers.application.currentPath') === 'main.login.index' ||
+              this.get('controllers.application.currentPath') === 'main.login.register' ||
+              this.get('controllers.application.currentPath') === 'main.login.activation') {
+
+              console.log('resetting mainCharts controller');
+              this.set('controllers.mainCharts.content', null);
+              this.transitionToRoute('main.charts');
+          }
+      }
+  }.observes('content.userRole')
+});
+*/
+
 // Organizational Units
 App.UserEditController = Ember.ObjectController.extend({
   needs: ["ous"],
@@ -713,6 +972,7 @@ App.SetupController = Ember.ObjectController.extend({
 
   dbs: null, // Array of supported DBs; gets set in SetupRoute
   pdoSupported: false,
+  authurl: null,
 
   isMySQL: function() {
     return (this.get('selectedDB')=='MySQL') ? true : false;
@@ -738,6 +998,7 @@ App.SetupController = Ember.ObjectController.extend({
       mysqlPassword: this.get('mysqlPassword'),
       mysqlDB: this.get('mysqlDB'),
       amtcbin: this.get('amtcbin'),
+      authurl: this.get('authurl'),
       importDemo: this.get('importDemo'),
       installHtaccess: this.get('installHtaccess'),
     };
@@ -969,22 +1230,6 @@ Ember.Handlebars.helper('format-from-now', function(date) {
 
 // Further helpers
 
-App.windowResizeHandler = function() {
-  topOffset = 50;
-  width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
-  if (width < 768) {
-    $('div.navbar-collapse').addClass('collapse');
-    topOffset = 100; // 2-row-menu
-  } else {
-    $('div.navbar-collapse').removeClass('collapse');
-  }
-  height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
-  height = height - topOffset;
-  if (height < 1) height = 1;
-  if (height > topOffset) {
-    $("#page-wrapper").css("min-height", (height) + "px");
-  }
-};
 
 // Legacy amtc-web1 needs-cleanup-stuff
 

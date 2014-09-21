@@ -17,6 +17,10 @@ date_default_timezone_set( defined('AMTC_TZ') ? AMTC_TZ : 'Europe/Berlin');
 require AMTC_WEBROOT.'/lib/php-activerecord/ActiveRecord.php';
 require AMTC_WEBROOT.'/lib/Slim/Slim.php';
 
+// FIXME
+//define('AMTC_AUTH_URL', 'http://localhost/~jan/amtc-web2/basic-auth/');
+//define('AMTC_AUTH_URL', 'https://www1.ethz.ch/id/servicedesk/guide/vpn/vpn_secret');
+
 // Initialize SLIM
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
@@ -39,6 +43,25 @@ ActiveRecord\Config::initialize(function($cfg){
   );
   $cfg->set_default_connection('production');
 });
+
+// Initialize session
+session_name("amtcweb");
+session_start();
+
+// Block access if unauthenticated - only permit some vital routes
+$allowUnauthenticated = Array('authenticate', 'rest-config.js', 'pages',
+                              'phptests', 'submit-configuration');
+$_route = split('/', $app->request()->getPathInfo());
+$route  = $_route[1];
+if ($_SESSION['authenticated'] == true ||
+    in_array($route, $allowUnauthenticated )) {
+    // || REQUEST_HOST == 'localhost' ==> submit CLI via CURL w/o sess?
+    // echo "Authenticated or request that is allowed without...";
+} else {
+  echo "{error:'Unauthenticated'}";
+  exit(0);
+}
+
 
 /*****************************************************************************/
 /**************** Only SLIM request handling below ***************************/
@@ -83,6 +106,7 @@ $app->post('/submit-configuration', function () use ($app) {
   $wanted = array(
     'TIMEZONE'   => preg_replace('/[^A-Za-z\/]/', '',  $_POST['timezone']),
     'AMTCBIN'    => realpath($_POST['amtcbin']),
+    'AUTHURL'    => $_POST['authurl'], /// FIXME
     'DBTYPE'     => preg_replace('/[^A-Za-z]/', '',    $_POST['selectedDB']),
     'DATADIR'    => realpath($_POST['datadir'])
   );
@@ -92,6 +116,7 @@ $app->post('/submit-configuration', function () use ($app) {
     $cfgTpl = "<?php\n\n".
               "define('AMTC_PDOSTRING', '%s');\n".
               "define('AMTC_BIN', '%s');\n".
+              "define('AMTC_AUTH_URL', '%s');\n".
               "define('AMTC_TZ', '%s');\n".
               "define('AMTC_DATADIR', '%s');\n";
 
@@ -113,11 +138,12 @@ $app->post('/submit-configuration', function () use ($app) {
       $wanted['PHPARSTRING'] = sprintf('mysql://%s:%s@%s/%s',
                                           $mUser, $mPass, $mHost, $mDB);
       $dbh = new PDO($wanted['PDOSTRING'], $mUser, $mPass);
+      $dbh->exec('CREATE DATABASE IF NOT EXISTS '.$mDB.';');
     }
+    // stuff below will only happen if PDO connect was ok...
 
-    // will only happen if PDO connect was ok...
     $cfg = sprintf($cfgTpl, $wanted['PHPARSTRING'], $wanted['AMTCBIN'],
-                            $wanted['TIMEZONE'],    $wanted['DATADIR']);
+                   $wanted['AUTHURL'], $wanted['TIMEZONE'], $wanted['DATADIR']);
 
     if (!is_writable(dirname(AMTC_CFGFILE))) {
       $x = array("errorMsg"=>"Config directory ".AMTC_CFGFILE." not writable!");
@@ -149,6 +175,7 @@ $app->get('/phptests', function () use ($app, $phptests) {
     array('id'=>'freshsetup','description'=>'No config file present yet','result'=>!file_exists(AMTC_CFGFILE),         'remedy'=>'remove config/siteconfig.php'),
     array('id'=>'data',      'description'=>'data/ directory writable',  'result'=>is_writable('data'),                'remedy'=>'run chmod 777 on data/ directory'),
     array('id'=>'config',    'description'=>'config/ directory writable','result'=>is_writable('config'),              'remedy'=>'run chmod 777 on config/ directory'),
+    array('id'=>'curl',      'description'=>'PHP cURL support',          'result'=>function_exists('curl_init'),       'remedy'=>'install PHP cURL module'),
     array('id'=>'pdo',       'description'=>'PHP PDO support',           'result'=>phpversion("pdo")?true:false,       'remedy'=>'install PHP PDO module'),
     array('id'=>'pdo_sqlite','description'=>'PDO SQLite support',        'result'=>phpversion("pdo_sqlite")?true:false,'remedy'=>'install PHP PDO sqlite module'),
     array('id'=>'pdo_mysql', 'description'=>'PDO MySQL support',         'result'=>phpversion("pdo_mysql")?true:false, 'remedy'=>'install PHP PDO mysql module'),
@@ -157,8 +184,50 @@ $app->get('/phptests', function () use ($app, $phptests) {
     //'dbconnect' => array('',   '', ''),
     //'dbwrite'   => array('',   '', ''), --> /testdb?
   );
-  $result = array('phptests'=>$tests);
+  $result = array('phptests'=>$tests,
+    'authurl'=>'http://localhost'.dirname($_SERVER['SCRIPT_NAME']).'/basic-auth/');
   echo json_encode( $result );
+});
+
+// simple basic auth verification 'proxy'
+$app->post('/authenticate', function () use ($app) {
+  // done here as browsers do not allow to block basic auth popups... hack? yes.
+  $wanted = array(
+    'username'   => $_POST['username'],
+    'password'   => $_POST['password']
+  );
+  $x = array("exceptionMessage"=>"failed");
+  $_SESSION['authenticated'] = false;
+  if ($wanted['username'] && $wanted['password']) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, AMTC_AUTH_URL);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
+    curl_setopt($ch, CURLOPT_HEADER, 1);
+    curl_setopt($ch, CURLOPT_USERPWD, $wanted['username'] . ":" . $wanted['password']);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, array());
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    $return = curl_exec($ch);
+    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($status === 200) {
+        $x = array("result"=>"success");
+        $_SESSION['authenticated'] = true;
+    } else
+      sleep(2);
+  }
+  echo json_encode($x);
+});
+
+$app->get('/logout', function () use ($app) {
+  if ($_SESSION['authenticated']) {
+    $x=array('message'=>'success');
+  } else {
+    $x=array('message'=>'no success');
+  }
+  session_destroy();
+  echo json_encode($x);
 });
 
 // DB-Model requests
