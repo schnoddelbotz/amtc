@@ -463,6 +463,7 @@ App.LoginController = Ember.ObjectController.extend({
   isLoggingIn: false,
   isAuthenticated: false,
   uuidToken: null,
+  authFailed: null,
 
   sessionid: null,
   username: null,
@@ -536,8 +537,8 @@ App.LoginController = Ember.ObjectController.extend({
             success: function(res, status, xhr) {
                 console.log(res);
                 if (res.exceptionMessage) {
-                  humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
-                   '<p>Bad username/password</p>', { timeout: 1000, clickToClose: false });
+                  self.set('authFailed', true);
+                  $("#password").effect( "shake" );
                 } else if (res.result=='success') {
                     console.log('AUTH SUCCESS!');
                     App.createCookie("username", u);

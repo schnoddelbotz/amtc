@@ -271,9 +271,11 @@
         {{input id="username" type="text" value=username insert-newline="doLogin" class="form-control" placeholder="username"}}
        </p>
        <p>
-        {{input type="password" value=password insert-newline="doLogin" class="form-control" placeholder="password"}}
+        {{input id="password" type="password" value=password insert-newline="doLogin" class="form-control" placeholder="password"}}
        </p>
         <button class="btn btn-default pull-right" {{action 'doLogin'}}><span class="fa fa-fw fa-sign-in"></span> sign in</button>
+
+        {{#if authFailed}}Bad username or password!{{/if}}
       {{/if}}
     </div>
     <div class="col-lg-4">
