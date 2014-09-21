@@ -4,12 +4,6 @@ CFLAGS=-I. -Wall
 AMTCV=$(shell cat ../version)
 APP=amtc-$(AMTCV)
 
-RPMBUILD ?= $(HOME)/rpmbuild
-RPMSRC ?= "$(RPMBUILD)/SOURCES/amtc-$(AMTCV).tar.gz"
-DESTDIR ?= /
-BINDIR ?= usr/bin
-WWWDIR ?= var/www/html
-
 HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset cmd_powercycle wsman_info wsman_info_step2 wsman_up wsman_down wsman_reset wsman_xenum wsman_xenum_step2
 
 amtc: amt.h 
@@ -24,37 +18,3 @@ amt.h:
 
 clean:
 	rm -f cmd_*.h wsman_*.h amtc_usage.h amt.h amtc *.o
-
-# create a tagged release and push it
-# fixme: should update README.md usage
-tag-rel-push:
-	perl -pi -e 's/^Version:.*/Version:\t $(AMTCV)/' ../amtc.spec
-	perl -pi -e 's@archive/\S+.tar.gz@archive/$(APP).tar.gz@' ../amtc.spec
-	( cd .. ; git commit . ; git tag -a "v$(AMTCV)" -m "Created release $(APP)" )
-	( cd .. ; git push ; git push --tags )
-
-# build from github tagged release (from version defined in ../version)
-rpm-rel: 
-	@echo Building release RPM of amtc $(AMTCV) 
-	wget -O $(RPMSRC) https://github.com/schnoddelbotz/amtc/archive/v$(AMTCV).tar.gz
-	rpmbuild -ba ../amtc.spec
-
-# build from local src
-rpm: rpm-snap
-rpm-snap: 
-	@echo Building snapshot RPM of amtc $(AMTCV) 
-	perl -pi -e 's/^Version:.*/Version:\t $(AMTCV)/' ../amtc.spec
-	perl -pi -e 's@archive/\S+.tar.gz@archive/$(APP).tar.gz@' ../amtc.spec
-	(cd ../..; mv amtc $(APP); tar -cvzf $(RPMSRC) $(APP); mv $(APP) amtc )
-	rpmbuild -ba ../amtc.spec
-
-install:
-	mkdir -p $(DESTDIR)/$(BINDIR) $(DESTDIR)/$(WWWDIR)
-	cp amtc $(DESTDIR)/$(BINDIR)
-	cp -R ../amtc-web $(DESTDIR)/var/www/html
-
-# build q&_d_ debian package (uses debian's equivs)
-deb: amtc
-	( cp amtc ..; cd .. ; equivs-build amtc.equivs )
-	( cd .. ; perl -e 'foreach (glob("amtc-web/*/*")) {push @F, "$$_ /var/www/$$_"}; $$f=join("\n ",@F); while (<>) {s#^Files:.*#Files: $$f#;print;}' amtc-web.equivs>amtc-web.equivs.build;  equivs-build amtc-web.equivs.build )
-

@@ -43,8 +43,7 @@ JSFILES="jquery.min.js bootstrap.min.js handlebars.js emberjs.min.js \
 # have a 'clean target' - trash any non-source / downloaded files
 if [ "$1" = "clean" ]; then
   rm -rf fonts css/plugins js/plugins
-  rm -f css/* js/*.js
-  git checkout css/amtc-web.css
+  rm -f css/{b,f,h,s}*.css js/{b,e,h,jq,m,s}*.js
   exit 0
 fi
 
@@ -75,7 +74,7 @@ if [ ! -f "js/bootstrap.min.js" ]; then
   rm -rf tmp_$$ bs.zip
 fi
 
-if [ ! -f "js/sb-admin-2.js" ]; then
+if [ ! -f "css/sb-admin-2.css" ]; then
   echo "Retreiving SB Admin 2"
   mkdir tmp2_$$ && cd tmp2_$$
   $RUNCURL sb.zip http://startbootstrap.com/downloads/sb-admin-2.zip
@@ -117,7 +116,7 @@ for src in css/styles.css js/jslibs.js index.html; do
   gzip -c --best $src > $src.gz
 done
 # drop any source js/css libs, as concatenated versions are used
-if [ ! -z 'DISTCLEAN' ]; then
+if [ ! -z "$DISTCLEAN" ]; then
   (cd css && rm $CSSFILES)
   (cd js && rm $JSFILES)
 fi
