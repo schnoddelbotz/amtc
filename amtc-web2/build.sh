@@ -42,8 +42,12 @@ JSFILES="jquery.min.js bootstrap.min.js handlebars.js emberjs.min.js \
 
 # have a 'clean target' - trash any non-source / downloaded files
 if [ "$1" = "clean" ]; then
-  rm -rf fonts css/plugins js/plugins
-  rm -f css/{b,f,h,s}*.css js/{b,e,h,jq,m,s}*.js
+  rm -rf fonts css/plugins js/plugins {.,css,js}/*.gz
+  rm -f css/{b,f,h,sb}*.css js/{b,e,h,jq,m,s}*.js
+  exit 0
+fi
+if [ "$1" = "distclean" ]; then
+  rm -f css/{b,f,h,sb}*.css js/{b,e,h,jq,m,s}*.js
   exit 0
 fi
 
