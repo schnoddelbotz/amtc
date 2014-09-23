@@ -38,11 +38,17 @@ clean:
 
 install: dist
 	cp -R dist/* $(DESTDIR)
+	rm -f $(DESTDIR)/usr/share/amtc-web/amtc-web2/.htaccess $(DESTDIR)/usr/share/amtc-web/amtc-web2/basic-auth/.htaccess
+	mkdir -p $(DESTDIR)/etc/apache2/conf.d
+	cp amtc-web2/_httpd_conf_example $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
+	ln -s ../../amtc-web/amtc-web_httpd.conf $(DESTDIR)/etc/apache2/conf.d
 
 deb:
 	echo y | dh_make --createorig -s -p amtc_$(AMTCV) || true
-	echo  "#!/bin/sh -e\nchown www-data:www-data /var/lib/amtc-web /etc/amtc-web" > debian/postinst
-	debuild
+	echo  "#!/bin/sh -e\nchown www-data:www-data /var/lib/amtc-web /etc/amtc-web\na2enmod headers\na2enmod rewrite\nservice apache2 restart" > debian/postinst
+	perl -pi -e 's@Description: .*@Description: Intel AMT/DASH remote power management tool@' debian/control
+	perl -pi -e 's@^Depends: (.*)@Depends: $$1, httpd, php5-curl, php5-sqlite|php5-mysql|php5-pgsql@' debian/control
+	debuild -i -us -uc -b
 
 debclean: clean
 	rm -rf debian ../amtc_*
