@@ -1,12 +1,12 @@
 Name:		amtc
-Version:	 0.6.2
+Version:	0.8.2
 Release:	1%{?dist}
 Summary:	Threaded remote power management commandline tool for intel vPro/AMT&DASH hosts
 
 Group:		Applications/System
 License:	CC BY 3.0
 URL:		https://github.com/schnoddelbotz/amtc
-Source0:	https://github.com/schnoddelbotz/amtc/archive/amtc-0.6.2.tar.gz
+Source0:	https://github.com/schnoddelbotz/amtc/archive/amtc-0.8.2.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires:  libcurl-devel,gnutls-devel
@@ -29,13 +29,12 @@ Combining amtc (or amtc-web) with cron makes scheduled power management.
 %setup -q
 
 %build
-cd src
 make %{?_smp_mflags}
 
 %install
 rm -rf %{buildroot}
-cd src
 make install DESTDIR=%{buildroot}
+make rpmfixup DESTDIR=%{buildroot}
 
 %clean
 rm -rf %{buildroot}
@@ -60,8 +59,14 @@ amtc-web is not only a fluffy web-GUI for amtc, brewed in PHP --
 its basic duty of managing lists of hosts to control via amtc-web
 can also be used to effectively power control these hosts using the CLI.
 It uses jQuery client-side and supports PHP PDO databases server-side.
+FIXME: /etc/amtc-web isn't writable F20; FIXME: httpd2.4
 
 %files web
 %defattr(-,root,root,-)
-/var/www/html/amtc-web
+/usr/share/amtc-web
+/etc/amtc-web
+/etc/httpd/conf.d
+/var/lib/amtc-web
 
+%post web
+chown apache /etc/amtc-web /var/lib/amtc-web

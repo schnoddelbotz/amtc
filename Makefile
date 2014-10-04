@@ -8,6 +8,9 @@
 # make amtc      -- build amtc C binary
 # make amtc-web  -- build amtc-web application (V2 ... incomplete yet)
 # make dist      -- prepare dist/ tree for distribution
+# make install   -- respects $DESTDIR
+# make deb       -- build rpm package of amtc incl. amtc-web
+# make rpm       -- build RPMs of amtc and amtc-web
 
 AMTCV=$(shell cat version)
 APP=amtc-$(AMTCV)
@@ -37,21 +40,12 @@ clean:
 # q+d .debian package
 
 install: dist
+	mkdir -p $(DESTDIR)
 	cp -R dist/* $(DESTDIR)
 	rm -f $(DESTDIR)/usr/share/amtc-web/amtc-web2/.htaccess $(DESTDIR)/usr/share/amtc-web/amtc-web2/basic-auth/.htaccess
 	mkdir -p $(DESTDIR)/etc/apache2/conf.d
 	cp amtc-web2/_httpd_conf_example $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
 	ln -s ../../amtc-web/amtc-web_httpd.conf $(DESTDIR)/etc/apache2/conf.d
-
-deb:
-	echo y | dh_make --createorig -s -p amtc_$(AMTCV) || true
-	echo  "#!/bin/sh -e\nchown www-data:www-data /var/lib/amtc-web /etc/amtc-web\na2enmod headers\na2enmod rewrite\nservice apache2 restart" > debian/postinst
-	perl -pi -e 's@Description: .*@Description: Intel AMT/DASH remote power management tool@' debian/control
-	perl -pi -e 's@^Depends: (.*)@Depends: $$1, httpd, php5-curl, php5-sqlite|php5-mysql|php5-pgsql@' debian/control
-	debuild -i -us -uc -b
-
-debclean: clean
-	rm -rf debian ../amtc_*
 
 dist: amtc amtc-web
 	echo "Preparing clean distribution in dist/"
@@ -63,23 +57,25 @@ dist: amtc amtc-web
 	(cd dist && mv $(WWWDIR)/$(AMTCWEBDIR)/config $(ETCDIR)/amtc-web && mv $(WWWDIR)/$(AMTCWEBDIR)/data $(DATADIR)/amtc-web)
 	(cd dist/$(WWWDIR)/$(AMTCWEBDIR) && ln -s /$(ETCDIR)/amtc-web config && ln -s /$(DATADIR)/amtc-web data)
 	(cd dist/$(WWWDIR)/$(AMTCWEBDIR) && perl -pi -e "s@AuthUserFile .*@AuthUserFile /$(ETCDIR)/amtc-web/.htpasswd@" basic-auth/.htaccess)
-	# more to come...
+
+# build debian .deb package (into ../)
+deb:
+	echo y | dh_make --createorig -s -p amtc_$(AMTCV) || true
+	echo  "#!/bin/sh -e\nchown www-data:www-data /var/lib/amtc-web /etc/amtc-web\na2enmod headers\na2enmod rewrite\nservice apache2 restart" > debian/postinst
+	perl -pi -e 's@Description: .*@Description: Intel AMT/DASH remote power management tool@' debian/control
+	perl -pi -e 's@^Depends: (.*)@Depends: $$1, httpd, php5-curl, php5-sqlite|php5-mysql|php5-pgsql@' debian/control
+	debuild -i -us -uc -b
+
+debclean: clean
+	rm -rf debian ../amtc_*
+
+# build RPM package (into ~/rpmbuild/RPMS/)
+rpm:
+	(cd ..; mv amtc $(APP); tar -cvzf $(RPMSRC) $(APP); mv $(APP) amtc )
+	rpmbuild -ba amtc.spec
+
+rpmfixup:
+	mv $(DESTDIR)/etc/apache2 $(DESTDIR)/etc/httpd
 
 
 .PHONY:	amtc-web
-
-
-
-### NEEDS amtc-web2 - CLEANUP/FIX/TEST
-# build from github tagged release (from version defined in ../version)
-rpm-rel: 
-	@echo Building release RPM of amtc $(AMTCV) 
-	wget -O $(RPMSRC) https://github.com/schnoddelbotz/amtc/archive/v$(AMTCV).tar.gz
-	rpmbuild -ba ../amtc.spec
-
-# build from local src
-rpm: rpm-snap
-rpm-snap: 
-	@echo Building snapshot RPM of amtc $(AMTCV) 
-
-

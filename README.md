@@ -101,21 +101,25 @@ building
 ```
 # OSX: Install XCode including CommandLineTools,
 #      Install gnutls, [homebrew](http://brew.sh) recommended.
-cd src
 make
 
 # debianoid: 
-apt-get install libcurl3 libcurl4-gnutls-dev libgnutls-dev build-essential
-cd src ; make
+sudo apt-get install libcurl3 libcurl4-gnutls-dev libgnutls-dev build-essential
+make
+sudo make install
+
+# ... or, create a .deb package - requires ....
+make deb
+sudo dpkg -i ../amtc_xxx.deb
 
 # RHELoid: 
-yum install libcurl-devel gnutls-devel libcurl gnutls
-cd src ; make
-# or
-rpmbuild -ba amtc.spec
+sudo yum install libcurl-devel gnutls-devel libcurl gnutls
+make
+
+# ... or, create a .rpm package - requires ....
+make rpm
 
 # Windows: install cygwin's curl,gnutls and pthreads (-dev) packages, make and gcc
-cd src
 make
 ```
 
