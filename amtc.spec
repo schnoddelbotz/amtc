@@ -70,3 +70,4 @@ FIXME: /etc/amtc-web isn't writable F20; FIXME: httpd2.4
 
 %post web
 chown apache /etc/amtc-web /var/lib/amtc-web
+service httpd reload

@@ -74,6 +74,7 @@ rpm: clean
 
 rpmfixup:
 	mv $(DESTDIR)/etc/apache2 $(DESTDIR)/etc/httpd
-
+	httpd -V  | grep -q Apache/2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Allow from all@Require all granted@sm' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
+	httpd -V  | grep -q Apache/2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Deny from all@Require all denied@smg' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
 
 .PHONY:	amtc-web
