@@ -29,7 +29,7 @@ Combining amtc (or amtc-web) with cron makes scheduled power management.
 %setup -q
 
 %build
-make %{?_smp_mflags}
+make
 
 %install
 rm -rf %{buildroot}

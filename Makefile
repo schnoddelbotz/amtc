@@ -37,8 +37,6 @@ clean:
 	(cd src && make clean)
 	(cd $(AMTCWEBDIR) && ./build.sh clean)
 
-# q+d .debian package
-
 install: dist
 	mkdir -p $(DESTDIR)
 	cp -R dist/* $(DESTDIR)
@@ -58,8 +56,8 @@ dist: amtc amtc-web
 	(cd dist/$(WWWDIR)/$(AMTCWEBDIR) && ln -s /$(ETCDIR)/amtc-web config && ln -s /$(DATADIR)/amtc-web data)
 	(cd dist/$(WWWDIR)/$(AMTCWEBDIR) && perl -pi -e "s@AuthUserFile .*@AuthUserFile /$(ETCDIR)/amtc-web/.htpasswd@" basic-auth/.htaccess)
 
-# build debian .deb package (into ../)
-deb:
+# build q+d debian .deb package (into ../)
+deb: clean
 	echo y | dh_make --createorig -s -p amtc_$(AMTCV) || true
 	echo  "#!/bin/sh -e\nchown www-data:www-data /var/lib/amtc-web /etc/amtc-web\na2enmod headers\na2enmod rewrite\nservice apache2 restart" > debian/postinst
 	perl -pi -e 's@Description: .*@Description: Intel AMT/DASH remote power management tool@' debian/control
@@ -70,8 +68,8 @@ debclean: clean
 	rm -rf debian ../amtc_*
 
 # build RPM package (into ~/rpmbuild/RPMS/)
-rpm:
-	(cd ..; mv amtc $(APP); tar -cvzf $(RPMSRC) $(APP); mv $(APP) amtc )
+rpm: clean
+	(cd ..; mv amtc $(APP); tar --exclude-vcs -czf $(RPMSRC) $(APP); mv $(APP) amtc )
 	rpmbuild -ba amtc.spec
 
 rpmfixup:

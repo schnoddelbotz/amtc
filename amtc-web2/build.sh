@@ -42,7 +42,7 @@ JSFILES="jquery.min.js bootstrap.min.js handlebars.js emberjs.min.js \
 
 # have a 'clean target' - trash any non-source / downloaded files
 if [ "$1" = "clean" ]; then
-  rm -rf fonts css/plugins js/plugins {.,css,js}/*.gz
+  rm -rf fonts css/plugins js/plugins {.,css,js}/*.gz lib/{Slim,php-activerecord}
   rm -f css/{b,f,h,sb}*.css js/{b,e,h,jq,m,s}*.js
   exit 0
 fi
@@ -137,12 +137,10 @@ fi
 
 if [ ! -d "lib/php-activerecord" ]; then
   echo "Retreiving PHP activerecord"
-  mkdir -p lib/php-activerecord
-  $RUNCURL ar.tgz http://www.phpactiverecord.org/builds/php-activerecord-20140720.tgz
-  tar -xzf ar.tgz
-  mv php-activerecord/ActiveRecord.php lib/php-activerecord
-  mv php-activerecord/lib lib/php-activerecord
-  rm -rf php-activerecord ar.tgz
+  cd lib
+  git clone https://github.com/jpfuentes2/php-activerecord.git
+  rm -rf php-activerecord/{examples,test,.gitignore,.travis.yml,CHANGELOG,README.md,composer.json,phpunit.xml.dist,.git}
+  cd ..
 fi
 
 [ -f config/.htpasswd ] || cp config/_htpasswd.default config/.htpasswd
