@@ -69,6 +69,7 @@ debclean: clean
 
 # build RPM package (into ~/rpmbuild/RPMS/)
 rpm: clean
+	mkdir -p $(RPMBUILD)/SOURCES
 	(cd ..; mv amtc $(APP); tar --exclude-vcs -czf $(RPMSRC) $(APP); mv $(APP) amtc )
 	rpmbuild -ba amtc.spec
 
