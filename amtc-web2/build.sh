@@ -48,6 +48,7 @@ if [ "$1" = "clean" ]; then
 fi
 if [ "$1" = "distclean" ]; then
   rm -f css/{b,f,h,sb}*.css js/{b,e,h,jq,m,s}*.js
+  rm -rf {css,js}/plugins
   exit 0
 fi
 
