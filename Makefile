@@ -11,7 +11,7 @@
 # make install   -- respects $DESTDIR
 # make deb       -- build debian/raspian package of amtc incl. amtc-web
 # make rpm       -- build RPMs (RHEL/CentOS/Fedora...) of amtc and amtc-web
-# make osxpkg    -- build OSX installer .pkg (depends on libs in /usr/local)
+# make osxpkg    -- build OSX installer .pkg
 
 AMTCV=$(shell cat version)
 APP=amtc-$(AMTCV)
@@ -74,13 +74,15 @@ rpm: clean
 	mkdir -p $(RPMBUILD)/SOURCES
 	(cd ..; mv amtc $(APP); tar --exclude-vcs -czf $(RPMSRC) $(APP); mv $(APP) amtc )
 	rpmbuild -ba amtc.spec
+	@echo "RPMs successfully built into: $(RPMBUILD). You may now try:"
+	@echo " sudo yum localinstall $(RPMBUILD)/RPMS/*/*.rpm"
 
 rpmfixup:
 	mv $(DESTDIR)/etc/apache2 $(DESTDIR)/etc/httpd
 	rpm -qa | grep httpd-2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Allow from all@Require all granted@sm' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf || true
 	rpm -qa | grep httpd-2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Deny from all@Require all denied@smg' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf || true
 
-# build OSX .pkg -- still requires gnutls+gcrypt via homebrew or others on target machine...
+# build OSX .pkg; uses Secure Transport
 osxpkg: dist
 	mkdir -p osxpkgscripts osxpkgroot
 	DESTDIR=osxpkgroot make install

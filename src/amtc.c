@@ -17,7 +17,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <curl/curl.h>
-#include <gcrypt.h>
 #include <errno.h>
 #include "amt.h"
 
@@ -36,8 +35,6 @@
 #define SCANRESULT_SSH_OPEN  22
 #define SCANRESULT_NONE_RUN  999
 #define SCANRESULT_RDP_OPEN  3389
-
-GCRY_THREAD_OPTION_PTHREAD_IMPL;
 
 unsigned char *acmds[] = {
   /* SOAP/XML request bodies as included via amt.h, AMT6-8 */
@@ -201,7 +198,6 @@ int main(int argc,char **argv,char **envp) {
 
   sem_init(&mutex, 0, 1);
   curl_global_init(CURL_GLOBAL_ALL);
-  gcry_control (GCRYCTL_SET_THREAD_CBS, &gcry_threads_pthread);
 
   process_hostlist();
 
