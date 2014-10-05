@@ -34,7 +34,7 @@ amtc-web:
 	(cd $(AMTCWEBDIR) && ./build.sh)
 
 clean:
-	rm -rf dist amtc amtc*.deb *.build debian/amtc osxpkgscripts osxpkgroot
+	rm -rf dist amtc amtc*.{deb,pkg} *.build debian/amtc osxpkgscripts osxpkgroot
 	(cd src && make clean)
 	(cd $(AMTCWEBDIR) && ./build.sh clean)
 
@@ -83,7 +83,7 @@ rpmfixup:
 	rpm -qa | grep httpd-2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Deny from all@Require all denied@smg' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf || true
 
 # build OSX .pkg; uses Secure Transport
-osxpkg: dist
+osxpkg: clean dist
 	mkdir -p osxpkgscripts osxpkgroot
 	DESTDIR=osxpkgroot make install
 	echo "#!/bin/sh" > osxpkgscripts/postinstall
