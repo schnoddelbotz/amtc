@@ -88,8 +88,10 @@ osxpkg: dist
 	DESTDIR=osxpkgroot make install
 	echo "#!/bin/sh" > osxpkgscripts/postinstall
 	echo "chown _www /etc/amtc-web /var/lib/amtc-web" >> osxpkgscripts/postinstall
+	echo "perl -pi -e 's@#LoadModule php5_module@LoadModule php5_module@' /etc/apache2/httpd.conf" >> osxpkgscripts/postinstall
+	echo "apachectl restart" >> osxpkgscripts/postinstall
 	chmod +x osxpkgscripts/postinstall
 	mv osxpkgroot/etc/apache2/conf.d osxpkgroot/etc/apache2/other
-	pkgbuild --root osxpkgroot --scripts osxpkgscripts --identifier ch.hacker.amtc amtc_$(AMTCV).pkg
+	pkgbuild --root osxpkgroot --scripts osxpkgscripts --identifier ch.hacker.amtc amtc_$(AMTCV)-OSX-$(shell sw_vers -productVersion).pkg
 
 .PHONY:	amtc-web
