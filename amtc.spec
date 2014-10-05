@@ -53,13 +53,13 @@ rm -rf %{buildroot}
 Summary:	Remote power management Web-GUI for intel vPro/AMT&DASH hosts, using amtc
 Group:		Applications/Internet
 BuildArch:  noarch
+Requires: httpd,php,php-pdo
 
 %description web
 amtc-web is not only a fluffy web-GUI for amtc, brewed in PHP --
 its basic duty of managing lists of hosts to control via amtc-web
 can also be used to effectively power control these hosts using the CLI.
 It uses jQuery client-side and supports PHP PDO databases server-side.
-FIXME: /etc/amtc-web isn't writable F20; FIXME: httpd2.4
 
 %files web
 %defattr(-,root,root,-)
@@ -70,4 +70,5 @@ FIXME: /etc/amtc-web isn't writable F20; FIXME: httpd2.4
 
 %post web
 chown apache /etc/amtc-web /var/lib/amtc-web
+chcon -R -t httpd_sys_rw_content_t /etc/amtc-web
 service httpd reload

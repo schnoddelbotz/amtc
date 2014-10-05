@@ -9,9 +9,9 @@
 # make amtc-web  -- build amtc-web application (V2 ... incomplete yet)
 # make dist      -- prepare dist/ tree for distribution
 # make install   -- respects $DESTDIR
-# make deb       -- build rpm package of amtc incl. amtc-web
-# make rpm       -- build RPMs of amtc and amtc-web
-# make osxpkg    -- build OSX installer .pkg
+# make deb       -- build debian/raspian package of amtc incl. amtc-web
+# make rpm       -- build RPMs (RHEL/CentOS/Fedora...) of amtc and amtc-web
+# make osxpkg    -- build OSX installer .pkg (depends on libs in /usr/local)
 
 AMTCV=$(shell cat version)
 APP=amtc-$(AMTCV)
@@ -63,6 +63,7 @@ deb: clean
 	echo  "#!/bin/sh -e\nchown www-data:www-data /var/lib/amtc-web /etc/amtc-web\na2enmod headers\na2enmod rewrite\nservice apache2 restart" > debian/postinst
 	perl -pi -e 's@Description: .*@Description: Intel AMT/DASH remote power management tool@' debian/control
 	perl -pi -e 's@^Depends: (.*)@Depends: $$1, httpd, php5-curl, php5-sqlite|php5-mysql|php5-pgsql@' debian/control
+	perl -pi -e 's@^Build-Depends: (.*)@Build-Depends: $$1, curl, vim-common, libcurl3, libcurl4-gnutls-dev, libgnutls-dev@' debian/control
 	debuild -i -us -uc -b
 
 debclean: clean
@@ -76,8 +77,8 @@ rpm: clean
 
 rpmfixup:
 	mv $(DESTDIR)/etc/apache2 $(DESTDIR)/etc/httpd
-	httpd -V  | grep -q Apache/2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Allow from all@Require all granted@sm' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
-	httpd -V  | grep -q Apache/2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Deny from all@Require all denied@smg' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
+	rpm -qa | grep httpd-2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Allow from all@Require all granted@sm' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf || true
+	rpm -qa | grep httpd-2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Deny from all@Require all denied@smg' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf || true
 
 # build OSX .pkg -- still requires gnutls+gcrypt via homebrew or others on target machine...
 osxpkg: dist

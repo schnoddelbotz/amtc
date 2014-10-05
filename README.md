@@ -108,7 +108,8 @@ sudo apt-get install libcurl3 libcurl4-gnutls-dev libgnutls-dev build-essential
 make
 sudo make install
 
-# ... or, create a .deb package - requires ....
+# ... or, create a .deb package (has additional build requirements)
+sudo apt-get install dh-make devscripts
 make deb
 sudo dpkg -i ../amtc_xxx.deb
 
