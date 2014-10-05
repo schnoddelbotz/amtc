@@ -11,6 +11,7 @@
 # make install   -- respects $DESTDIR
 # make deb       -- build rpm package of amtc incl. amtc-web
 # make rpm       -- build RPMs of amtc and amtc-web
+# make osxpkg    -- build OSX installer .pkg
 
 AMTCV=$(shell cat version)
 APP=amtc-$(AMTCV)
@@ -33,7 +34,7 @@ amtc-web:
 	(cd $(AMTCWEBDIR) && ./build.sh)
 
 clean:
-	rm -rf dist amtc amtc*.deb *.build debian/amtc
+	rm -rf dist amtc amtc*.deb *.build debian/amtc osxpkgscripts osxpkgroot
 	(cd src && make clean)
 	(cd $(AMTCWEBDIR) && ./build.sh clean)
 
@@ -77,5 +78,15 @@ rpmfixup:
 	mv $(DESTDIR)/etc/apache2 $(DESTDIR)/etc/httpd
 	httpd -V  | grep -q Apache/2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Allow from all@Require all granted@sm' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
 	httpd -V  | grep -q Apache/2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Deny from all@Require all denied@smg' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
+
+# build OSX .pkg -- still requires gnutls+gcrypt via homebrew or others on target machine...
+osxpkg: dist
+	mkdir -p osxpkgscripts osxpkgroot
+	DESTDIR=osxpkgroot make install
+	echo "#!/bin/sh" > osxpkgscripts/postinstall
+	echo "chown _www /etc/amtc-web /var/lib/amtc-web" >> osxpkgscripts/postinstall
+	chmod +x osxpkgscripts/postinstall
+	mv osxpkgroot/etc/apache2/conf.d osxpkgroot/etc/apache2/other
+	pkgbuild --root osxpkgroot --scripts osxpkgscripts --identifier ch.hacker.amtc amtc_$(AMTCV).pkg
 
 .PHONY:	amtc-web
