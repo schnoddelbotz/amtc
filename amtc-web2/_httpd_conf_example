@@ -1,6 +1,6 @@
-Alias /amtc-web /usr/share/amtc-web/amtc-web2
+Alias /amtc-web /usr/share/amtc-web
 
-<Directory /usr/share/amtc-web/amtc-web2>
+<Directory /usr/share/amtc-web>
   Order allow,deny
   Allow from all
   Options SymLinksIfOwnerMatch
@@ -29,19 +29,19 @@ Alias /amtc-web /usr/share/amtc-web/amtc-web2
   RewriteRule ^(/.*)(.+\.js|.+\.css|.+\.html)$ $1$2.gz [L]
 </Directory> 
 
-<Directory /usr/share/amtc-web/amtc-web2/basic-auth>
+<Directory /usr/share/amtc-web/basic-auth>
   AuthUserFile /etc/amtc-web/.htpasswd
   AuthName "amtc-web loopback basic auth"
   AuthType Basic
   require valid-user
 </Directory> 
 
-<Directory /usr/share/amtc-web/amtc-web2/data>
+<Directory /usr/share/amtc-web/data>
   Order allow,deny
   Deny from all
 </Directory> 
 
-<Directory /usr/share/amtc-web/amtc-web2/config>
+<Directory /usr/share/amtc-web/config>
   Order allow,deny
   Deny from all
 </Directory> 

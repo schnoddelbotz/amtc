@@ -3,7 +3,7 @@
 # https://github.com/schnoddelbotz/amtc
 #
 # Toplevel Makefile for amtc and amtc-web.
-# 
+#
 # Targets:
 # make amtc      -- build amtc C binary
 # make amtc-web  -- build amtc-web application (V2 ... incomplete yet)
@@ -42,9 +42,9 @@ clean:
 install: dist
 	mkdir -p $(DESTDIR)
 	cp -R dist/* $(DESTDIR)
-	rm -f $(DESTDIR)/usr/share/amtc-web/amtc-web2/.htaccess $(DESTDIR)/usr/share/amtc-web/amtc-web2/basic-auth/.htaccess
+	rm -f $(DESTDIR)/$(WWWDIR)/.htaccess $(DESTDIR)/$(WWWDIR)/basic-auth/.htaccess
 	mkdir -p $(DESTDIR)/etc/apache2/conf.d
-	cp amtc-web2/_httpd_conf_example $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
+	cp $(AMTCWEBDIR)/_httpd_conf_example $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
 	ln -s ../../amtc-web/amtc-web_httpd.conf $(DESTDIR)/etc/apache2/conf.d
 
 dist: amtc amtc-web
@@ -52,11 +52,11 @@ dist: amtc amtc-web
 	rm -rf dist
 	mkdir -p dist/$(BINDIR) dist/$(WWWDIR) dist/$(ETCDIR) dist/$(DATADIR)
 	cp src/amtc dist/$(BINDIR)
-	cp -R $(AMTCWEBDIR) dist/$(WWWDIR)
-	(cd dist/$(WWWDIR)/$(AMTCWEBDIR) && ./build.sh distclean && mv _htaccess_example .htaccess && rm -f basic-auth/_htaccess.default config/_htpasswd.default data/amtc-web.db config/siteconfig.php build.sh)
-	(cd dist && mv $(WWWDIR)/$(AMTCWEBDIR)/config $(ETCDIR)/amtc-web && mv $(WWWDIR)/$(AMTCWEBDIR)/data $(DATADIR)/amtc-web)
-	(cd dist/$(WWWDIR)/$(AMTCWEBDIR) && ln -s /$(ETCDIR)/amtc-web config && ln -s /$(DATADIR)/amtc-web data)
-	(cd dist/$(WWWDIR)/$(AMTCWEBDIR) && perl -pi -e "s@AuthUserFile .*@AuthUserFile /$(ETCDIR)/amtc-web/.htpasswd@" basic-auth/.htaccess)
+	cp -R $(AMTCWEBDIR)/* dist/$(WWWDIR)
+	(cd dist/$(WWWDIR) && ./build.sh distclean && mv _htaccess_example .htaccess && rm -f basic-auth/_htaccess.default config/_htpasswd.default data/amtc-web.db config/siteconfig.php build.sh)
+	(cd dist && mv $(WWWDIR)/config $(ETCDIR)/amtc-web && mv $(WWWDIR)/data $(DATADIR)/amtc-web)
+	(cd dist/$(WWWDIR) && ln -s /$(ETCDIR)/amtc-web config && ln -s /$(DATADIR)/amtc-web data)
+	(cd dist/$(WWWDIR) && perl -pi -e "s@AuthUserFile .*@AuthUserFile /$(ETCDIR)/amtc-web/.htpasswd@" basic-auth/.htaccess)
 
 # build q+d debian .deb package (into ../)
 deb: clean

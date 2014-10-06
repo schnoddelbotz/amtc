@@ -74,7 +74,6 @@ $app->get('/rest-config.js', function () use ($app) {
   // what about rootURL ? http://emberjs.com/guides/routing/
   // this response could be done statically if #/setup would write it to config/cfg.js?
 });
-
 // Return static markdown help pages, json encoded
 $app->get('/pages/:id', function ($id) use ($app) {
   $file = sprintf("pages/%s.md", $id);
@@ -87,7 +86,6 @@ $app->get('/pages/:id', function ($id) use ($app) {
     'page_content' => $contents
   )));
 });
-
 // Installer
 $app->post('/submit-configuration', function () use ($app) {
 
@@ -159,7 +157,6 @@ $app->post('/submit-configuration', function () use ($app) {
 
   echo json_encode($x);
 });
-
 // installation precondition tests
 $app->get('/phptests', function () use ($app) {
   $v=explode(".",PHP_VERSION);
@@ -181,7 +178,6 @@ $app->get('/phptests', function () use ($app) {
     'authurl'=>'http://localhost'.dirname($_SERVER['SCRIPT_NAME']).'/basic-auth/');
   echo json_encode( $result );
 });
-
 // simple basic auth verification 'proxy'
 $app->post('/authenticate', function () use ($app) {
   // done here as browsers do not allow to block basic auth popups... hack? yes.
@@ -212,7 +208,6 @@ $app->post('/authenticate', function () use ($app) {
   }
   echo json_encode($x);
 });
-
 $app->get('/logout', function () use ($app) {
   if ($_SESSION['authenticated']) {
     $x=array('message'=>'success');
@@ -278,7 +273,7 @@ $app->put('/ous/:id', function ($id) {
 $app->post('/ous', function () use ($app) {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $ndev = $post['ou'];
-  if ($dev = new OU) {
+  if ($dev = OU::create()) {
     $dev->name = $ndev->name;
     $dev->description = $ndev->description;
     $dev->parent_id = $ndev->parent_id;
@@ -336,7 +331,6 @@ $app->get('/laststates', function () {
 
 
 /**************** Users ******************************************************/
-// ACL control: undone. intension is to do auth via apache / external source...
 
 $app->get('/users', function () {
   $result = array('users'=>array());
