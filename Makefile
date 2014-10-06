@@ -12,6 +12,7 @@
 # make deb       -- build debian/raspian package of amtc incl. amtc-web
 # make rpm       -- build RPMs (RHEL/CentOS/Fedora...) of amtc and amtc-web
 # make osxpkg    -- build OSX installer .pkg
+# make purge     -- remove any installed package, INCLUDING data
 
 AMTCV=$(shell cat version)
 APP=amtc-$(AMTCV)
@@ -93,5 +94,14 @@ osxpkg: clean dist
 	chmod +x osxpkgscripts/postinstall
 	mv osxpkgroot/etc/apache2/conf.d osxpkgroot/etc/apache2/other
 	pkgbuild --root osxpkgroot --scripts osxpkgscripts --identifier ch.hacker.amtc amtc_$(AMTCV)-OSX-$(shell sw_vers -productVersion).pkg
+
+# uninstall any installed package and remove any file/directory created by amtc-web
+purge:
+	@echo "Removing any installed amtc(-web). Should be used via sudo/su."
+	[ `whoami` = 'root' ] || exit 1
+	-pkgutil --forget ch.hacker.amtc
+	-apt-get remove --purge amtc
+	-rpm -e amtc amtc-web amtc-debuginfo
+	rm -rf /etc/amtc-web /var/lib/amtc-web /usr/share/amtc-web /etc/{httpd,apache2}/{other,conf.d}/amtc-web_httpd.conf
 
 .PHONY:	amtc-web
