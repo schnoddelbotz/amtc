@@ -1,4 +1,4 @@
 <?php
-class Statelog extends ActiveRecord\Model
-{
+class Statelog extends Model {
+  public static $_table = 'statelogs';
 }

@@ -1,4 +1,4 @@
 <?php
-class Optionset extends ActiveRecord\Model
-{
+class Optionset extends Model {
+  public static $_table = 'optionsets';
 }

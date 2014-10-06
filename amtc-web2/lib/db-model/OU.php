@@ -3,8 +3,13 @@
 /**
 * Represents an OU
 */
-class OU extends ActiveRecord\Model
+class OU extends Model
 {
+  public static $_table = 'ous';
+
+/* php-activerecord ... replace by:
+   http://paris.readthedocs.org/en/latest/associations.html
+ 
   static $belongs_to = array(
     array('parent_id', 'class_name' => 'OU', 'foreign_key'=>'parent_id'),
   );
@@ -12,6 +17,7 @@ class OU extends ActiveRecord\Model
   static $has_many = array(
     array('children', 'class_name' => 'OU', 'foreign_key' => 'parent_id'),
   );
+*/
 
 
   /*
@@ -19,6 +25,7 @@ class OU extends ActiveRecord\Model
    * e.g. /Customer/Floor/...
    * might be ugly, (not only) in a phpAR sense, sorry ... 
    */
+// paris has no exists()
   function getPathString() {
     $p[] = $this->name;
     $has_parent = Ou::exists(array('id'=>$this->parent_id));

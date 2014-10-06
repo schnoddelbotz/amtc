@@ -1,4 +1,4 @@
 <?php
-class Host extends ActiveRecord\Model
-{
+class Host extends Model {
+  public static $_table = 'hosts';
 }

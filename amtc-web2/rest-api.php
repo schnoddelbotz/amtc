@@ -3,25 +3,29 @@
  * rest-api.php - part of amtc-web, part of amtc
  * https://github.com/schnoddelbotz/amtc
  *
- * Use http://www.slimframework.com/ and http://www.phpactiverecord.org/
+ * Use http://www.slimframework.com/ and http://j4mie.github.io/idiormandparis/
  * to provide a REST backend for amtc-web (ember-data, installer, amtc ...)
  */
-
 // sleep(2);
+// error_reporting(E_ALL); ini_set('display_errors','stdout');
 
 define('AMTC_WEBROOT', dirname(__FILE__));
 define('AMTC_CFGFILE', AMTC_WEBROOT.'/config/siteconfig.php');
 @include AMTC_CFGFILE; // to let static ember help pages work even if unconfigured
 date_default_timezone_set( defined('AMTC_TZ') ? AMTC_TZ : 'Europe/Berlin');
 
-require AMTC_WEBROOT.'/lib/php-activerecord/ActiveRecord.php';
-require AMTC_WEBROOT.'/lib/Slim/Slim.php';
+set_include_path(get_include_path().PATH_SEPARATOR.
+  AMTC_WEBROOT.'/lib'.PATH_SEPARATOR.AMTC_WEBROOT.'/lib/db-model');
+spl_autoload_extensions('.php');
+spl_autoload_register();
+require 'idiorm.php';
+require 'paris.php';
+require 'Slim/Slim.php';
 
-// FIXME
-//define('AMTC_AUTH_URL', 'http://localhost/~jan/amtc-web2/basic-auth/');
-//define('AMTC_AUTH_URL', 'https://www1.ethz.ch/id/servicedesk/guide/vpn/vpn_secret');
+// Initialize http://j4mie.github.io/idiormandparis/
+ORM::configure(AMTC_PDOSTRING);
 
-// Initialize SLIM
+// Initialize http://www.slimframework.com/
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
 $app->config('debug', false); // ... and enables custom $app->error() handler
@@ -30,18 +34,7 @@ $app->notFound(function () use ($app) {
   echo json_encode(Array('error'=>'Not found'));
 });
 $app->error(function (\Exception $e) use ($app) {
-  echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') ); // to much / insecure?
-});
-
-// Initialize http://www.phpactiverecord.org/
-ActiveRecord\Config::initialize(function($cfg){
-  $cfg->set_model_directory(AMTC_WEBROOT.'/lib/db-model');
-  $cfg->set_connections(
-     array(
-      'production' => AMTC_PDOSTRING
-     )
-  );
-  $cfg->set_default_connection('production');
+  echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') );
 });
 
 // Initialize session
@@ -51,7 +44,7 @@ session_start();
 // Block access if unauthenticated - only permit some vital routes
 $allowUnauthenticated = Array('authenticate', 'rest-config.js', 'pages',
                               'phptests', 'submit-configuration');
-$_route = split('/', $app->request()->getPathInfo());
+$_route = explode('/', $app->request()->getPathInfo());
 $route  = $_route[1];
 if ($_SESSION['authenticated'] == true ||
     in_array($route, $allowUnauthenticated )) {
@@ -125,7 +118,6 @@ $app->post('/submit-configuration', function () use ($app) {
       @touch($_POST['sqlitePath']); // grr should be called sqlitefile not path
       $wanted['SQLITEPATH'] = realpath($_POST['sqlitePath']);
       $wanted['PDOSTRING'] = sprintf('sqlite:%s', $wanted['SQLITEPATH']);
-      $wanted['PHPARSTRING'] = sprintf('sqlite://unix(%s)', $wanted['SQLITEPATH']);
       $dbh = new PDO($wanted['PDOSTRING']);
     }
     if ($wanted['DBTYPE'] == 'MySQL') {
@@ -135,14 +127,15 @@ $app->post('/submit-configuration', function () use ($app) {
       $mHost = preg_replace('/[^A-Za-z]/', '',    $_POST['mysqlHost']);
       $mDB   = preg_replace('/[^A-Za-z]/', '',    $_POST['mysqlDB']);
       $wanted['PDOSTRING'] = sprintf('mysql:host=%s;dbname=%s', $mHost, $mDB);
-      $wanted['PHPARSTRING'] = sprintf('mysql://%s:%s@%s/%s',
-                                          $mUser, $mPass, $mHost, $mDB);
+      // FIXME ... paris needs own function calls for setup... :-/
+      //$wanted['PHPARSTRING'] = sprintf('mysql://%s:%s@%s/%s',
+      //                                    $mUser, $mPass, $mHost, $mDB);
       $dbh = new PDO($wanted['PDOSTRING'], $mUser, $mPass);
       $dbh->exec('CREATE DATABASE IF NOT EXISTS '.$mDB.';');
     }
     // stuff below will only happen if PDO connect was ok...
 
-    $cfg = sprintf($cfgTpl, $wanted['PHPARSTRING'], $wanted['AMTCBIN'],
+    $cfg = sprintf($cfgTpl, $wanted['PDOSTRING'], $wanted['AMTCBIN'],
                    $wanted['AUTHURL'], $wanted['TIMEZONE'], $wanted['DATADIR']);
 
     if (!is_writable(dirname(AMTC_CFGFILE))) {
@@ -168,7 +161,7 @@ $app->post('/submit-configuration', function () use ($app) {
 });
 
 // installation precondition tests
-$app->get('/phptests', function () use ($app, $phptests) {
+$app->get('/phptests', function () use ($app) {
   $v=explode(".",PHP_VERSION);
   $tests = array(
     array('id'=>'php53',     'description'=>'PHP version 5.3+',          'result'=>$v[0]>5||($v[0]==5&&$v[1]>2),       'remedy'=>'upgrade PHP to 5.3+'),
@@ -236,7 +229,10 @@ $app->get('/logout', function () use ($app) {
 
 $app->get('/notifications', function () {
   $result = array('notifications'=>array());
-  foreach (Notification::all(array("order" => "tstamp desc", 'limit' => 50)) as $record) { $result['notifications'][] = $record->to_array(); }
+  // php-activerecord...
+  //foreach (Notification::all(array("order" => "tstamp desc", 'limit' => 50)) as $record) { $result['notifications'][] = $record->to_array(); }
+  // paris....
+  foreach (Notification::limit(20)->order_by_desc('tstamp')->find_many() as $record) { $result['notifications'][] = $record->as_array(); }
   echo json_encode( $result );
 });
 
@@ -244,29 +240,31 @@ $app->get('/notifications', function () {
 
 $app->get('/ous', function () {
   $result = array('ous'=>array());
-  foreach (OU::all() as $record) {
-    $r = $record->to_array();
-    $children = OU::find('all', array('conditions' => array('parent_id = ?', $r['id'])));
+  foreach (OU::find_many() as $record) {
+    $r = $record->as_array();
+    //print_r($r);
+    $children = OU::where('parent_id', $r['id'])->find_many() ;//'all', array('conditions' => array('parent_id = ?', $r['id'])));
+    //$children = OU::find_many() ;
     $kids = array();
     foreach ($children as $childOu) {
       $kids[] = $childOu->id;
     }
     $r['children'] = $kids;
-    $r['ou_path'] = $record->getPathString(); // should/could be done clientside, too
+    $r['ou_path'] = 'fixme';// fixme $record->getPathString(); // should/could be done clientside, too
     $result['ous'][] = $r;
   }
   # relations? Book::all(array('include'=>array('author'));
   echo json_encode( $result );
 });
 $app->get('/ous/:id', function ($ouid) use ($app) {
-  if ($ou = OU::find($ouid)) {
-    echo json_encode( array('ou'=> $ou->to_array()) );
+  if ($ou = OU::find_one($ouid)) {
+    echo json_encode( array('ou'=> $ou->as_array()) );
   }
 });
 $app->put('/ous/:id', function ($id) {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $udev = $put['ou'];
-  if ($dev = OU::find_by_id($id)) {
+  if ($dev = OU::find_one($id)) {
     $dev->name = $udev->name;
     $dev->description = $udev->description;
     $dev->parent_id = $udev->parent_id;
@@ -274,7 +272,7 @@ $app->put('/ous/:id', function ($id) {
     $dev->idle_power = $udev->idle_power;
     $dev->logging = $udev->logging;
     $dev->save();
-    echo json_encode( array('ou'=> $dev->to_array()) );
+    echo json_encode( array('ou'=> $dev->as_array()) );
   }
 });
 $app->post('/ous', function () use ($app) {
@@ -288,11 +286,11 @@ $app->post('/ous', function () use ($app) {
     $dev->idle_power = $ndev->idle_power;
     $dev->logging = $ndev->logging;
     $dev->save();
-    echo json_encode( array('ou'=> $dev->to_array()) );
+    echo json_encode( array('ou'=> $dev->as_array()) );
   }
 });
 $app->delete('/ous/:id', function ($id) {
-  if ($dev = OU::find_by_id($id)) {
+  if ($dev = OU::find_one($id)) {
     OU::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
     // "Note: Although after destroyRecord or deleteRecord/save the adapter
@@ -307,8 +305,8 @@ $app->delete('/ous/:id', function ($id) {
 
 $app->get('/hosts', function () {
   $result = array('hosts'=>array());
-  foreach (Host::all(array("order" => "hostname asc")) as $record) {
-    $r = $record->to_array();
+  foreach (Host::order_by_asc('hostname')->find_many() as $record) {
+    $r = $record->as_array();
     $result['hosts'][] = $r;
   }
   echo json_encode( $result );
@@ -316,18 +314,18 @@ $app->get('/hosts', function () {
 $app->post('/hosts', function () use ($app) {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $ndev = $post['host'];
-  if ($dev = new Host) {
+  if ($dev = Host::create()) {
     $dev->hostname = $ndev->hostname;
     $dev->ou_id = $ndev->ou_id;
     $dev->save();
-    echo json_encode( array('host'=> $dev->to_array()) );
+    echo json_encode( array('host'=> $dev->as_array()) );
   }
 });
 // should better be side-loaded with hosts...?
 $app->get('/laststates', function () {
   $result = array('laststates'=>array());
-  foreach (Laststate::all() as $record) {
-    $result['laststates'][] = $record->to_array();
+  foreach (Laststate::find_many() as $record) {
+    $result['laststates'][] = $record->as_array();
   }
   echo json_encode( $result );
 });
@@ -342,21 +340,21 @@ $app->get('/laststates', function () {
 
 $app->get('/users', function () {
   $result = array('users'=>array());
-  foreach (User::all(array("order" => "name asc")) as $record) {
-    $r = $record->to_array();
+  foreach (User::order_by_asc('name')->find_many() as $record) {
+    $r = $record->as_array();
     $result['users'][] = $r;
   }
   echo json_encode( $result );
 });
 $app->get('/users/:id', function ($uid) use ($app) {
-  if ($user = User::find($uid)) {
-    echo json_encode( array('user'=> $user->to_array()) );
+  if ($user = User::find_one($uid)) {
+    echo json_encode( array('user'=> $user->as_array()) );
   }
 });
 $app->put('/users/:id', function ($id) {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $udev = $put['user'];
-  if ($dev = User::find_by_id($id)) {
+  if ($dev = User::find_one($id)) {
     $dev->name = $udev->name;
     $dev->fullname = $udev->fullname;
     $dev->ou_id = $udev->ou_id;
@@ -365,13 +363,13 @@ $app->put('/users/:id', function ($id) {
     $dev->is_admin = $udev->is_admin;
     $dev->can_control = $udev->can_control;
     $dev->save();
-    echo json_encode( array('user'=> $dev->to_array()) );
+    echo json_encode( array('user'=> $dev->as_array()) );
   }
 });
 $app->post('/users', function () {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $udev = $put['user'];
-  if ($dev = new User) {
+  if ($dev = User::create()) {
     $dev->name = $udev->name;
     $dev->fullname = $udev->fullname;
     $dev->ou_id = $udev->ou_id;
@@ -380,11 +378,11 @@ $app->post('/users', function () {
     $dev->is_admin = $udev->is_admin;
     $dev->can_control = $udev->can_control;
     $dev->save();
-    echo json_encode( array('user'=> $dev->to_array()) );
+    echo json_encode( array('user'=> $dev->as_array()) );
   }
 });
 $app->delete('/users/:id', function ($id) {
-  if ($dev = User::find_by_id($id)) {
+  if ($dev = User::find_one($id)) {
     Optionset::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
     echo '{}';
@@ -395,21 +393,21 @@ $app->delete('/users/:id', function ($id) {
 
 $app->get('/optionsets', function () {
   $result = array('optionsets'=>array());
-  foreach (Optionset::all(array("order" => "name asc")) as $record) {
-    $r = $record->to_array();
+  foreach (Optionset::order_by_asc('name')->find_many() as $record) {
+    $r = $record->as_array();
     $result['optionsets'][] = $r;
   }
   echo json_encode( $result );
 });
 $app->get('/optionsets/:id', function ($ouid) use ($app) {
-  if ($os = Optionset::find($ouid)) {
-    echo json_encode( array('optionset'=> $os->to_array()) );
+  if ($os = Optionset::find_one($ouid)) {
+    echo json_encode( array('optionset'=> $os->as_array()) );
   }
 });
 $app->put('/optionsets/:id', function ($id) {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $udev = $put['optionset'];
-  if ($dev = Optionset::find_by_id($id)) {
+  if ($dev = Optionset::find_one($id)) {
     $dev->name = $udev->name;
     $dev->description = $udev->description;
     $dev->sw_v5 = $udev->sw_v5;
@@ -424,11 +422,11 @@ $app->put('/optionsets/:id', function ($id) {
     $dev->opt_passfile = $udev->opt_passfile;
     $dev->opt_timeout = $udev->opt_timeout;
     $dev->save();
-    echo json_encode( array('optionset'=> $dev->to_array()) );
+    echo json_encode( array('optionset'=> $dev->as_array()) );
   }
 });
 $app->delete('/optionsets/:id', function ($id) {
-  if ($dev = Optionset::find_by_id($id)) {
+  if ($dev = Optionset::find_one($id)) {
     Optionset::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
     echo '{}';
@@ -437,7 +435,7 @@ $app->delete('/optionsets/:id', function ($id) {
 $app->post('/optionsets', function () use ($app) {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $udev = $post['optionset'];
-  if ($dev = new Optionset) {
+  if ($dev = Optionset::create()) {
     $dev->name = $udev->name;
     $dev->description = $udev->description;
     $dev->sw_v5 = $udev->sw_v5;
@@ -452,7 +450,7 @@ $app->post('/optionsets', function () use ($app) {
     $dev->opt_passfile = $udev->opt_passfile;
     $dev->opt_timeout = $udev->opt_timeout;
     $dev->save();
-    echo json_encode( array('optionset'=> $dev->to_array()) );
+    echo json_encode( array('optionset'=> $dev->as_array()) );
   }
 });
 

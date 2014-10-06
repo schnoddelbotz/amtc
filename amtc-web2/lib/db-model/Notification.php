@@ -1,4 +1,4 @@
 <?php
-class Notification extends ActiveRecord\Model
-{
+class Notification extends Model {
+ public static $_table = 'notifications';
 }

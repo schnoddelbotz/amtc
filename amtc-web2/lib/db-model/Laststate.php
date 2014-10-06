@@ -1,4 +1,4 @@
 <?php
-class Laststate extends ActiveRecord\Model
-{
+class Laststate extends Model {
+  public static $_table = 'laststates';
 }

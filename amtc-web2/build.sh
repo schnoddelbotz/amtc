@@ -42,8 +42,8 @@ JSFILES="jquery.min.js bootstrap.min.js handlebars.js emberjs.min.js \
 
 # have a 'clean target' - trash any non-source / downloaded files
 if [ "$1" = "clean" ]; then
-  rm -rf fonts css/plugins js/plugins {.,css,js}/*.gz lib/{Slim,php-activerecord}
-  rm -f css/{b,f,h,sb}*.css js/{b,e,h,jq,m,s}*.js
+  rm -rf fonts css/plugins js/plugins {.,css,js}/*.gz lib/Slim
+  rm -f css/{b,f,h,sb}*.css js/{b,e,h,jq,m,s}*.js lib/{paris,idiorm}.php
   exit 0
 fi
 if [ "$1" = "distclean" ]; then
@@ -65,6 +65,8 @@ FetchIfNotExists js/showdown.js https://github.com/coreyti/showdown/raw/master/s
 FetchIfNotExists js/moment.js http://momentjs.com/downloads/moment.js
 FetchIfNotExists js/humane.min.js https://raw.githubusercontent.com/wavded/humane-js/master/humane.min.js
 FetchIfNotExists css/humane-original.css https://raw.githubusercontent.com/wavded/humane-js/master/themes/original.css
+FetchIfNotExists lib/idiorm.php https://raw.githubusercontent.com/j4mie/idiorm/master/idiorm.php
+FetchIfNotExists lib/paris.php https://raw.githubusercontent.com/j4mie/paris/master/paris.php
 
 if [ ! -f "js/bootstrap.min.js" ]; then
   echo "Retreiving Twitter bootstrap ..."
@@ -134,14 +136,6 @@ if [ ! -d "lib/Slim" ]; then
   unzip -q slim.zip
   mv codeguy-Slim-*/Slim lib
   rm -rf codeguy-Slim-* slim.zip
-fi
-
-if [ ! -d "lib/php-activerecord" ]; then
-  echo "Retreiving PHP activerecord"
-  cd lib
-  git clone https://github.com/jpfuentes2/php-activerecord.git
-  rm -rf php-activerecord/{examples,test,.gitignore,.travis.yml,CHANGELOG,README.md,composer.json,phpunit.xml.dist,.git}
-  cd ..
 fi
 
 [ -f config/.htpasswd ] || cp config/_htpasswd.default config/.htpasswd

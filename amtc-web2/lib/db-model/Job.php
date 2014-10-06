@@ -1,4 +1,4 @@
 <?php
-class Job extends ActiveRecord\Model
-{
+class Job extends Model {
+  public static $_table = 'jobs';
 }
