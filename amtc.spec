@@ -71,4 +71,4 @@ It uses jQuery client-side and supports PHP PDO databases server-side.
 %post web
 chown apache /etc/amtc-web /var/lib/amtc-web
 chcon -R -t httpd_sys_rw_content_t /etc/amtc-web
-service httpd reload
+service httpd reload || service httpd start
