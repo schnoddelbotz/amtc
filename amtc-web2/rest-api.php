@@ -142,11 +142,11 @@ $app->post('/submit-configuration', function () use ($app) {
       $x = array("errorMsg"=>"Could not write config file!");
     } else {
       $selectedDB = strtolower($wanted['DBTYPE']);
-      $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'.sql'));
-      $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-minimal.sql'));
+      $dbh->exec(file_get_contents('lib/install-db/'.$selectedDB.'.sql'));
+      $dbh->exec(file_get_contents('lib/install-db/'.$selectedDB.'-minimal.sql'));
 
       if ($_POST['importDemo']=='true'/* yes, a string. fixme */)
-        $dbh->exec(file_get_contents('lib/db-model/install-db/'.$selectedDB.'-exampledata.sql'));
+        $dbh->exec(file_get_contents('lib/install-db/'.$selectedDB.'-exampledata.sql'));
 
       // fixme: add _htaccess thing ... and some sanitization ... and error checking ... and stuff.
     }

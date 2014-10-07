@@ -5,7 +5,6 @@
 */
 class OU extends Model
 {
-  public static $_table = 'ous';
 
 /* php-activerecord ... replace by:
    http://paris.readthedocs.org/en/latest/associations.html
