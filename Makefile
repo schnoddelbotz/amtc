@@ -2,17 +2,24 @@
 # Makefile - part of amtc
 # https://github.com/schnoddelbotz/amtc
 #
-# Toplevel Makefile for amtc and amtc-web.
+# Toplevel Makefile for amtc and amtc-web(2).
 #
 # Targets:
 # make amtc      -- build amtc C binary
 # make amtc-web  -- build amtc-web application (V2 ... incomplete yet)
+# make package   -- build a deb/rpm/osx package of amtc & amtc-web
+# make install-package -- build and install package for current platform (sudo!)
+# make purge     -- remove any installed package, INCLUDING data (sudo!)
+#
 # make dist      -- prepare dist/ tree for distribution
-# make install   -- respects $DESTDIR
+# make install   -- install amtc and amtc-web, respects $DESTDIR
 # make deb       -- build debian/raspian package of amtc incl. amtc-web
 # make rpm       -- build RPMs (RHEL/CentOS/Fedora...) of amtc and amtc-web
 # make osxpkg    -- build OSX installer .pkg
-# make purge     -- remove any installed package, INCLUDING data
+# make clean     -- remove build artifacts
+# make debclean  -- remove .deb package build artifacts, including .deb built
+# make farmbuild -- build release packages on VM build hosts
+
 
 AMTCV=$(shell cat version)
 APP=amtc-$(AMTCV)
@@ -26,11 +33,20 @@ ETCDIR  ?= etc
 DATADIR ?= var/lib
 AMTCWEBDIR = amtc-web2
 
-all: amtc amtc-web dist
+# for farmbuild target - build hosts
+HOSTS_deb = debian7 ubuntu14 raspbian7
+HOSTS_rpm = fedora20 centos7
 
+PKGTYPE = $(shell (test -f /etc/debian_version && echo deb) || \
+						(test -f /etc/redhat-release && echo rpm) || echo osxpkg)
+
+all: dist
+
+# build amtc C binary
 amtc:
 	(cd src && make)
 
+# build amtc-web (fetch/concat js & css libs)
 amtc-web:
 	(cd $(AMTCWEBDIR) && ./build.sh)
 
@@ -58,15 +74,21 @@ dist: amtc amtc-web
 	(cd dist/$(WWWDIR) && ln -s /$(ETCDIR)/amtc-web config && ln -s /$(DATADIR)/amtc-web data)
 	(cd dist/$(WWWDIR) && perl -pi -e "s@AuthUserFile .*@AuthUserFile /$(ETCDIR)/amtc-web/.htpasswd@" basic-auth/.htaccess)
 
+
+# build package, depending on current os
+package:
+	make $(PKGTYPE)
+
 # build q+d debian .deb package (into ../)
 deb: clean
 	echo y | dh_make --createorig -s -p amtc_$(AMTCV) || true
 	echo  "#!/bin/sh -e\nchown www-data:www-data /var/lib/amtc-web /etc/amtc-web\na2enmod headers\na2enmod rewrite\nservice apache2 restart" > debian/postinst
 	perl -pi -e 's@Description: .*@Description: Intel AMT/DASH remote power management tool@' debian/control
-	perl -pi -e 's@^Depends: (.*)@Depends: $$1, httpd, php5-curl, php5-sqlite|php5-mysql|php5-pgsql@' debian/control
+	perl -pi -e 's@^Depends: (.*)@Depends: $$1, apache2|lighttpd|nginx, php5-curl, php5-sqlite|php5-mysql|php5-pgsql@' debian/control
 	perl -pi -e 's@^Build-Depends: (.*)@Build-Depends: $$1, curl, vim-common, libcurl3, libcurl4-gnutls-dev, libgnutls-dev@' debian/control
 	debuild -i -us -uc -b
 
+# remove debian/ subdirectory and trash package(s) built
 debclean: clean
 	rm -rf debian ../amtc_*
 
@@ -75,15 +97,16 @@ rpm: clean
 	mkdir -p $(RPMBUILD)/SOURCES
 	(cd ..; mv amtc $(APP); tar --exclude-vcs -czf $(RPMSRC) $(APP); mv $(APP) amtc )
 	rpmbuild -ba amtc.spec
-	@echo "RPMs successfully built into: $(RPMBUILD). You may now try:"
-	@echo " sudo yum localinstall $(RPMBUILD)/RPMS/*/*.rpm"
 
+# apply RHELoid + apache 2.4 changes (if installed _on buildhost_)
+# called by amtc.spec%install
 rpmfixup:
 	mv $(DESTDIR)/etc/apache2 $(DESTDIR)/etc/httpd
 	rpm -qa | grep httpd-2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Allow from all@Require all granted@sm' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf || true
 	rpm -qa | grep httpd-2.4 && perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Deny from all@Require all denied@smg' $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf || true
 
-# build OSX .pkg; uses Secure Transport
+# build OSX .pkg (into ./); use SecureTransport;
+# postinst enables system apache's php5 module
 osxpkg: clean dist
 	mkdir -p osxpkgscripts osxpkgroot
 	DESTDIR=osxpkgroot make install
@@ -93,15 +116,36 @@ osxpkg: clean dist
 	echo "apachectl restart" >> osxpkgscripts/postinstall
 	chmod +x osxpkgscripts/postinstall
 	mv osxpkgroot/etc/apache2/conf.d osxpkgroot/etc/apache2/other
-	pkgbuild --root osxpkgroot --scripts osxpkgscripts --identifier ch.hacker.amtc amtc_$(AMTCV)-OSX-$(shell sw_vers -productVersion).pkg
+	pkgbuild --root osxpkgroot --scripts osxpkgscripts --identifier ch.hacker.amtc amtc_$(AMTCV)-OSX_$(shell sw_vers -productVersion|cut -b1-4).pkg
 
-# uninstall any installed package and remove any file/directory created by amtc-web
+
+# build and install package for current platform. requires sudo privileges.
+install-package: package
+	test "$(PKGTYPE)" = "osxpkg" && sudo installer -tgt / -pkg amtc_$(AMTCV)-OSX_$(shell sw_vers -productVersion|cut -b1-4).pkg || true
+	test "$(PKGTYPE)" = "deb"    && (sudo dpkg -i ../amtc_*.deb ; sudo apt-get install -f) || true
+	test "$(PKGTYPE)" = "rpm"    && sudo yum localinstall $(RPMBUILD)/RPMS/*/*.rpm || true
+	@echo
+	@echo "Done! If no errors occured, try visiting http://localhost/amtc-web/ now."
+	@echo "After completing installation, change the default admin password ('amtc')!"
+
+# uninstall any installed package and remove ANY file/directory created by amtc-web
 purge:
-	@echo "Removing any installed amtc(-web). Should be used via sudo/su."
-	[ `whoami` = 'root' ] || exit 1
-	-pkgutil --forget ch.hacker.amtc
-	-apt-get remove --purge amtc
-	-rpm -e amtc amtc-web amtc-debuginfo
-	rm -rf /etc/amtc-web /var/lib/amtc-web /usr/share/amtc-web /etc/{httpd,apache2}/{other,conf.d}/amtc-web_httpd.conf
+	-sudo pkgutil --forget ch.hacker.amtc
+	-sudo apt-get purge -y amtc
+	-sudo yum remove -y amtc amtc-web amtc-debuginfo
+	sudo rm -rf /etc/amtc-web /var/lib/amtc-web /usr/share/amtc-web /etc/{httpd,apache2}/{other,conf.d}/amtc-web_httpd.conf
 
+
+# build farm / 'internal' use only: build and fetch releases on/from remote VMs
+farmbuild:
+	test `uname -s` = 'Darwin' || exit 1
+	mkdir -p releases/$(AMTCV)
+	make osxpkg
+	cp amtc_*.pkg releases/$(AMTCV)
+	for host in $(HOSTS_rpm) $(HOSTS_deb); do ssh $$host 'cd checkouts/amtc; git pull; make debclean package'; done
+	for host in $(HOSTS_rpm); do scp $$host:rpmbuild/RPMS/*/*.rpm releases/$(AMTCV); done
+	for host in $(HOSTS_deb); do file=`ssh $$host "cd checkouts; ls -1 amtc_*.deb"`; scp $$host:checkouts/$$file releases/$(AMTCV)/$${host}_$${file}; done
+
+
+#
 .PHONY:	amtc-web
