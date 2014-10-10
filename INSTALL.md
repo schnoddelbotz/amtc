@@ -60,7 +60,7 @@ meet runtime dependencies of amtc and amtc-web:
 
  * `OSX` None. Simply install the amtc binary package!
  * `RPM` `sudo yum install httpd php-pdo`
- * `DEB` `sudo apt-get libapache2-mod-php5 php5-curl php5-sqlite`
+ * `DEB` `sudo apt-get install libapache2-mod-php5 php5-curl php5-sqlite`
 
 ... where `RPM` stands for commands to be executed on RPM-based
 systems (like RHEL/CentOS, Fedora...), `DEB` for debian and

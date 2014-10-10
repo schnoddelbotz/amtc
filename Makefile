@@ -38,7 +38,10 @@ HOSTS_deb = debian7 ubuntu14 raspbian7
 HOSTS_rpm = fedora20 centos7
 
 PKGTYPE = $(shell (test -f /etc/debian_version && echo deb) || \
-						(test -f /etc/redhat-release && echo rpm) || echo osxpkg)
+			(test -f /etc/redhat-release && echo rpm) || echo osxpkg)
+
+APACHECONFD = $(shell test -d /etc/apache2/conf-enabled && echo conf-enabled || \
+			echo conf.d)
 
 all: dist
 
@@ -59,9 +62,9 @@ install: dist
 	mkdir -p $(DESTDIR)
 	cp -R dist/* $(DESTDIR)
 	rm -f $(DESTDIR)/$(WWWDIR)/.htaccess $(DESTDIR)/$(WWWDIR)/basic-auth/.htaccess
-	mkdir -p $(DESTDIR)/etc/apache2/conf.d
+	mkdir -p $(DESTDIR)/etc/apache2/$(APACHECONFD)
 	cp $(AMTCWEBDIR)/_httpd_conf_example $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
-	ln -s ../../amtc-web/amtc-web_httpd.conf $(DESTDIR)/etc/apache2/conf.d
+	ln -s ../../amtc-web/amtc-web_httpd.conf $(DESTDIR)/etc/apache2/$(APACHECONFD)
 
 dist: amtc amtc-web
 	echo "Preparing clean distribution in dist/"
