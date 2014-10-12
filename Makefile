@@ -54,7 +54,7 @@ amtc-web:
 	(cd $(AMTCWEBDIR) && ./build.sh)
 
 clean:
-	rm -rf dist amtc amtc*.{deb,pkg} *.build debian/amtc osxpkgscripts osxpkgroot
+	rm -rf dist amtc amtc*.{deb,pkg} *.build debian/amtc osxpkgscripts osxpkgroot Distribution.xml
 	(cd src && make clean)
 	(cd $(AMTCWEBDIR) && ./build.sh clean)
 
@@ -119,8 +119,12 @@ osxpkg: clean dist
 	echo "apachectl restart" >> osxpkgscripts/postinstall
 	chmod +x osxpkgscripts/postinstall
 	mv osxpkgroot/etc/apache2/conf.d osxpkgroot/etc/apache2/other
-	pkgbuild --root osxpkgroot --scripts osxpkgscripts --identifier ch.hacker.amtc amtc_$(AMTCV)-OSX_$(shell sw_vers -productVersion|cut -b1-4).pkg
-
+	pkgbuild --root osxpkgroot --scripts osxpkgscripts \
+   --identifier ch.hacker.amtc --version $(AMTCV) amtc.pkg
+	productbuild --synthesize --package amtc.pkg Distribution.xml
+	perl -pi -e 's@</installer-gui-script>@<title>amtc</title><background file="amtc-installer-bg.png" mime-type="image/png" alignment="right" scaling="none" /></installer-gui-script>@' Distribution.xml
+	productbuild --distribution Distribution.xml --resources osxpkgresources amtc_$(AMTCV)-OSX_$(shell sw_vers -productVersion|cut -b1-4).pkg
+	rm amtc.pkg
 
 # build and install package for current platform. requires sudo privileges.
 install-package: package
