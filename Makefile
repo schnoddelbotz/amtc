@@ -123,7 +123,12 @@ osxpkg: clean dist
 	pkgbuild --root osxpkgroot --scripts osxpkgscripts \
    --identifier ch.hacker.amtc --version $(AMTCV) amtc.pkg
 	productbuild --synthesize --package amtc.pkg Distribution.xml
-	perl -pi -e 's@</installer-gui-script>@<title>amtc</title><background file="amtc-installer-bg.png" mime-type="image/png" alignment="right" scaling="none" /></installer-gui-script>@' Distribution.xml
+	perl -pi -e 's@</installer-gui-script>@ \
+		<title>amtc</title> \
+		<readme file="readme.rtf" mime-type="text/rtf" /> \
+		<conclusion file="conclusion.rtf" mime-type="text/rtf" /> \
+		<background file="amtc-installer-bg.png" mime-type="image/png" alignment="right" scaling="none" /> \
+		</installer-gui-script>@' Distribution.xml
 	productbuild --distribution Distribution.xml --resources osxpkgresources amtc_$(AMTCV)-unsigned.pkg
 	-productsign --sign 'Developer ID Installer' amtc_$(AMTCV)-unsigned.pkg amtc_$(AMTCV)-OSX_$(shell sw_vers -productVersion|cut -d. -f1-2).pkg
 
