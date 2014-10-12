@@ -36,8 +36,6 @@ AMTCWEBDIR = amtc-web2
 # for farmbuild target - build hosts
 HOSTS_deb = debian7 ubuntu14 raspbian7
 HOSTS_rpm = fedora20 centos7
-# identity to use for OSX (release) pkg signing
-OSXSIGN ?= J25CBY4397
 
 PKGTYPE = $(shell (test -f /etc/debian_version && echo deb) || \
 			(test -f /etc/redhat-release && echo rpm) || echo osxpkg)
@@ -126,8 +124,8 @@ osxpkg: clean dist
    --identifier ch.hacker.amtc --version $(AMTCV) amtc.pkg
 	productbuild --synthesize --package amtc.pkg Distribution.xml
 	perl -pi -e 's@</installer-gui-script>@<title>amtc</title><background file="amtc-installer-bg.png" mime-type="image/png" alignment="right" scaling="none" /></installer-gui-script>@' Distribution.xml
-	productbuild --distribution Distribution.xml --resources osxpkgresources amtc_unsigned.pkg
-	productsign --sign $(OSXSIGN) amtc_unsigned.pkg amtc_$(AMTCV)-OSX_$(shell sw_vers -productVersion|cut -b1-4).pkg
+	productbuild --distribution Distribution.xml --resources osxpkgresources amtc_$(AMTCV)-unsigned.pkg
+	-productsign --sign 'Developer ID Installer' amtc_$(AMTCV)-unsigned.pkg amtc_$(AMTCV)-OSX_$(shell sw_vers -productVersion|cut -d. -f1-2).pkg
 
 # build and install package for current platform. requires sudo privileges.
 install-package: package
