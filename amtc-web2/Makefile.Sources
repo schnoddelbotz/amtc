@@ -1,0 +1,29 @@
+#
+# Makefile.Sources
+# part of https://github.com/schnoddelbotz/amtc
+#
+# This file lists any external dependencies of amtc-web.
+# Versions defined in Makefile.
+# These libraries will be fetched during build.
+#
+
+# JS libs
+js/jquery.min.js http://code.jquery.com/jquery-${JQUERY}.min.js
+js/jquery.min.map http://code.jquery.com/jquery-${JQUERY}.min.map
+js/emberjs.min.js http://builds.emberjs.com/tags/v${EMBERJS}/ember.min.js
+js/ember-data.min.js http://builds.emberjs.com/tags/v${EMBERDATA}/ember-data.min.js
+js/handlebars.js http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v${HANDLEBARS}.js
+js/showdown.js https://github.com/coreyti/showdown/raw/master/src/showdown.js
+js/moment.js http://momentjs.com/downloads/moment.js
+js/humane.min.js https://raw.githubusercontent.com/wavded/humane-js/master/humane.min.js
+
+# Styles (CSS / Fonts)
+fonts/fontawesome-webfont.woff http://fortawesome.github.io/Font-Awesome/assets/${FA}.zip
+css/humane-original.css https://raw.githubusercontent.com/wavded/humane-js/master/themes/original.css
+
+
+# PHP libs
+lib/Slim/Slim.php https://github.com/codeguy/Slim/zipball/master
+lib/idiorm.php https://raw.githubusercontent.com/j4mie/idiorm/master/idiorm.php
+lib/paris.php https://raw.githubusercontent.com/j4mie/paris/master/paris.php
+

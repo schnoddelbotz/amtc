@@ -51,13 +51,13 @@ amtc:
 
 # build amtc-web (fetch/concat js & css libs)
 amtc-web:
-	(cd $(AMTCWEBDIR) && ./build.sh)
+	(cd $(AMTCWEBDIR) && make -j10)
 
 clean:
 	rm -rf dist amtc amtc*.{deb,pkg} *.build debian/amtc \
          osxpkgscripts osxpkgroot Distribution.xml
 	(cd src && make clean)
-	(cd $(AMTCWEBDIR) && ./build.sh clean)
+	(cd $(AMTCWEBDIR) && make clean)
 
 install: dist
 	mkdir -p $(DESTDIR)
@@ -73,7 +73,7 @@ dist: amtc amtc-web
 	mkdir -p dist/$(BINDIR) dist/$(WWWDIR) dist/$(ETCDIR) dist/$(DATADIR)
 	cp src/amtc dist/$(BINDIR)
 	cp -R $(AMTCWEBDIR)/* dist/$(WWWDIR)
-	(cd dist/$(WWWDIR) && ./build.sh distclean && mv _htaccess_example .htaccess && rm -f basic-auth/_htaccess.default config/_htpasswd.default data/amtc-web.db config/siteconfig.php build.sh)
+	(cd dist/$(WWWDIR) && make distclean && mv _htaccess_example .htaccess && rm -f basic-auth/_htaccess.default config/_htpasswd.default data/amtc-web.db config/siteconfig.php build.sh Makefile Makefile.Sources)
 	(cd dist && mv $(WWWDIR)/config $(ETCDIR)/amtc-web && mv $(WWWDIR)/data $(DATADIR)/amtc-web)
 	(cd dist/$(WWWDIR) && ln -s /$(ETCDIR)/amtc-web config && ln -s /$(DATADIR)/amtc-web data)
 	(cd dist/$(WWWDIR) && perl -pi -e "s@AuthUserFile .*@AuthUserFile /$(ETCDIR)/amtc-web/.htpasswd@" basic-auth/.htaccess)
