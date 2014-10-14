@@ -4,6 +4,8 @@
 #
 # Makefile for amtc-web(2)
 
+SHELL = bash
+
 # define versions to fetch
 export JQUERY      = 2.1.1
 export JQUERYUI    = 1.11.1
@@ -23,13 +25,11 @@ JSFILES=js/jquery.min.js js/bootstrap.min.js js/handlebars.js js/emberjs.min.js 
 PHPLIBS=lib/Slim/Slim.php lib/idiorm.php lib/paris.php
 FONTS=fonts/fontawesome-webfont.woff
 
-SCRIPTPATH = $(shell pushd `dirname $0` > /dev/null; P=`pwd`; popd > /dev/null; echo $P)
-
 install: download compress
 	[ -f config/.htpasswd ] || cp config/_htpasswd.default config/.htpasswd
 	if [ ! -f basic-auth/.htaccess ]; then \
 	  cp basic-auth/_htaccess.default basic-auth/.htaccess ; \
-	  perl -pi -e "s@AuthUserFile .*@AuthUserFile $(SCRIPTPATH)/config/.htpasswd@" basic-auth/.htaccess ; \
+	  perl -pi -e "s@AuthUserFile .*@AuthUserFile `pwd`/config/.htpasswd@" basic-auth/.htaccess ; \
 	fi
 
 download: $(CSSFILES) $(JSFILES) $(PHPLIBS) $(FONTS)
