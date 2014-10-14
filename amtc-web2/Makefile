@@ -23,21 +23,14 @@ JSFILES=js/jquery.min.js js/bootstrap.min.js js/handlebars.js js/emberjs.min.js 
 PHPLIBS=lib/Slim/Slim.php lib/idiorm.php lib/paris.php
 FONTS=fonts/fontawesome-webfont.woff
 
-# how to avoid ...?
-%.js:
-	@URL1=`grep '$*.js'  Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "Fetch $*.js from $$URL"; curl -Lso $*.js $$URL
-%.css:
-	@URL1=`grep '$*.css' Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "Fetch $*.css from $$URL"; curl -Lso $*.css $$URL
-%.php:
-	@URL1=`grep '$*.php' Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "Fetch $*.php from $$URL"; curl -Lso $*.php $$URL
+SCRIPTPATH = $(shell pushd `dirname $0` > /dev/null; P=`pwd`; popd > /dev/null; echo $P)
 
 install: download compress
-	# FIXME: re-add...
-	#[ -f config/.htpasswd ] || cp config/_htpasswd.default config/.htpasswd
-	#if [ ! -f basic-auth/.htaccess ]; then
-	#  cp basic-auth/_htaccess.default basic-auth/.htaccess
-	#  perl -pi -e "s@AuthUserFile .*@AuthUserFile $SCRIPTPATH/config/.htpasswd@" basic-auth/.htaccess
-	#fi
+	[ -f config/.htpasswd ] || cp config/_htpasswd.default config/.htpasswd
+	if [ ! -f basic-auth/.htaccess ]; then \
+	  cp basic-auth/_htaccess.default basic-auth/.htaccess ; \
+	  perl -pi -e "s@AuthUserFile .*@AuthUserFile $(SCRIPTPATH)/config/.htpasswd@" basic-auth/.htaccess ; \
+	fi
 
 download: $(CSSFILES) $(JSFILES) $(PHPLIBS) $(FONTS)
 	@echo All dependencies downloaded and unpacked.
@@ -49,6 +42,14 @@ clean:
 distclean:
 	rm -f css/{b,f,h,sb}*.css js/{b,e,h,jq,m,s}*.js
 	rm -rf {css,js}/plugins
+
+# how to avoid ...?
+%.js:
+	@URL1=`grep '$*.js'  Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "Fetch $*.js from $$URL"; curl -Lso $*.js $$URL
+%.css:
+	@URL1=`grep '$*.css' Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "Fetch $*.css from $$URL"; curl -Lso $*.css $$URL
+%.php:
+	@URL1=`grep '$*.php' Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "Fetch $*.php from $$URL"; curl -Lso $*.php $$URL
 
 js/jquery-ui.min.js:
 	curl -Lso jq.zip http://jqueryui.com/resources/download/jquery-ui-${JQUERYUI}.zip
