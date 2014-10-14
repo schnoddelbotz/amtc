@@ -20,7 +20,7 @@
 # make debclean  -- remove .deb package build artifacts, including .deb built
 # make farmbuild -- build release packages on VM build hosts
 
-
+SHELL=bash
 AMTCV=$(shell cat version)
 APP=amtc-$(AMTCV)
 
@@ -38,10 +38,10 @@ HOSTS_deb = debian7 ubuntu14 raspbian7
 HOSTS_rpm = fedora20 centos7
 
 PKGTYPE = $(shell (test -f /etc/debian_version && echo deb) || \
-			(test -f /etc/redhat-release && echo rpm) || echo osxpkg)
+		  (test -f /etc/redhat-release && echo rpm) || echo osxpkg)
 
-APACHECONFD = $(shell test -d /etc/apache2/conf-enabled && echo conf-enabled || \
-			echo conf.d)
+APACHECONFD = $(shell test -d /etc/apache2/conf-enabled && \
+		      echo conf-enabled || echo conf.d)
 
 all: dist
 
@@ -73,7 +73,9 @@ dist: amtc amtc-web
 	mkdir -p dist/$(BINDIR) dist/$(WWWDIR) dist/$(ETCDIR) dist/$(DATADIR)
 	cp src/amtc dist/$(BINDIR)
 	cp -R $(AMTCWEBDIR)/* dist/$(WWWDIR)
-	cd dist/$(WWWDIR) && make distclean && mv _htaccess_example .htaccess && rm -f basic-auth/_htaccess.default config/_htpasswd.default data/amtc-web.db config/siteconfig.php build.sh Makefile Makefile.Sources
+	cd dist/$(WWWDIR) && make distclean && mv _htaccess_example .htaccess && \
+	   rm -f basic-auth/_htaccess.default config/_htpasswd.default data/amtc-web.db \
+	   config/siteconfig.php build.sh Makefile Makefile.Sources
 	cd dist && mv $(WWWDIR)/config $(ETCDIR)/amtc-web && mv $(WWWDIR)/data $(DATADIR)/amtc-web
 	cd dist/$(WWWDIR) && ln -s /$(ETCDIR)/amtc-web config && ln -s /$(DATADIR)/amtc-web data
 	cd dist/$(WWWDIR) && perl -pi -e "s@AuthUserFile .*@AuthUserFile /$(ETCDIR)/amtc-web/.htpasswd@" basic-auth/.htaccess
@@ -124,7 +126,7 @@ osxpkg: clean dist
 		<title>amtc</title> \
 		<readme file="readme.rtf" mime-type="text/rtf" /> \
 		<conclusion file="conclusion.rtf" mime-type="text/rtf" /> \
-		<background file="amtc-installer-bg.png" mime-type="image/png" alignment="right" scaling="none" /> \
+		<background file="amtc-installer-bg.png" mime-type="image/png" alignment="bottomleft" scaling="none" /> \
 		</installer-gui-script>@' Distribution.xml
 	productbuild --distribution Distribution.xml --resources osxpkgresources amtc_$(AMTCV)-unsigned.pkg
 	-productsign --sign 'Developer ID Installer' amtc_$(AMTCV)-unsigned.pkg amtc_$(AMTCV)-OSX_$(shell sw_vers -productVersion|cut -d. -f1-2).pkg

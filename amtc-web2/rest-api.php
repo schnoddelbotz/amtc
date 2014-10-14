@@ -6,36 +6,11 @@
  * Use http://www.slimframework.com/ and http://j4mie.github.io/idiormandparis/
  * to provide a REST backend for amtc-web (ember-data, installer, amtc ...)
  */
+
 // sleep(2);
 // error_reporting(E_ALL); ini_set('display_errors','stdout');
-
-define('AMTC_WEBROOT', dirname(__FILE__));
-define('AMTC_CFGFILE', AMTC_WEBROOT.'/config/siteconfig.php');
-@include AMTC_CFGFILE; // to let static ember help pages work even if unconfigured
-date_default_timezone_set( defined('AMTC_TZ') ? AMTC_TZ : 'Europe/Berlin');
-
-set_include_path(get_include_path().PATH_SEPARATOR.
-  AMTC_WEBROOT.'/lib'.PATH_SEPARATOR.AMTC_WEBROOT.'/lib/db-model');
-spl_autoload_extensions('.php');
-spl_autoload_register();
-require 'idiorm.php';
-require 'paris.php';
-require 'Slim/Slim.php';
-
-// Initialize http://j4mie.github.io/idiormandparis/
-ORM::configure(AMTC_PDOSTRING);
-
-// Initialize http://www.slimframework.com/
-\Slim\Slim::registerAutoloader();
-$app = new \Slim\Slim();
-$app->config('debug', false); // ... and enables custom $app->error() handler
-$app->response()->header('Content-Type', 'application/json;charset=utf-8');
-$app->notFound(function () use ($app) {
-  echo json_encode(Array('error'=>'Not found'));
-});
-$app->error(function (\Exception $e) use ($app) {
-  echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') );
-});
+// set up autoloader, include required libs, init ORM & Slim
+require 'lib/app_bootstrap.php';
 
 // Initialize session
 session_name("amtcweb");
@@ -48,7 +23,6 @@ $_route = explode('/', $app->request()->getPathInfo());
 $route  = $_route[1];
 if ($_SESSION['authenticated'] == true ||
     in_array($route, $allowUnauthenticated )) {
-    // || REQUEST_HOST == 'localhost' ==> submit CLI via CURL w/o sess?
     // echo "Authenticated or request that is allowed without...";
 } else {
   echo "{error:'Unauthenticated'}";
