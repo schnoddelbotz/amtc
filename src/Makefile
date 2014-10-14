@@ -1,14 +1,22 @@
 
-LFLAGS=-lcurl -lpthread
+# Makefile - part of amtc
+# https://github.com/schnoddelbotz/amtc
+#
+# Makefile for amtc
+
+LDLIBS=-lcurl -lpthread
 CFLAGS=-I. -Wall
 AMTCV=$(shell cat ../version)
 APP=amtc-$(AMTCV)
 OS=$(shell uname -s)
 
-HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset cmd_powercycle wsman_info wsman_info_step2 wsman_up wsman_down wsman_reset wsman_xenum wsman_xenum_step2
+HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset \
+	cmd_powercycle wsman_info wsman_info_step2 wsman_up wsman_down \
+	wsman_reset wsman_xenum wsman_xenum_step2
 
-amtc: amt.h 
-	$(CC) -o amtc amtc.c $(CFLAGS) $(LFLAGS)
+amtc: amtc.c
+
+amtc.c: amt.h
 
 amt.h:
 	perl -pi -e 's/v(\d\.\d\.\d)/v$(AMTCV)/' amtc_usage
@@ -19,3 +27,4 @@ amt.h:
 
 clean:
 	rm -f cmd_*.h wsman_*.h amtc_usage.h amt.h amtc *.o
+
