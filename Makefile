@@ -114,11 +114,7 @@ rpmfixup:
 osxpkg: clean dist
 	mkdir -p osxpkgscripts osxpkgroot
 	DESTDIR=osxpkgroot make install
-	echo "#!/bin/sh" > osxpkgscripts/postinstall
-	echo "chown _www /etc/amtc-web /var/lib/amtc-web" >> osxpkgscripts/postinstall
-	echo "perl -pi -e 's@#LoadModule php5_module@LoadModule php5_module@' /etc/apache2/httpd.conf" >> osxpkgscripts/postinstall
-	echo "perl -pi -e 's@#LoadModule rewrite_module@LoadModule rewrite_module@' /etc/apache2/httpd.conf" >> osxpkgscripts/postinstall
-	echo "apachectl restart" >> osxpkgscripts/postinstall
+	cp osxpkgresources/postinstall osxpkgscripts
 	chmod +x osxpkgscripts/postinstall
 	mv osxpkgroot/etc/apache2/conf.d osxpkgroot/etc/apache2/other
 	pkgbuild --root osxpkgroot --scripts osxpkgscripts \
@@ -135,7 +131,7 @@ osxpkg: clean dist
 
 # build and install package for current platform. requires sudo privileges.
 install-package: package
-	test "$(PKGTYPE)" = "osxpkg" && sudo installer -tgt / -pkg amtc_$(AMTCV)-OSX_$(shell sw_vers -productVersion|cut -b1-4).pkg || true
+	test "$(PKGTYPE)" = "osxpkg" && sudo installer -tgt / -pkg amtc_$(AMTCV)-OSX_$(shell sw_vers -productVersion|cut -d. -f1-2).pkg || true
 	test "$(PKGTYPE)" = "deb"    && (sudo dpkg -i ../amtc_*.deb ; sudo apt-get install -f) || true
 	test "$(PKGTYPE)" = "rpm"    && sudo yum localinstall $(RPMBUILD)/RPMS/*/*.rpm || true
 	@echo

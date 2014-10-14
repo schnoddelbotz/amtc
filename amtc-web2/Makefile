@@ -59,8 +59,8 @@ js/jquery-ui.min.js:
 js/bootstrap.min.js:
 	curl -Lso bs.zip https://github.com/twbs/bootstrap/releases/download/v${BOOTSTRAP}/bootstrap-${BOOTSTRAP}-dist.zip
 	unzip -q bs.zip
-	cd bootstrap-${BOOTSTRAP}-dist ; mv css/bootstrap.min.css ../css ; mv js/bootstrap.min.js ../js
-	#mv fonts ..  needed??? have FA
+	mkdir -p fonts
+	cd bootstrap-${BOOTSTRAP}-dist; mv css/bootstrap.min.css ../css; mv js/bootstrap.min.js ../js; mv fonts/* ../fonts
 	rm -rf bootstrap-${BOOTSTRAP}-dist bs.zip
 
 css/sb-admin-2.css:
