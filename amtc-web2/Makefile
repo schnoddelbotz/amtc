@@ -26,6 +26,7 @@ PHPLIBS=lib/Slim/Slim.php lib/idiorm.php lib/paris.php
 FONTS=fonts/fontawesome-webfont.woff
 
 install: download compress
+	chmod 777 data config
 	[ -f config/.htpasswd ] || cp config/_htpasswd.default config/.htpasswd
 	if [ ! -f basic-auth/.htaccess ]; then \
 	  cp basic-auth/_htaccess.default basic-auth/.htaccess ; \
