@@ -19,7 +19,7 @@ CSSFILES=css/bootstrap.min.css css/plugins/metisMenu/metisMenu.min.css \
  	css/plugins/timeline.css css/sb-admin-2.css css/plugins/morris.css \
  	css/font-awesome.min.css css/humane-original.css
 JSFILES=js/jquery.min.js js/bootstrap.min.js js/handlebars.js js/emberjs.min.js \
-  js/ember-data.min.js js/showdown.js js/moment.js js/humane.min.js \
+	js/ember-data.min.js js/showdown.js js/moment.js js/humane.min.js \
 	js/plugins/metisMenu/metisMenu.min.js js/plugins/morris/raphael.min.js \
 	js/plugins/morris/morris.min.js js/jquery-ui.min.js
 PHPLIBS=lib/Slim/Slim.php lib/idiorm.php lib/paris.php
@@ -46,11 +46,11 @@ distclean:
 
 # how to avoid ...?
 %.js:
-	@URL1=`grep '$*.js'  Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "Fetch $*.js from $$URL"; curl -Lso $*.js $$URL
+	@URL1=`grep '$*.js'  Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "curl -Lso $*.js $$URL"; curl -Lso $*.js $$URL
 %.css:
-	@URL1=`grep '$*.css' Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "Fetch $*.css from $$URL"; curl -Lso $*.css $$URL
+	@URL1=`grep '$*.css' Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "curl -Lso $*.css $$URL"; curl -Lso $*.css $$URL
 %.php:
-	@URL1=`grep '$*.php' Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "Fetch $*.php from $$URL"; curl -Lso $*.php $$URL
+	@URL1=`grep '$*.php' Makefile.Sources | awk '{print $$2}'`; URL=`eval echo $$URL1`; echo "curl -Lso $*.php $$URL"; curl -Lso $*.php $$URL
 
 js/jquery-ui.min.js:
 	curl -Lso jq.zip http://jqueryui.com/resources/download/jquery-ui-${JQUERYUI}.zip
@@ -88,8 +88,8 @@ lib/Slim/Slim.php:
 	rm -rf codeguy-Slim-* slim.zip
 
 concat: download
-	( cat $(CSSFILES) > css/styles.css  )
-	( cat $(JSFILES) > js/jslibs.js )
+	cat $(CSSFILES) > css/styles.css
+	cat $(JSFILES) > js/jslibs.js
 
 compress: concat
 	for src in css/styles.css js/jslibs.js index.html; do \

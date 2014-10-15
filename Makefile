@@ -120,7 +120,7 @@ osxpkg: clean dist
 	chmod +x osxpkgscripts/postinstall
 	mv osxpkgroot/etc/apache2/conf.d osxpkgroot/etc/apache2/other
 	pkgbuild --root osxpkgroot --scripts osxpkgscripts \
-   --identifier ch.hacker.amtc --version $(AMTCV) amtc.pkg
+		 --identifier ch.hacker.amtc --version $(AMTCV) amtc.pkg
 	productbuild --synthesize --package amtc.pkg Distribution.xml
 	perl -pi -e 's@</installer-gui-script>@ \
 		<title>amtc</title> \
