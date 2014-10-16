@@ -23,18 +23,16 @@ JSFILES=js/jquery.min.js js/bootstrap.min.js js/handlebars.js js/emberjs.min.js 
 	js/plugins/metisMenu/metisMenu.min.js js/plugins/morris/raphael.min.js \
 	js/plugins/morris/morris.min.js js/jquery-ui.min.js
 PHPLIBS=lib/Slim/Slim.php lib/idiorm.php lib/paris.php
+ZIPSRC=js/jquery-ui.min.js js/bootstrap.min.js css/sb-admin-2.css fonts/fontawesome-webfont.woff
 FONTS=fonts/fontawesome-webfont.woff
 
-install: download compress
-	chmod 777 data config
-	[ -f config/.htpasswd ] || cp config/_htpasswd.default config/.htpasswd
-	if [ ! -f basic-auth/.htaccess ]; then \
-	  cp basic-auth/_htaccess.default basic-auth/.htaccess ; \
-	  perl -pi -e "s@AuthUserFile .*@AuthUserFile `pwd`/config/.htpasswd@" basic-auth/.htaccess ; \
-	fi
+install: download compress basic-auth/.htaccess
 
 download: $(CSSFILES) $(JSFILES) $(PHPLIBS) $(FONTS)
-	@echo All dependencies downloaded and unpacked.
+
+concat: download css/styles.css js/jslibs.js
+
+compress: concat css/styles.css.gz js/jslibs.js.gz index.html.gz
 
 clean:
 	rm -rf fonts css/plugins js/plugins {.,css,js}/*.gz lib/Slim
@@ -43,6 +41,14 @@ clean:
 distclean:
 	rm -f css/{b,f,h,sb}*.css js/{b,e,h,jq,m,s}*.js
 	rm -rf {css,js}/plugins
+
+basic-auth/.htaccess:
+	chmod 777 data config
+	[ -f config/.htpasswd ] || cp config/_htpasswd.default config/.htpasswd
+	if [ ! -f basic-auth/.htaccess ]; then \
+	  cp basic-auth/_htaccess.default basic-auth/.htaccess ; \
+	  perl -pi -e "s@AuthUserFile .*@AuthUserFile `pwd`/config/.htpasswd@" basic-auth/.htaccess ; \
+	fi
 
 # how to avoid ...?
 %.js:
@@ -87,18 +93,15 @@ lib/Slim/Slim.php:
 	mv codeguy-Slim-*/Slim lib
 	rm -rf codeguy-Slim-* slim.zip
 
-concat: download
+css/styles.css: $(CSSFILES) $(ZIPSRC)
 	cat $(CSSFILES) > css/styles.css
+
+js/jslibs.js: $(JSFILES) $(ZIPSRC)
 	cat $(JSFILES) > js/jslibs.js
 
-compress: concat
-	for src in css/styles.css js/jslibs.js index.html; do \
-	  gzip -c --best $$src > $$src.gz; \
-	done
+%.gz: js/jslibs.js css/styles.css
+	gzip -c --best $* > $*.gz
 
 # void targets (but globally listed for (con)cat purposes)
 css/font-awesome.min.css js/plugins/metisMenu/metisMenu.min.js js/plugins/morris/morris.min.js js/plugins/morris/raphael.min.js css/plugins/metisMenu/metisMenu.min.css css/plugins/morris.css css/plugins/timeline.css css/bootstrap.min.css:
 	@# nothing to do, included elsewhere
-
-# htaccess stuff..
-install-examples:

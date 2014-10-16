@@ -43,7 +43,7 @@ PKGTYPE = $(shell (test -f /etc/debian_version && echo deb) || \
 APACHECONFD = $(shell test -d /etc/apache2/conf-enabled && \
 		      echo conf-enabled || echo conf.d)
 
-all: dist
+all: amtc amtc-web
 
 # build amtc C binary
 amtc:
