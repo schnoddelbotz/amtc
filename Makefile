@@ -20,22 +20,22 @@
 # make debclean  -- remove .deb package build artifacts, including .deb built
 # make farmbuild -- build release packages on VM build hosts
 
-SHELL=bash
-AMTCV=$(shell cat version)
-APP=amtc-$(AMTCV)
+AMTCV = $(shell cat version)
+APP   = amtc-$(AMTCV)
+SHELL = bash
 
-RPMBUILD ?= $(HOME)/rpmbuild
-RPMSRC ?= "$(RPMBUILD)/SOURCES/amtc-$(AMTCV).tar.gz"
-DESTDIR ?= /
-BINDIR  ?= usr/bin
-WWWDIR  ?= usr/share/amtc-web
-ETCDIR  ?= etc
-DATADIR ?= var/lib
+RPMBUILD  ?= $(HOME)/rpmbuild
+RPMSRC    ?= "$(RPMBUILD)/SOURCES/amtc-$(AMTCV).tar.gz"
+DESTDIR   ?= /
+BINDIR    ?= usr/bin
+WWWDIR    ?= usr/share/amtc-web
+ETCDIR    ?= etc
+DATADIR   ?= var/lib
 AMTCWEBDIR = amtc-web2
 
 # for farmbuild target - build hosts
-HOSTS_deb = debian7 ubuntu14 raspbian7
-HOSTS_rpm = fedora20 centos7
+HOSTS_deb  = debian7 ubuntu14 raspbian7
+HOSTS_rpm  = fedora20 centos7
 
 PKGTYPE = $(shell (test -f /etc/debian_version && echo deb) || \
 		  (test -f /etc/redhat-release && echo rpm) || echo osxpkg)
@@ -43,6 +43,7 @@ PKGTYPE = $(shell (test -f /etc/debian_version && echo deb) || \
 APACHECONFD = $(shell test -d /etc/apache2/conf-enabled && \
 		      echo conf-enabled || echo conf.d)
 
+#
 all: amtc amtc-web
 
 # build amtc C binary
@@ -55,7 +56,7 @@ amtc-web:
 
 clean:
 	rm -rf dist amtc amtc*.{deb,pkg} *.build debian/amtc \
-         osxpkgscripts osxpkgroot Distribution.xml
+        	osxpkgscripts osxpkgroot Distribution.xml
 	cd src && make clean
 	cd $(AMTCWEBDIR) && make clean
 
@@ -113,7 +114,7 @@ rpmfixup:
 
 # build OSX .pkg (into ./); use SecureTransport;
 # postinst enables system apache's php5 module
-osxpkg: clean dist
+osxpkg: clean
 	mkdir -p osxpkgscripts osxpkgroot
 	DESTDIR=osxpkgroot make install
 	cp osxpkgresources/postinstall osxpkgscripts
@@ -124,7 +125,7 @@ osxpkg: clean dist
 	productbuild --synthesize --package amtc.pkg Distribution.xml
 	perl -pi -e 's@</installer-gui-script>@ \
 		<title>amtc</title> \
-		<readme file="readme.rtf" mime-type="text/rtf" /> \
+		<welcome file="welcome.rtf" mime-type="text/rtf" /> \
 		<conclusion file="conclusion.rtf" mime-type="text/rtf" /> \
 		<background file="amtc-installer-bg.png" mime-type="image/png" alignment="bottomleft" scaling="none" /> \
 		</installer-gui-script>@' Distribution.xml
