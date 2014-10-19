@@ -143,9 +143,16 @@ install-package: package
 
 # uninstall any installed package and remove ANY file/directory created by amtc-web
 purge:
-	-sudo pkgutil --forget ch.hacker.amtc
-	-sudo apt-get purge -y amtc
-	-sudo yum remove -y amtc amtc-web amtc-debuginfo
+	ifeq ($(UNAME_S),Darwin)
+          -sudo pkgutil --forget ch.hacker.amtc
+        else ifeq (,$(wildcard /etc/debian_version))
+          # we got debian
+          # TODO: fix above check to match any deb-based distro
+          -sudo apt-get purge -y amtc amtc-web amtc-debuginfo
+        else
+          # assume rpm based distro
+          -sudo yum remove -y amtc amtc-web amtc-debuginfo
+    	endif
 	sudo rm -rf /etc/amtc-web /var/lib/amtc-web /usr/share/amtc-web /etc/{httpd,apache2}/{other,conf.d}/amtc-web_httpd.conf
 
 
