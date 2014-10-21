@@ -126,9 +126,12 @@ make
 
 license
 =======
-gnah. `amtc` didn't make it to github by accident. it's open. it's yours. take it.
-i'll most likely survive, even if you don't [CC BY](http://creativecommons.org/licenses/by/3.0/)
-me - in case you really intend to recycle some of these bits ...
+This project is published under the [MIT license](../master/LICENSE.txt).
+It heavily relies on bundled 3rd party OSS components that are listed in the
+in-app ['about' page](../master/amtc-web2/pages/about.md) of amtc-web;
+their individual license texts have been bundled into 
+[LICENSES-3rd-party.txt](../master/amtc-web2/LICENSES-3rd-Party.txt). That file is also
+distributed with any [release of amtc](https://github.com/schnoddelbotz/amtc/releases).
 
 alternatives
 ============
