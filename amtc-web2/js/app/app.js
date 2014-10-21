@@ -448,15 +448,15 @@ App.IndexView = Ember.View.extend({
   }
 });
 App.NavigationView = Em.View.extend({
-    templateName: 'navigation',
-    selectedBinding: 'controller.selected',
-    NavItemView: Ember.View.extend({
-        tagName: 'li',
-        classNameBindings: 'isActive:active'.w(),
-        isActive: function() {
-            return this.get('item') === this.get('parentView.selected');
-        }.property('item', 'parentView.selected').cacheable()
-    })
+  templateName: 'navigation',
+  selectedBinding: 'controller.selected',
+  NavItemView: Ember.View.extend({
+    tagName: 'li',
+    classNameBindings: 'isActive:active'.w(),
+    isActive: function() {
+        return this.get('item') === this.get('parentView.selected');
+    }.property('item', 'parentView.selected').cacheable()
+  })
 });
 
 // Controllers
@@ -507,7 +507,8 @@ App.LoginController = Ember.ObjectController.extend({
     console.log('Fetching user: ' + this.get('username'));
     if (this.get('username')) {
       this.set('content', this.store.find('user', this.get('username')));
-    } else {
+    } else if (!window.location.href.match('/page')) {
+      // redir to /login if non-/page (.md doc) request
       this.set('content', null);
       this.transitionToRoute('login');
     }

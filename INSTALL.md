@@ -151,9 +151,3 @@ the most interesting [Makefile](../blob/master/Makefile) targets available are:
  * `make purge` is _DANGEROUS_. Will not only uninstall, but trash config and (SQLite-)DB.
 
 
-# Disclaimer
-
-I can not be held responsible for the correctness, completeness or quality
-of the information provided in this document. Therefore, liability claims
-regarding any damages caused by the use of any information provided, including
-information which is incomplete or incorrect, will be discarded.
