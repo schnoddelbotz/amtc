@@ -51,7 +51,7 @@ js/jslibs.js: $(JSFILES) $(ZIPSRC)
 # remove any non-repo / downloaded / built files
 clean:
 	rm -rf fonts css/plugins js/plugins {.,css,js}/*.gz lib/Slim
-	rm -f css/{b,f,h,sb,st}*.css js/{b,e,h,j,m,s}*.js lib/{paris,idiorm}.php
+	rm -f css/{b,f,h,sb,st}*.css js/{b,e,h,j,m,s}*.js js/jq*.map lib/{paris,idiorm}.php
 
 # remove single js/css files (to keep concat+compress version only)
 distclean:
