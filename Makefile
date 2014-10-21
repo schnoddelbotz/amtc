@@ -37,6 +37,7 @@ AMTCWEBDIR = amtc-web2
 HOSTS_deb  = debian7 ubuntu14 raspbian7
 HOSTS_rpm  = fedora20 centos7
 
+# note: debian derivates (ubuntu, raspbian...) have /etc/d_v, too.
 PKGTYPE = $(shell (test -f /etc/debian_version && echo deb) || \
 		  (test -f /etc/redhat-release && echo rpm) || echo osxpkg)
 
@@ -143,16 +144,13 @@ install-package: package
 
 # uninstall any installed package and remove ANY file/directory created by amtc-web
 purge:
-	ifeq ($(UNAME_S),Darwin)
-          -sudo pkgutil --forget ch.hacker.amtc
-        else ifeq (,$(wildcard /etc/debian_version))
-          # we got debian
-          # TODO: fix above check to match any deb-based distro
-          -sudo apt-get purge -y amtc amtc-web amtc-debuginfo
-        else
-          # assume rpm based distro
-          -sudo yum remove -y amtc amtc-web amtc-debuginfo
-    	endif
+ifeq ($(PKGTYPE),osxpkg)
+	-sudo pkgutil --forget ch.hacker.amtc
+else ifeq ($(PKGTYPE),deb)
+	-sudo apt-get purge -y amtc amtc-web amtc-debuginfo
+else ifeq ($(PKGTYPE),rpm)
+	-sudo yum remove -y amtc amtc-web amtc-debuginfo
+endif
 	sudo rm -rf /etc/amtc-web /var/lib/amtc-web /usr/share/amtc-web /etc/{httpd,apache2}/{other,conf.d}/amtc-web_httpd.conf
 
 
