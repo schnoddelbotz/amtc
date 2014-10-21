@@ -147,7 +147,7 @@ purge:
 ifeq ($(PKGTYPE),osxpkg)
 	-sudo pkgutil --forget ch.hacker.amtc
 else ifeq ($(PKGTYPE),deb)
-	-sudo apt-get purge -y amtc amtc-web amtc-debuginfo
+	-sudo apt-get purge -y amtc
 else ifeq ($(PKGTYPE),rpm)
 	-sudo yum remove -y amtc amtc-web amtc-debuginfo
 endif
