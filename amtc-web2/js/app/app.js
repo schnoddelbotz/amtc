@@ -21,16 +21,21 @@ var App = Ember.Application.create({
   ready: function() {
     // turn off splash screen
     window.setTimeout( function(){
-      $('#splash').fadeOut(1200);
-      $('#backdrop').fadeOut(1000);
-    }, 750);
+      if (App.readCookie("isLoggedIn")) {
+        $('#splash').hide();
+        $('#backdrop').hide();
+      } else {
+        $('#splash').fadeOut(1200);
+        $('#backdrop').fadeOut(1000);
+      }
+    }, App.readCookie("isLoggedIn") ? 0 : 750);
 
     $(window).bind("load resize", function(){
       App.windowResizeHandler();
     });
 
     // AMTCWEB_IS_CONFIGURED gets defined via included script rest-api.php/rest-config.js
-    if (typeof AMTCWEB_IS_CONFIGURED != 'undefined' && AMTCWEB_IS_CONFIGURED===false && !window.location.hash.match('#/pages')) {
+    if (typeof AMTCWEB_IS_CONFIGURED != 'undefined' && AMTCWEB_IS_CONFIGURED===false && !window.location.hash.match('#/page')) {
       // unconfigured system detected. inform user and relocate to setup.php
       humane.log('<i class="glyphicon glyphicon-fire"></i> '+
                  'No configuration file found!<br>warping into setup ...', { timeout: 3000 });
@@ -135,7 +140,32 @@ Ember.Route.reopen({
   render: function(controller, model) {
     this._super();
     window.scrollTo(0, 0);
+  },
+
+  init: function() {
+    // this will redirect any user arriving e.g. via bookmark -- without cookie.
+    // done here, as ember-data routes would trigger errors without valid sess.
+    var U = App.readCookie("username");
+    var L = App.readCookie("isLoggedIn");
+    if (U == null && L == null && !window.location.href.match('/login')) {
+      console.log('NULL USER detected on Ember.Route.init(); redir to #/login!');
+      window.location.href = '#/login';
+    }
+    this._super();
   }
+});
+App.Router.reopen({
+  routeDidChange: function() {
+    // this will redirect any user that clicks on a link w/o having a cookie
+    // console.log('AppRouter didTransition to: ' + url);
+    var url = this.get('url')
+    var U = App.readCookie("username");
+    var L = App.readCookie("isLoggedIn");
+    if (U == null && !url.match('/page')) {
+      console.log('NULL USER detected on App.Router.routeDidChange(); redir to #/login!');
+      window.location.href = '#/login';
+    }
+  }.on('didTransition')
 });
 
 App.PageRoute = Ember.Route.extend({
@@ -267,11 +297,6 @@ MyView = Ember.View.extend({
 });
 */
 
-App.LoginView = Ember.View.extend({
-  didInsertElement: function() {
-    $('#username').focus();
-  }
-});
 App.ApplicationView = Ember.View.extend({
   didInsertElement: function() {
     $('#side-menu').metisMenu(); // initialize metisMenu
@@ -470,146 +495,91 @@ App.LoginController = Ember.ObjectController.extend({
   password: null,
 
   init: function() {
-
-      var controller = this;
-
-      var cuser = App.readCookie("username");
-      var isL = App.readCookie("isLoggedIn");
-      this.set('username', cuser);
-      this.set('isLoggedIn', isL);
-      console.log('INIT UserCtrl with user ... ' + cuser);
-      //if (cuser=='' || isL!=1 ) {
-        //  this.transitionToRoute('login');
-      //}
+    var cuser = App.readCookie("username");
+    var isL = App.readCookie("isLoggedIn");
+    this.set('username', cuser);
+    this.set('isLoggedIn', isL);
+    console.log('INIT UserCtrl with user ... ' + cuser);
   },
 
   isLoggedInObserver: function() {
-      console.log('Fetching user: ' + this.get('username'));
-
-      if (this.get('username')) {
-          this.set('content', this.store.find('user', this.get('username')));
-      } else {
-          this.set('content', null);
-          this.transitionToRoute('login');
-      }
+    // third place to redirect users w/o login sess cookie
+    console.log('Fetching user: ' + this.get('username'));
+    if (this.get('username')) {
+      this.set('content', this.store.find('user', this.get('username')));
+    } else {
+      this.set('content', null);
+      this.transitionToRoute('login');
+    }
   }.observes('isLoggedIn').on('init'),
-/*
-  isLoggedIn: function() {
-      return this.get('content.id') != undefined && this.get('content.id') != null;
-  }.property('content.id'),
 
-  userRoleObserver: function() {
-      if (this.get('content.isNotAuthenticated')) {
-          console.log('user is not authenticated in Montric. Transitioning to Login');
-          this.transitionToRoute('login');
-      } else if (this.get('content.isNew')) {
-          this.transitionToRoute('login.activation');
-      } else if (this.get('content.isUnregistered')) {
-          console.log('user is not registered in Montric. Transitioning to Registration');
-          this.transitionToRoute('login.register');
-      } else if (this.get('content.isUser')) {
-          console.log('user is logged in and is a user.');
-
-
-          if (this.get('controllers.application.currentPath') === 'main.login.index' ||
-              this.get('controllers.application.currentPath') === 'main.login.register' ||
-              this.get('controllers.application.currentPath') === 'main.login.activation') {
-
-              console.log('resetting mainCharts controller');
-              this.set('controllers.mainCharts.content', null);
-              this.transitionToRoute('main.charts');
-          }
-      }
-  }.observes('content.userRole'),
-*/
   actions: {
     doLogin: function(assertion) {
-        this.set('isLoggingIn', true);
-        var u = this.get('username');
-        var p = this.get('password');
-        var self = this;
+      this.set('isLoggingIn', true);
+      var u = this.get('username');
+      var p = this.get('password');
+      var self = this;
 
-        $.ajax({
-            type: 'POST',
-            url: 'rest-api.php/authenticate',
-            data: {username: u, password: p},
+      $.ajax({
+        type: 'POST',
+        url: 'rest-api.php/authenticate',
+        data: {username: u, password: p},
 
-            success: function(res, status, xhr) {
-                console.log(res);
-                if (res.exceptionMessage) {
-                  self.set('authFailed', true);
-                  $("#password").effect( "shake" );
-                } else if (res.result=='success') {
-                    console.log('AUTH SUCCESS!');
-                    App.createCookie("username", u);
-                    App.createCookie("isLoggedIn", 1);
-                    self.set('isLoggingIn', false);
-                    self.set('password','no-longer-required');
-                    self.set('isAuthenticated', true);
-                    // self.transitionToRoute('index');
-                    // lazy way, retrigger ember-data loads...
-                    window.location.href = 'index.html';
-                }
-                /*
-                if (res.registered === true) {
-                    //login user
-                    console.log('user authenticated. Setting UUID Token');
-                    this.set('uuidToken', res.uuidToken);
-                    this.set('isLoggingIn', false);
-                } else {
-                    console.log('onLogin success. Not Registered');
-                    this.set('newUuidToken', res.uuidToken);
-                    this.transitionToRoute('login.register');
-                }*/
-            },
-            error: function(xhr, status, err) { console.log("error: " + status + " error: " + err); }
-        });
+        success: function(res, status, xhr) {
+          console.log(res);
+          if (res.exceptionMessage) {
+            self.set('authFailed', true);
+            $("#password").effect( "shake" );
+          } else if (res.result=='success') {
+            console.log('AUTH SUCCESS!');
+            App.createCookie("username", u);
+            App.createCookie("isLoggedIn", 1);
+            self.set('isLoggingIn', false);
+            self.set('password','no-longer-required');
+            self.set('isAuthenticated', true);
+            // self.transitionToRoute('index');
+            // lazy way, retrigger ember-data loads...
+            window.location.href = 'index.html';
+          }
+        },
+        error: function(xhr, status, err) {
+          console.log("error: " + status + " error: " + err);
+        }
+      });
     },
     doLogout: function() {
-        //controller.set('content', null);
-        this.set('isAuthenticated', false);
-        //Montric.eraseCookie("uuidToken");
-        $.ajax({
-            type: 'GET',
-            url: 'rest-api.php/logout',
-            success: function(xhr, status, err) {
-                console.log('onlogout: ');
-                console.log(xhr);
-                App.eraseCookie("amtcweb");
-                App.eraseCookie("username");
-                App.eraseCookie("isLoggedIn");
-                humane.log('<i class="glyphicon glyphicon-fire"></i> Signed out successfully',
-                  { timeout: 1000, clickToClose: false });
-                window.setTimeout( function(){
-                  window.location.href='index.html'; // not nice ... but ok 4 now
-                }, 1100);
-            },
-            error: function(xhr, status, err) {
-                console.log(xhr);
-                console.log('Error while logging out: ' + err + " status: " + status);
-            }
+      //controller.set('content', null);
+      this.set('isAuthenticated', false);
+      $.ajax({
+        type: 'GET',
+        url: 'rest-api.php/logout',
+        success: function(xhr, status, err) {
+          console.log('onlogout: ');
+          console.log(xhr);
+          App.eraseCookie("amtcweb");
+          App.eraseCookie("username");
+          App.eraseCookie("isLoggedIn");
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Signed out successfully',
+            { timeout: 1000, clickToClose: false });
+          window.setTimeout( function(){
+            window.location.href='index.html'; // not nice ... but ok 4 now
+          }, 1100);
+        },
+        error: function(xhr, status, err) {
+          console.log(xhr);
+          console.log('Error while logging out: ' + err + " status: " + status);
+        }
         });
     }
   },
 });
-var ccc = App.LoginController;
 App.LogoutController = Ember.ObjectController.extend({
   needs: ["user", "login"],
   init: function() {
-
-      var controller = this;
-
-      var cuser = App.readCookie("username");
-      var isL = App.readCookie("isLoggedIn");
-      //this.set('username', cuser);
-      //this.set('isLoggedIn', isL);
-      console.log('LOGOUT UserCtrl with user ... ' + cuser);
-      //ctrl = App.LoginController;
-      this.get('controllers.login').send('doLogout');
-      //
-      //if (cuser=='' || isL!=1 ) {
-        //  this.transitionToRoute('login');
-      //}
+    var cuser = App.readCookie("username");
+    var isL = App.readCookie("isLoggedIn");
+    console.log('LOGOUT UserCtrl with user ... ' + cuser);
+    this.get('controllers.login').send('doLogout');
   },
 });
 
@@ -631,66 +601,6 @@ App.NotificationsController = Ember.ArrayController.extend({
   }.property()
 });
 // Users
-
-// https://raw.githubusercontent.com/joachimhs/Montric/9b9722bd475461be663967d03a3ea3ebfeb5678f/Montric.View/src/main/webapp/js/app/UserController.js
-/*
-App.UserController = Ember.Controller.extend({
-  //needs: ['application', 'mainCharts'],
-  username: null,
-  password: null,
-
-  init: function() {
-      console.log('INIT UserCtrl');
-      var controller = this;
-
-      var cookie = App.readCookie("amtcweb");
-      console.log('COOKIE UUID: ' + cookie);
-      if (cookie) {
-          this.set('uuidToken', cookie);
-      }
-  },
-
-  uuidTokenObserver: function() {
-      console.log('Fetching user: ' + this.get('uuidToken'));
-
-      if (this.get('uuidToken')) {
-          this.set('content', this.store.find('user', this.get('uuidToken')));
-      } else {
-          this.set('content', null);
-          this.transitionToRoute('login');
-      }
-
-  }.observes('uuidToken').on('init'),
-
-  isLoggedIn: function() {
-      return this.get('content.id') != undefined && this.get('content.id') != null;
-  }.property('content.id'),
-
-  userRoleObserver: function() {
-      if (this.get('content.isNotAuthenticated')) {
-          console.log('user is not authenticated in Montric. Transitioning to Login');
-          this.transitionToRoute('login');
-      } else if (this.get('content.isNew')) {
-          this.transitionToRoute('login.activation');
-      } else if (this.get('content.isUnregistered')) {
-          console.log('user is not registered in Montric. Transitioning to Registration');
-          this.transitionToRoute('login.register');
-      } else if (this.get('content.isUser')) {
-          console.log('user is logged in and is a user.');
-
-
-          if (this.get('controllers.application.currentPath') === 'main.login.index' ||
-              this.get('controllers.application.currentPath') === 'main.login.register' ||
-              this.get('controllers.application.currentPath') === 'main.login.activation') {
-
-              console.log('resetting mainCharts controller');
-              this.set('controllers.mainCharts.content', null);
-              this.transitionToRoute('main.charts');
-          }
-      }
-  }.observes('content.userRole')
-});
-*/
 
 // Organizational Units
 App.UserEditController = Ember.ObjectController.extend({

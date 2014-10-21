@@ -268,7 +268,7 @@
         <button class="btn btn-default" {{action 'doLogout'}}><span class="fa fa-fw fa-sign-out"></span> Logout</button>
       {{else}}
        <p>
-        {{input id="username" type="text" value=username insert-newline="doLogin" class="form-control" placeholder="username"}}
+        {{input id="username" type="text" value=username autofocus=true insert-newline="doLogin" class="form-control" placeholder="username"}}
        </p>
        <p>
         {{input id="password" type="password" value=password insert-newline="doLogin" class="form-control" placeholder="password"}}
@@ -989,8 +989,6 @@
           {{tree-menu-node node=node action="selectNode" selectedNode=selectedNode}}
       {{/if}}
     {{/each}}
-  {{else}}
-    <li><a href="#"><i class="fa fa-spinner fa-spin"></i> <i>loading rooms...</i></a></li>
   {{/if}}
 </script>
 
