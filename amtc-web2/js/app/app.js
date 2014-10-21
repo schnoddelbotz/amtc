@@ -147,7 +147,7 @@ Ember.Route.reopen({
     // done here, as ember-data routes would trigger errors without valid sess.
     var U = App.readCookie("username");
     var L = App.readCookie("isLoggedIn");
-    if (U == null && L == null && !window.location.href.match('/login') && !window.location.href.match('/setup')) {
+    if (U == null && L == null && !window.location.href.match('/login') && !window.location.href.match('/setup') && !window.location.href.match('/page')) {
       console.log('NULL USER detected on Ember.Route.init(); redir to #/login!');
       window.location.href = '#/login';
     }
