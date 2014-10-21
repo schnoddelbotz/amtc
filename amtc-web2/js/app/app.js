@@ -40,7 +40,7 @@ var App = Ember.Application.create({
       humane.log('<i class="glyphicon glyphicon-fire"></i> '+
                  'No configuration file found!<br>warping into setup ...', { timeout: 3000 });
       window.setTimeout( function(){
-        window.location.href = '#setup'; // how to use transitionToRoute here?
+        window.location.href = '#/setup'; // how to use transitionToRoute here?
       }, 3100);
     }
 
@@ -147,7 +147,7 @@ Ember.Route.reopen({
     // done here, as ember-data routes would trigger errors without valid sess.
     var U = App.readCookie("username");
     var L = App.readCookie("isLoggedIn");
-    if (U == null && L == null && !window.location.href.match('/login')) {
+    if (U == null && L == null && !window.location.href.match('/login') && !window.location.href.match('/setup')) {
       console.log('NULL USER detected on Ember.Route.init(); redir to #/login!');
       window.location.href = '#/login';
     }
@@ -161,8 +161,8 @@ App.Router.reopen({
     var url = this.get('url')
     var U = App.readCookie("username");
     var L = App.readCookie("isLoggedIn");
-    if (U == null && !url.match('/page')) {
-      console.log('NULL USER detected on App.Router.routeDidChange(); redir to #/login!');
+    if (U == null && !url.match('/page') && !window.location.href.match('/setup')) {
+      console.log('NULL USER detected on App.Router.routeDidChange(); redir to #/login!' + window.location.href);
       window.location.href = '#/login';
     }
   }.on('didTransition')
