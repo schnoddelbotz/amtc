@@ -130,7 +130,7 @@ This project is published under the [MIT license](../master/LICENSE.txt).
 It heavily relies on bundled 3rd party OSS components that are listed in the
 in-app ['about' page](../master/amtc-web2/pages/about.md) of amtc-web;
 their individual license texts have been bundled into 
-[LICENSES-3rd-party.txt](../master/amtc-web2/LICENSES-3rd-Party.txt). That file is also
+[LICENSES-3rd-party.txt](../master/amtc-web2/LICENSES-3rd-party.txt). That file is also
 distributed with any [release of amtc](https://github.com/schnoddelbotz/amtc/releases).
 
 alternatives
