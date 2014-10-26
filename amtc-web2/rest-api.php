@@ -422,6 +422,49 @@ $app->post('/optionsets', function () use ($app) {
   }
 });
 
+/**************** Scheduler items *********************************************/
+
+$app->get('/jobs', function () {
+  $result = array('jobs'=>array());
+  foreach (Job::order_by_asc('description')->find_many() as $record) {
+    $r = $record->as_array();
+    $result['jobs'][] = $r;
+  }
+  echo json_encode( $result );
+});
+/*  FIXME
+$app->get('/jobs/:id', function ($ouid) use ($app) {
+  if ($os = Job::find_one($ouid)) {
+    echo json_encode( array('job'=> $os->as_array()) );
+  }
+});
+$app->put('/jobs/:id', function ($id) {
+  $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
+  $udev = $put['job'];
+  if ($dev = Job::find_one($id)) {
+    $dev->opt_timeout = $udev->opt_timeout;
+    $dev->save();
+    echo json_encode( array('job'=> $dev->as_array()) );
+  }
+});
+$app->delete('/jobs/:id', function ($id) {
+  if ($dev = Job::find_one($id)) {
+    Job::query('PRAGMA foreign_keys = ON;');
+    $dev->delete();
+    echo '{}';
+  }
+});
+$app->post('/jobs', function () use ($app) {
+  $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
+  $udev = $post['job'];
+  if ($dev = Job::create()) {
+    $dev->opt_timeout = $udev->opt_timeout;
+    $dev->save();
+    echo json_encode( array('job'=> $dev->as_array()) );
+  }
+});
+*/
+
 /*****************************************************************************/
 /*
  *

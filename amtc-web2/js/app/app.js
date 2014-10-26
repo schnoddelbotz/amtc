@@ -108,7 +108,7 @@ App.Router.map(function() {
   this.route('setup');
   this.resource('logs');
   this.resource('energy');
-  this.resource('schedule');
+  //this.resource('schedule');
   this.resource('page', { path: '/page/:id' });
 
   this.resource('ous', function() {
@@ -133,6 +133,14 @@ App.Router.map(function() {
   this.resource('optionset', { path: '/optionset/:id' }, function() {
     this.route('edit');
   });
+
+  this.resource('schedules', function() {
+    this.route('new');
+  });
+  this.resource('schedule', { path: '/schedule/:id' }, function() {
+    this.route('edit');
+  });
+
 });
 
 Ember.Route.reopen({
@@ -282,6 +290,12 @@ App.SetupRoute = Ember.Route.extend({
                      '<p>webserver seems to lack PHP support!</p>', { timeout: 0, clickToClose: true });
         }
       );
+  }
+});
+App.SchedulesRoute = Ember.Route.extend({
+  model: function() {
+    console.log("SchedulesRoute model() fetching jobs with type=sched");
+    return this.store.find('job');
   }
 });
 
@@ -1086,6 +1100,31 @@ App.Laststate = DS.Model.extend({
   amtStateCssClass: function() {
     return 'S' + this.get('state_amt');
   }.property('state_amt'),
+});
+// Jobs / scheduled tasks
+App.Job = DS.Model.extend({
+  ou_id: DS.belongsTo('ou', {async:false}),//, {inverse: null}),
+  job_type: attr('number'), // 1=interactive, 2=scheduled, 3=monitor
+  description: attr('string'),
+  start_time: attr('number'),
+  amtc_cmd: attr('string'),
+  amtc_delay: attr('number'),
+  repeat_interval: attr('number'),
+  repeat_days: attr('number'),
+  last_started: attr('number'),
+  last_done: attr('number'),
+
+  on_sunday:   function() { return this.get('repeat_days') & 1; }.property('repeat_days'),
+  on_monday:   function() { return this.get('repeat_days') & 2; }.property('repeat_days'),
+  on_tuesday:  function() { return this.get('repeat_days') & 4; }.property('repeat_days'),
+  on_wednesday:function() { return this.get('repeat_days') & 8; }.property('repeat_days'),
+  on_thursday: function() { return this.get('repeat_days') & 16;}.property('repeat_days'),
+  on_friday:   function() { return this.get('repeat_days') & 32;}.property('repeat_days'),
+  on_saturday: function() { return this.get('repeat_days') & 64;}.property('repeat_days'),
+
+  isInteractiveTask: function() { return this.get('job_type')==1; }.property('job_type'),
+  isScheduledTask:   function() { return this.get('job_type')==2; }.property('job_type'),
+  isMonitoringTask:  function() { return this.get('job_type')==3; }.property('job_type')
 });
 
 // Components (menu tree...)

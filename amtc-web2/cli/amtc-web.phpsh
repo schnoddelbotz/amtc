@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# amtc-web.phpsh - part of amtc-web, part of amtc
+# https://github.com/schnoddelbotz/amtc
+#
+# used to (mainly) interact with amtc-web scheduled tasks (via cron).
+
+# log to amtc-web's data dir by default.
+# let user override by defining AMTC_LOGFILE.
+# let user disable logging by defining AMTC_NOLOG.
+# let user disable console output by using --quiet as first arg to $0
+
+DIR=$(cd "$(dirname "$0")"; pwd)
+DATE_FMT="%Y%m%d-%H:%M:%S"
+WHO="[$$/`whoami`]"
+PHP_OPTIONS="-derror_reporting=E_ALL -ddisplay_errors=stdout"
+PHP_CODE="require '$DIR/../lib/app_bootstrap.php'; amtcwebSpooler::CLI_main();"
+LOGFILE=${AMTC_LOGFILE:-$DIR/../data/amtc-web-cli.log}
+[ -z "$AMTC_NOLOG" ] || LOGFILE=/dev/null
+
+# log start time/user of any action
+echo "$(date +"$DATE_FMT") $WHO started with args: '$@'" >> $LOGFILE
+
+# execute amtc cli command
+if [ "$1" = "--quiet" ]; then
+  # only write to LOGFILE (for cron usage)
+  shift
+  php $PHP_OPTIONS -r "$PHP_CODE" -- $@ >> $LOGFILE 2>&1
+else
+  # write to log and stdout by default (interactive usage)
+  php $PHP_OPTIONS -r "$PHP_CODE" -- $@ 2>&1 | tee -a $LOGFILE
+fi
+
+# get/log return value from php execution
+PHP_RETVAL=${PIPESTATUS[0]}
+echo "$(date +"$DATE_FMT") $WHO completed; retval: $PHP_RETVAL" >> $LOGFILE
+
+
+# disregarding --quiet, produce a mail once when a cron job fails fatally
+REPORT_ONCE_FLAGFILE=/tmp/amtc-web-error.reported
+if [ $PHP_RETVAL -ne 0 -a ! -f $REPORT_ONCE_FLAGFILE ]; then
+  echo    "Oops! amtc-web error#0815: PHP retval: $PHP_RETVAL"
+  echo -e "Better check logs in:\n $LOGFILE"
+  echo    "REMOVE $REPORT_ONCE_FLAGFILE to get future messages!"
+  echo -e "Tail of amtc-web log:\n\n"
+  tail $LOGFILE
+  touch $REPORT_ONCE_FLAGFILE
+fi
+
+# remember /me to remove a stale flag file from time to time
+RANDOM_NUMBER=`echo $RANDOM % 100 + 1 | bc`
+if [ $RANDOM_NUMBER -eq 42 -a -f $REPORT_ONCE_FLAGFILE ]; then
+  echo "Please remember to remove $REPORT_ONCE_FLAGFILE !"
+fi
+
+exit $PHP_RETVAL

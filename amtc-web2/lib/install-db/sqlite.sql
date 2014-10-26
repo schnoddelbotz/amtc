@@ -25,7 +25,7 @@ CREATE TABLE "ou" (
   "description"       VARCHAR(255),
   "idle_power"        REAL,
   "logging"           INT          DEFAULT 1,
-  
+
   FOREIGN KEY(optionset_id) REFERENCES optionset(id),
   FOREIGN KEY(parent_id) REFERENCES ou(id) ON DELETE RESTRICT
 );
@@ -58,15 +58,15 @@ CREATE TABLE "statelog" (
   "host_id"           INTEGER      NOT NULL,
   "state_begin"       INTEGER(4)   DEFAULT (strftime('%s','now')),
   "open_port"         INTEGER      DEFAULT NULL,
-  "state_amt"         INTEGER(1), 
+  "state_amt"         INTEGER(1),
   "state_http"        INTEGER(2),
 
   FOREIGN KEY(host_id) REFERENCES host(id)
 );
-CREATE INDEX "logdata_ld" ON "statelog" ("state_begin"); 
+CREATE INDEX "logdata_ld" ON "statelog" ("state_begin");
 CREATE INDEX "logdata_pd" ON "statelog" ("host_id");
 CREATE VIEW  "laststate"  AS   -- ... including fake id column to make e-d happy
-  SELECT host_id AS id, host_id,max(state_begin) AS state_begin,open_port,state_amt,state_http 
+  SELECT host_id AS id, host_id,max(state_begin) AS state_begin,open_port,state_amt,state_http
   FROM statelog GROUP BY host_id;
 
 -- amt(c) option sets
@@ -87,20 +87,30 @@ CREATE TABLE "optionset" (
 );
 
 
--- amtc-web v1 ... tbd
--- undone... scheduled tasks should create jobs, too (not only interactive...)?
 CREATE TABLE "job" (
   "id"                INTEGER      NOT NULL PRIMARY KEY,
-  "cmd_state"         INTEGER      DEFAULT '0',
+  "job_type"          INTEGER,     -- 1=interactive, 2=scheduled, 3=monitor
+  "job_status"        INTEGER      DEFAULT '0',
   "createdat"         INTEGER(4)   DEFAULT (strftime('%s','now')),
-  "username"          TEXT,
+  "user_id"           INTEGER      NOT NULL,
+
   "amtc_cmd"          CHAR(1)      NOT NULL,  -- U/D/R/C
-  "amtc_hosts"        TEXT, -- now ids of hosts...? FIXME tbd
-  "startedat"         INTEGER(4)   DEFAULT NULL,
-  "doneat"            INTEGER(4)   DEFAULT NULL,
   "amtc_delay"        REAL,
-  "bootdevice"        CHAR(1)      DEFAULT NULL, -- tbd; no support in amtc yet
+  "amtc_bootdevice"   CHAR(1)      DEFAULT NULL, -- tbd; no support in amtc yet
+
+  "amtc_hosts"        TEXT, -- now ids of hosts...? FIXME tbd
   "ou_id"             INTEGER, -- req'd to determine optionset; allow override?
 
-  FOREIGN KEY(ou_id) REFERENCES ou(id)
+  "start_time"        INTEGER(4)   DEFAULT NULL, -- start time at day; tbd= minutes?
+  "repeat_interval"   INTEGER, -- minutes
+  "repeat_days"       INTEGER, -- pow(2, getdate()[wday])
+  "last_started"      INTEGER(4)   DEFAULT NULL,
+  "last_done"         INTEGER(4)   DEFAULT NULL,
+  "proc_pid"          INTEGER, -- process id of currently running job
+
+  "description"       VARCHAR(32), -- to reference it e.g. in logs (insb. sched)
+  FOREIGN KEY(ou_id) REFERENCES ou(id),
+  FOREIGN KEY(user_id) REFERENCES user(id)
 );
+
+--- SYNC MySQL !!!
