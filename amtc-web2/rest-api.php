@@ -432,38 +432,41 @@ $app->get('/jobs', function () {
   }
   echo json_encode( $result );
 });
-/*  FIXME
-$app->get('/jobs/:id', function ($ouid) use ($app) {
-  if ($os = Job::find_one($ouid)) {
-    echo json_encode( array('job'=> $os->as_array()) );
+$app->get('/jobs/:id', function ($jid) {
+  if ($job = Job::find_one($jid)) {
+    echo json_encode( array('job'=> $job->as_array()) );
   }
 });
 $app->put('/jobs/:id', function ($id) {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $udev = $put['job'];
-  if ($dev = Job::find_one($id)) {
-    $dev->opt_timeout = $udev->opt_timeout;
-    $dev->save();
-    echo json_encode( array('job'=> $dev->as_array()) );
+  $user = $put['job'];
+  if ($job = Job::find_one($id)) {
+    $job->repeat_days = $user->repeat_days;
+    $job->description = $user->description;
+    $job->save();
+    echo json_encode( array('job'=> $job->as_array()) );
   }
 });
 $app->delete('/jobs/:id', function ($id) {
-  if ($dev = Job::find_one($id)) {
-    Job::query('PRAGMA foreign_keys = ON;');
-    $dev->delete();
+  if ($job = Job::find_one($id)) {
+    //Job::query('PRAGMA foreign_keys = ON;'); // YIKES! FIXME!-no-idiorm...ORM::configure?
+    $job->delete();
     echo '{}';
   }
 });
 $app->post('/jobs', function () use ($app) {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $udev = $post['job'];
-  if ($dev = Job::create()) {
-    $dev->opt_timeout = $udev->opt_timeout;
-    $dev->save();
-    echo json_encode( array('job'=> $dev->as_array()) );
+  $user = $post['job'];
+  if ($job = Job::create()) {
+    $job->repeat_days = $user->repeat_days;
+    $job->description = $user->description;
+    $job->job_type = 2; // FIXME use CONSTANT JOBTYPE_SCHEDULED
+    $job->user_id = 1; // FIXME!!
+    $job->amtc_cmd = 'U'; // FIXME!!
+    $job->save();
+    echo json_encode( array('job'=> $job->as_array()) );
   }
 });
-*/
 
 /*****************************************************************************/
 /*

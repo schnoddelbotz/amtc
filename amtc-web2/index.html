@@ -509,7 +509,7 @@
     <div class="col-lg-2">
       <h3>Actions</h3>
       <ul>
-          <li>{{#link-to 'schedule'}}Show schedule{{/link-to}}</li>
+          <li>{{#link-to 'schedules'}}Show schedule{{/link-to}}</li>
           <li>{{#link-to 'schedules.new'}}Add item{{/link-to}}</li>
       </ul>
     </div>
@@ -522,8 +522,7 @@
   <table class="table">
     <thead>
       <tr>
-        <th>Edit</th>
-        <th>Job Name</th>
+        <th>Job Description</th>
         <th>Mon</th>
         <th>Tue</th>
         <th>Wed</th>
@@ -540,8 +539,8 @@
     {{#each model}}
     {{#if isScheduledTask}}
       <tr>
-        <td>{{#link-to 'schedule.edit' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
-        <td>{{#link-to 'schedule.edit' this}}{{description}}{{/link-to}}</td>
+        <td>{{#link-to 'schedule.edit' this}}<i class="glyphicon glyphicon-edit"></i> {{/link-to}}&nbsp;
+        {{#link-to 'schedule.edit' this}}{{description}}{{/link-to}}</td>
         <td>{{check-mark on_monday}}</td>
         <td>{{check-mark on_tuesday}}</td>
         <td>{{check-mark on_wednesday}}</td>
@@ -558,6 +557,60 @@
     {{/each}}
   </table>
 </script>
+
+<script type="text/x-handlebars" id="schedule">
+  {{! Display a single scheduler item }}
+    {{! Display a single OU }}
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Edit Job {{description}}</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      {{partial "scheduleEdit"}}
+      <div id="editbutton">
+        <button {{action "removeSchedule"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete Job</button>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+        {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
+      </div>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="schedules/new">
+  <h1 class="page-header">Create a new scheduled task</h1>
+  <p>
+    Create a new scheduled task here - a remote power control job that is executed
+    in the interval you specify here. Provide a description, select days the job should apply on.
+  </p>
+  {{partial "scheduleEdit"}}
+  <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save task</button>
+</script>
+
+<script type="text/x-handlebars" data-template-name='_scheduleEdit'>
+  <form id="optionsetEditForm">
+   <fieldset>
+      <div class="form-group">
+        <label for "description">Description</label>
+          {{input class="form-control" type="text" value=description insert-newline="doneEditingReturn" placeholder="Power-Up|Down Room when ..."}}
+      </div>
+
+      <div class="checkbox"><label>{{input type="checkbox" checked=on_monday}} Monday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=on_tuesday}} Tuesday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=on_wednesday}} Wednesday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=on_thursday}} Thursday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=on_friday}} Friday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=on_saturday}} Saturday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=on_sunday}} Sunday</label></div>
+
+      fixme: OU chooser; time chooser; action chooser...
+
+   </fieldset>
+  </form>
+  <div class="clearboth"></div><br>
+</script>
+
 
 <script type="text/x-handlebars" id="setup">
   <div class="row">
@@ -664,27 +717,6 @@
                 {{/if}}
 
                 <div class="form-group">
-                    <label>Example data</label>
-                    <div class="checkbox">
-                        <label>
-                            {{input type="checkbox" checked=importDemo}} Install example data (some OUs, AMT option sets, and hosts)
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Performance optimization</label>
-                    <div class="checkbox">
-                        <label>
-                            {{input type="checkbox" checked=installHtaccess}} Enable RewriteRules via .htaccess
-                        </label>
-                        <p class="help-block">Your webserver must have mod_rewrite enabled and AllowOverride must
-                                              be configured to allow use of .htaccess files. <br>Given that, you may
-                                              check this option to deliver gzip compressed HTML/CSS/JS to clients.</p>
-                    </div>
-                </div>
-
-                <div class="form-group">
                   <label>HTTP Basic authentication URL</label>
                   {{input type="text" value=authurl class="form-control"}}
                   <p class="help-block">Defaults to <code>basic-auth</code> subdirectory, relative to
@@ -693,6 +725,15 @@
                   passwords by means of <code>htpasswd</code> locally -- or you may configure <code>basic-auth</code>
                   subdirectory to use e.g. LDAP as authentication backend. Inside amtc-web s DB, only usernames and
                   settings are stored.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Example data</label>
+                    <div class="checkbox">
+                        <label>
+                            {{input type="checkbox" checked=importDemo}} Install example data (some OUs, AMT option sets, and hosts)
+                        </label>
+                    </div>
                 </div>
 
                 <div class="form-group">

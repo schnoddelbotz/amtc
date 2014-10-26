@@ -88,6 +88,11 @@ INSERT INTO "statelog" (host_id,open_port,state_amt,state_http) VALUES (23,22,0,
 INSERT INTO "statelog" (host_id,open_port,state_amt,state_http) VALUES (24,22,0,200);
 INSERT INTO "statelog" (host_id,open_port,state_amt,state_http) VALUES (25,22,0,200);
 
--- some example scheduled tasks
-INSERT INTO "job" VALUES(2,2,0,1414278074,2,'U',NULL,NULL,'',11,600,NULL,65,NULL,NULL,NULL,'Power-Up OU 11 at 10 am');
-INSERT INTO "job" VALUES(3,1,0,1414278138,2,'R',NULL,'','12,13',9,NULL,NULL,NULL,NULL,NULL,NULL,'Reset two now...');
+-- some example jobs
+-- scheduled tasks
+INSERT INTO "job" VALUES(2,2,0,1414363556,1,'U',NULL,NULL,NULL,8,NULL,NULL,127,NULL,NULL,NULL,'Power-Up E19 Mon-Sun');
+INSERT INTO "job" VALUES(3,2,0,1414363575,1,'D',NULL,NULL,NULL,8,NULL,NULL,62,NULL,NULL,NULL,'Power-Down E19 Mon-Fri');
+INSERT INTO "job" VALUES(4,2,0,1414363590,1,'D',NULL,NULL,NULL,8,NULL,NULL,65,NULL,NULL,NULL,' Power-Down E19 Sat+Sun');
+INSERT INTO "job" VALUES(5,2,0,1414363765,1,'U',NULL,NULL,NULL,5,NULL,NULL,62,NULL,NULL,NULL,'Power-Up Course rooms Mon-Fri');
+-- interactive jobs
+INSERT INTO "job" VALUES(6,1,0,1414278138,2,'R',NULL,'','12,13',9,NULL,NULL,NULL,NULL,NULL,NULL,'Reset two now...');

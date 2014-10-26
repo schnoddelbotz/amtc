@@ -298,6 +298,18 @@ App.SchedulesRoute = Ember.Route.extend({
     return this.store.find('job');
   }
 });
+App.SchedulesNewRoute = Ember.Route.extend({
+  model: function() {
+    console.log("SchedulesNewRoute create record");
+    return this.store.createRecord('job');
+  }
+});
+App.ScheduleRoute = Ember.Route.extend({
+  model: function(params) {
+    console.log("SchedulesRoute model() fetching job with id=" + params.id);
+    return this.store.find('job', params.id);
+  }
+});
 
 // Views
 /*
@@ -845,14 +857,6 @@ App.OptionsetController = Ember.ObjectController.extend({
       )};
     },
 
-    becameError: function() {
-      alert("This does not work... elsewhere?");
-    },
-
-    edit: function() {
-      this.set('isEditing', true);
-    },
-
     doneEditingReturn: function() {
       this.set('isEditing', false);
       console.log(this.get('model'));
@@ -866,7 +870,6 @@ App.OptionsetController = Ember.ObjectController.extend({
                    'Check console, please.' : res.exceptionMessage;
         humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
                    '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-        device.rollback();
         }
       );
     }
@@ -878,6 +881,53 @@ App.OptionsetsController = Ember.ArrayController.extend({
     return this.get('store').find('optionset');
   }.property()
 });
+// Scheduled Tasks
+App.ScheduleController = Ember.ObjectController.extend({
+  //needs: ["schedules"],
+  currentOU: null,
+  isEditing: false,
+  ouTree: null,
+
+  actions: {
+    removeSchedule: function () {
+      if (confirm("Really delete this job?")) {
+        console.log('FINALLY Remove it');
+        var device = this.get('model');
+        device.deleteRecord();
+        device.save().then(function() {
+          humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
+            { timeout: 1500, clickToClose: false });
+          console.log("FIXME - transtionToRoute doesnt work here...");
+          window.location.href = '#/schedules';
+        }, function(response){
+          var res = jQuery.parseJSON(response.responseText);
+          var msg = (typeof res.exceptionMessage=='undefined') ?
+                    'Check console, please.' : res.exceptionMessage;
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
+        }
+      )};
+    },
+
+    doneEditingReturn: function() {
+      this.set('isEditing', false);
+      //console.log(this.get('model'));
+      this.get('model').save().then(function() {
+        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
+          { timeout: 800 });
+        window.location.href = '#/schedules';
+      }, function(response){
+        var res = jQuery.parseJSON(response.responseText);
+        var msg = (typeof res.exceptionMessage=='undefined') ?
+                   'Check console, please.' : res.exceptionMessage;
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                   '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
+        }
+      );
+    }
+  }
+});
+App.SchedulesNewController = App.ScheduleController; // FIXME: evil? dumb...?
 // Controller for /#setup (Installer)
 App.SetupController = Ember.ObjectController.extend({
   // Controller used for initial installation page #setup
@@ -1114,13 +1164,43 @@ App.Job = DS.Model.extend({
   last_started: attr('number'),
   last_done: attr('number'),
 
-  on_sunday:   function() { return this.get('repeat_days') & 1; }.property('repeat_days'),
-  on_monday:   function() { return this.get('repeat_days') & 2; }.property('repeat_days'),
-  on_tuesday:  function() { return this.get('repeat_days') & 4; }.property('repeat_days'),
-  on_wednesday:function() { return this.get('repeat_days') & 8; }.property('repeat_days'),
-  on_thursday: function() { return this.get('repeat_days') & 16;}.property('repeat_days'),
-  on_friday:   function() { return this.get('repeat_days') & 32;}.property('repeat_days'),
-  on_saturday: function() { return this.get('repeat_days') & 64;}.property('repeat_days'),
+  // repeat_days is a bitmask, starting with sunday=1.
+  // setters on computable properties below provide easy access...
+  on_sunday: function(k,v) {
+    if (arguments.length > 1)
+      this.set('repeat_days', this.get('repeat_days') ^ 1);
+    return this.get('repeat_days') & 1 ? true : false;
+  }.property('repeat_days'),
+  on_monday: function(k,v) {
+    if (arguments.length > 1)
+      this.set('repeat_days', this.get('repeat_days') ^ 2);
+    return this.get('repeat_days') & 2 ? true : false;
+  }.property('repeat_days'),
+  on_tuesday: function(k,v) {
+    if (arguments.length > 1)
+      this.set('repeat_days', this.get('repeat_days') ^ 4);
+    return this.get('repeat_days') & 4 ? true : false;
+  }.property('repeat_days'),
+  on_wednesday: function(k,v) {
+    if (arguments.length > 1)
+      this.set('repeat_days', this.get('repeat_days') ^ 8);
+    return this.get('repeat_days') & 8 ? true : false;
+  }.property('repeat_days'),
+  on_thursday: function(k,v) {
+    if (arguments.length > 1)
+      this.set('repeat_days', this.get('repeat_days') ^ 16);
+    return this.get('repeat_days') & 16 ? true : false;
+  }.property('repeat_days'),
+  on_friday: function(k,v) {
+    if (arguments.length > 1)
+      this.set('repeat_days', this.get('repeat_days') ^ 32);
+    return this.get('repeat_days') & 32 ? true : false;
+  }.property('repeat_days'),
+  on_saturday: function(k,v) {
+    if (arguments.length > 1)
+      this.set('repeat_days', this.get('repeat_days') ^ 64);
+    return this.get('repeat_days') & 64 ? true : false;
+  }.property('repeat_days'),
 
   isInteractiveTask: function() { return this.get('job_type')==1; }.property('job_type'),
   isScheduledTask:   function() { return this.get('job_type')==2; }.property('job_type'),
