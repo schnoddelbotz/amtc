@@ -87,3 +87,7 @@ INSERT INTO "statelog" (host_id,open_port,state_amt,state_http) VALUES (22,0,0,2
 INSERT INTO "statelog" (host_id,open_port,state_amt,state_http) VALUES (23,22,0,200);
 INSERT INTO "statelog" (host_id,open_port,state_amt,state_http) VALUES (24,22,0,200);
 INSERT INTO "statelog" (host_id,open_port,state_amt,state_http) VALUES (25,22,0,200);
+
+-- some example scheduled tasks
+INSERT INTO "job" VALUES(2,2,0,1414278074,2,'U',NULL,NULL,'',11,600,NULL,65,NULL,NULL,NULL,'Power-Up OU 11 at 10 am');
+INSERT INTO "job" VALUES(3,1,0,1414278138,2,'R',NULL,'','12,13',9,NULL,NULL,NULL,NULL,NULL,NULL,'Reset two now...');
