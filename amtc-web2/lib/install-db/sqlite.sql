@@ -66,8 +66,8 @@ CREATE TABLE "statelog" (
 CREATE INDEX "logdata_ld" ON "statelog" ("state_begin");
 CREATE INDEX "logdata_pd" ON "statelog" ("host_id");
 CREATE VIEW  "laststate"  AS   -- ... including fake id column to make e-d happy
-  SELECT host_id AS id, host_id,max(state_begin) AS state_begin,open_port,state_amt,state_http
-  FROM statelog GROUP BY host_id;
+  SELECT host_id AS id, hostname, host_id,max(state_begin) AS state_begin,open_port,state_amt,state_http
+  FROM statelog,host WHERE statelog.host_id=host.id GROUP BY host_id;
 
 -- amt(c) option sets
 CREATE TABLE "optionset" (

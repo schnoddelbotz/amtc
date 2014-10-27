@@ -532,7 +532,7 @@ void get_amt_pw() {
   if (amtpasswdfilep!=NULL) {
     pwfile = fopen(amtpasswdfilep, "r");
     if(pwfile == NULL) {
-      perror("Error opening password file");
+      printf("Error opening password file\n");
       exit(4);
     }
     if( fgets (amtpasswd, sizeof amtpasswd, pwfile)!=NULL ) {

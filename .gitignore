@@ -1,4 +1,8 @@
 
+.DS_Store
+Distribution.xml
+*.pkg
+
 amtc-web2/js/*.js
 amtc-web2/css/*.css
 
@@ -6,6 +10,7 @@ amtc-web2/basic-auth/.htaccess
 amtc-web2/config/.htpasswd
 amtc-web2/config/siteconfig.php
 amtc-web2/data/amtc-web.db
+amtc-web2/data/amtc-*.log
 
 amtc-web2/fonts/
 amtc-web2/css/plugins/
@@ -26,3 +31,6 @@ src/cmd_*.h
 src/wsman_*.h
 
 releases/
+osxpkgroot/
+osxpkgscripts/
+dist/
