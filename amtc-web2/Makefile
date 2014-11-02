@@ -80,12 +80,12 @@ js/bootstrap.min.js:
 	rm -rf bootstrap-$(BOOTSTRAP)-dist bs.zip
 
 css/sb-admin-2.css:
-	curl -Lso sb.zip http://startbootstrap.com/downloads/sb-admin-2.zip
+	curl -Lso sb.zip https://github.com/IronSummitMedia/startbootstrap-sb-admin-2/archive/v1.0.0.zip
 	unzip -q sb.zip
-	cp sb-admin-2/css/sb-admin-2.css css
-	cp -R sb-admin-2/css/plugins css
-	cp -R sb-admin-2/js/plugins js
-	rm -rf sb-admin-2 sb.zip
+	cp startbootstrap-sb-admin-2-1.0.0/css/sb-admin-2.css css
+	cp -R startbootstrap-sb-admin-2-1.0.0/css/plugins css
+	cp -R startbootstrap-sb-admin-2-1.0.0/js/plugins js
+	rm -rf startbootstrap-sb-admin-2-1.0.0 sb.zip
 
 fonts/fontawesome-webfont.woff:
 	curl -Lso fa.zip http://fortawesome.github.io/Font-Awesome/assets/font-awesome-$(FONTAWESOME).zip

@@ -9,11 +9,11 @@ INSERT INTO "notification" VALUES(NULL,1409988624,2,'envelope','daily status rep
 INSERT INTO "notification" VALUES(NULL,1410004353,2,'warning','More than 10 hosts unreachable!');
 
 -- some amtc option sets
-INSERT INTO "optionset" VALUES(1,'DASH / No TLS','Uses DASH',0,1,1,1,0,0,200,10,'/tmp/test2.pass','');
-INSERT INTO "optionset" VALUES(2,'DASH / TLS / VerifyCertSkip','Skips TLS certificate verification',0,1,1,1,1,1,175,10,'/tmp/test2.pass','');
-INSERT INTO "optionset" VALUES(3,'DASH / TLS / VerifyCert','Most secure optionset',0,1,1,1,1,0,150,15,'/tmp/test3.pass','/tmp/my.ca.crt');
-INSERT INTO "optionset" VALUES(4,'EOI / No TLS - AMT v5','For old hardware with AMT 5.0 (around 2008)',1,0,0,0,0,0,100,10,'/tmp/testv5.pass',NULL);
-INSERT INTO "optionset" VALUES(5,'EOI / No TLS - AMT v6-8','EOI + No TLS = the fastest. But only does digest auth via http.',0,0,1,1,0,0,250,6,'/tmp/test1.pass','');
+INSERT INTO "optionset" VALUES(1,'DASH / No TLS','Uses DASH',0,1,1,1,0,0,200,10,'/etc/amtc-web/AMT-password.pass','');
+INSERT INTO "optionset" VALUES(2,'DASH / TLS / VerifyCertSkip','Skips TLS certificate verification',0,1,1,1,1,1,175,10,'/etc/amtc-web/AMT-password.pass','');
+INSERT INTO "optionset" VALUES(3,'DASH / TLS / VerifyCert','Most secure optionset',0,1,1,1,1,0,150,15,'/etc/amtc-web/AMT-password.pass','/etc/amtc-web/my.ca.crt');
+INSERT INTO "optionset" VALUES(4,'EOI / No TLS - AMT v5','For old hardware with AMT 5.0 (around 2008)',1,0,0,0,0,0,100,10,'/etc/amtc-web/AMT-password.pass',NULL);
+INSERT INTO "optionset" VALUES(5,'EOI / No TLS - AMT v6-8','EOI + No TLS = the fastest. But only does digest auth via http.',0,0,1,1,0,0,250,6,'/etc/amtc-web/AMT-password.pass','');
 
 -- example OUs ...
 -- comes in via minimal already:
@@ -88,11 +88,12 @@ INSERT INTO "statelog" (host_id,open_port,state_amt,state_http) VALUES (23,22,0,
 INSERT INTO "statelog" (host_id,open_port,state_amt,state_http) VALUES (24,22,0,200);
 INSERT INTO "statelog" (host_id,open_port,state_amt,state_http) VALUES (25,22,0,200);
 
--- some example jobs
+-- single monitoring task
+-- ... contained in -minimal.sql
 -- scheduled tasks
-INSERT INTO "job" VALUES(2,2,0,1414363556,1,'U',NULL,NULL,NULL,8,NULL,NULL,127,NULL,NULL,NULL,'Power-Up E19 Mon-Sun');
-INSERT INTO "job" VALUES(3,2,0,1414363575,1,'D',NULL,NULL,NULL,8,NULL,NULL,62,NULL,NULL,NULL,'Power-Down E19 Mon-Fri');
-INSERT INTO "job" VALUES(4,2,0,1414363590,1,'D',NULL,NULL,NULL,8,NULL,NULL,65,NULL,NULL,NULL,' Power-Down E19 Sat+Sun');
-INSERT INTO "job" VALUES(5,2,0,1414363765,1,'U',NULL,NULL,NULL,5,NULL,NULL,62,NULL,NULL,NULL,'Power-Up Course rooms Mon-Fri');
+INSERT INTO "job" VALUES(2,2,0,1414363556,1,'U',NULL,NULL,NULL,8,480,NULL,127,NULL,NULL,NULL,'Power-Up E19 Mon-Sun');
+INSERT INTO "job" VALUES(3,2,0,1414363575,1,'D',NULL,NULL,NULL,8,1290,NULL,62,NULL,NULL,NULL,'Power-Down E19 Mon-Fri');
+INSERT INTO "job" VALUES(4,2,0,1414363590,1,'D',NULL,NULL,NULL,8,960,NULL,65,NULL,NULL,NULL,'Power-Down E19 Sat+Sun');
+INSERT INTO "job" VALUES(5,2,0,1414363765,1,'U',NULL,NULL,NULL,5,570,NULL,62,NULL,NULL,NULL,'Power-Up Course rooms Mon-Fri');
 -- interactive jobs
-INSERT INTO "job" VALUES(6,1,0,1414278138,2,'R',NULL,'','12,13',9,NULL,NULL,NULL,NULL,NULL,NULL,'Reset two now...');
+INSERT INTO "job" VALUES(6,1,2,1414278138,2,'R',NULL,'','12,13',9,735,NULL,NULL,NULL,NULL,NULL,'Reset two now...');

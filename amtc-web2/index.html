@@ -191,6 +191,7 @@
         <div class="navbar-default sidebar" role="navigation">
             <div class="sidebar-nav navbar-collapse">
                 <ul class="nav" id="side-menu">
+                <!--
                     <li class="sidebar-search">
                         <div class="input-group custom-search-form">
                             <input type="text" class="form-control" placeholder="Search host or room">
@@ -200,8 +201,9 @@
                             </button>
                         </span>
                         </div>
-                        <!-- /input-group -->
                     </li>
+                -->
+                {{#if controllers.login.isLoggedIn}} <!-- hide menu items that require login -->
                     <li>
                         <a href="#"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                     </li>
@@ -215,12 +217,13 @@
                     </li>
                     {{#linkTo 'logs' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>{{/linkTo}}
                     {{#linkTo 'energy' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-area-chart fa-fw"></i> Energy Consumption</a>{{/linkTo}}
-                    {{#linkTo 'schedules' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Power Schedule</a>{{/linkTo}}
                     <li>
                         <a href="#"><i class="fa fa-wrench fa-fw"></i> Administration<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
 
                             {{#linkTo 'ous' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>{{/linkTo}}
+
+                            {{#linkTo 'schedules' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Power Schedule</a>{{/linkTo}}
 
                             {{#linkTo 'users' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-users fa-fw"></i> Users</a>{{/linkTo}}
 
@@ -231,6 +234,9 @@
                         </ul>
                         <!-- /.nav-second-level -->
                     </li>
+                {{else}}
+                 <li><a href="#/login"><i class="fa fa-user fa-fw"></i> Login</a></li>
+                {{/if}} <!-- / hide menu items that require login -->
                     <li>
                         <a href="#"><i class="fa fa-ambulance fa-fw"></i> Help<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level">
@@ -548,7 +554,7 @@
         <td>{{check-mark on_friday}}</td>
         <td>{{check-mark on_saturday}}</td>
         <td>{{check-mark on_sunday}}</td>
-        <td>{{start_time}}</td>
+        <td>{{human_start_time}}</td>
         <td>{{amtc_cmd}}</td>
         <td>{{ou_id.name}}</td>
         <td>{{delay}}</td>
@@ -604,7 +610,24 @@
       <div class="checkbox"><label>{{input type="checkbox" checked=on_saturday}} Saturday</label></div>
       <div class="checkbox"><label>{{input type="checkbox" checked=on_sunday}} Sunday</label></div>
 
-      fixme: OU chooser; time chooser; action chooser...
+      <div class="form-group">
+        <label for "start_time">Start time</label>
+        {{input class="form-control" type="time" value=human_start_time insert-newline="doneEditingReturn"}}
+      </div>
+
+      <div class="form-group">
+        {{#if controllers.ous.ous.content}}
+        {{view Ember.Select content=controllers.ous.ous.content
+                            class="form-control"
+                            value=ou_id.id
+                            selection=ou_id
+                            prompt="Choose OU"
+                            optionValuePath="content.id"
+                            optionLabelPath="content.name" }}
+        {{/if}}
+      </div>
+
+      todo: + action chooser...
 
    </fieldset>
   </form>

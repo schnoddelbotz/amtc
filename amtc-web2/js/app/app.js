@@ -57,7 +57,10 @@ var App = Ember.Application.create({
       $('#bolt').removeClass('flash');
     });
   },
-
+  // for zero-padding numbers
+  pad: function(number, length) {
+    return (number+"").length >= length ?  number + "" : this.pad("0" + number, length);
+  },
   // SB-Admin 2 responsiveness helper
   windowResizeHandler: function() {
     topOffset = 50;
@@ -484,6 +487,12 @@ App.NavigationView = Em.View.extend({
     }.property('item', 'parentView.selected').cacheable()
   })
 });
+App.LoginView = Ember.View.extend({
+  // that element has auto-focus, but it only works when entering route 1st time
+  didInsertElement: function() {
+    $('#username').focus();
+  }
+});
 
 // Controllers
 // see http://emberjs.com/guides/routing/generated-objects/
@@ -761,10 +770,6 @@ App.OuHostsController = Ember.ObjectController.extend({
   hostname: null,
   domainName: null,
 
-  padNumber: function(number, length) {
-   return (number+"").length >= length ?  number + "" : this.padNumber("0" + number, length);
-  },
-
   hostsToAdd: function() {
     if (!this.get('addMultiple')) {
       return [this.get('hostname')];
@@ -777,7 +782,7 @@ App.OuHostsController = Ember.ObjectController.extend({
       var stop  = parseInt(this.get('startNum')) + parseInt(this.get('numHosts')) - 1;
       for (var x=start; x<=stop; x++) {
         var hostname = this.get('hostname') +
-                       this.padNumber( x, this.get('padNum')) +
+                       App.pad( x, this.get('padNum')) +
                        (this.get('domainName') ? ('.' + this.get('domainName')) : '');
         hosts.push(hostname);
       }
@@ -883,7 +888,7 @@ App.OptionsetsController = Ember.ArrayController.extend({
 });
 // Scheduled Tasks
 App.ScheduleController = Ember.ObjectController.extend({
-  //needs: ["schedules"],
+  needs: ["ous"],
   currentOU: null,
   isEditing: false,
   ouTree: null,
@@ -1163,6 +1168,21 @@ App.Job = DS.Model.extend({
   repeat_days: attr('number'),
   last_started: attr('number'),
   last_done: attr('number'),
+
+  // start_time is a int value representing minute-of-day.
+  // allow getting / setting it in a human readable form.
+  human_start_time: function(k,v) {
+    if (arguments.length > 1) {
+      var parts =  v.split(':');
+      var h = parseInt(parts[0]);
+      var m = parseInt(parts[1]);
+      var hm = h*60 + m;
+      this.set('start_time', hm);
+    }
+    var hrs = App.pad( Math.floor(this.get('start_time')/60),  2);
+    var min = App.pad( this.get('start_time') - ( hrs * 60),  2);
+    return hrs + ':' + min;
+  }.property('start_time'),
 
   // repeat_days is a bitmask, starting with sunday=1.
   // setters on computable properties below provide easy access...

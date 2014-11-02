@@ -8,8 +8,8 @@ amtc and is intended for any user willing to power manage and control a fleet of
 Intel vPro/AMT or AMD DASH equipped hosts. While amtc itself is a command line tool that can be
 used to quickly control hosts, amtc-web tries to visually make most out of the information
 that can be gathered via vPro, lets you [monitor and control](#/monitors/1) a bunch of PCs
-with just a few clicks, [logs states](#/logs) which allows drawing some approximate 
-[engergy consumption charts](#/energy) and allows comfortable 
+with just a few clicks, [logs states](#/logs) which allows drawing some approximate
+[engergy consumption charts](#/energy) and allows comfortable
 [scheduled power management](#/schedule).
 
 amtc was intially developed to power-control a single room equipped with 170 PCs.
@@ -20,25 +20,25 @@ contribute
 ==========
 
 Please feel free to [report issues](https://github.com/schnoddelbotz/amtc/issues) or
-[fork amtc on github](https://github.com/schnoddelbotz/amtc) and send 
-[pull requests](https://github.com/schnoddelbotz/amtc/pulls)! 
+[fork amtc on github](https://github.com/schnoddelbotz/amtc) and send
+[pull requests](https://github.com/schnoddelbotz/amtc/pulls)!
 
 amtc / amtc-web license
 =======================
 I chose CC-BY (accident) first, but [was told](https://wiki.creativecommons.org/FAQ#Can_I_use_a_Creative_Commons_license_for_software.3F) that it was a bad idea.
-Same story for [CC0](http://creativecommons.org/publicdomain/zero/1.0/). 
+Same story for [CC0](http://creativecommons.org/publicdomain/zero/1.0/).
 Also liked shortness of [wtfpl](http://www.wtfpl.net/about/) but refused
 to initially assoiciate that particular word with my github repo on my own.
 
-So, finally, starting with 0.8.3alpha github release amtc and amtc-web are, 
+So, finally, starting with 0.8.3alpha github release amtc and amtc-web are,
 tadaa, released under the [MIT license](https://github.com/schnoddelbotz/amtc/blob/master/version/LICENSE.txt).
 
 bundled 3rd party components
 ============================
 
-In addition to the [LICENSES-3rd-party.txt](LICENSES-3rd-party.txt) file, which 
-contains all individual 3rd party license texts and which is also bundled with 
-any amtc release package made available on github, the following list is 
+In addition to the [LICENSES-3rd-party.txt](LICENSES-3rd-party.txt) file, which
+contains all individual 3rd party license texts and which is also bundled with
+any amtc release package made available on github, the following list is
 here to name any 3rd party component that makes up amtc-web (in random order).
 
  * [Slim framework](http://www.slimframework.com/)
@@ -53,6 +53,10 @@ here to name any 3rd party component that makes up amtc-web (in random order).
  * [emberJS](http://emberjs.com)
    * Copyright © 2014 Yehuda Katz, Tom Dale and Ember.js contributors
    * [MIT license](https://github.com/emberjs/ember.js/blob/master/LICENSE)
+ * [ember-data](https://github.com/emberjs/data)
+   * Copyright (C) 2011-2014 Tilde, Inc. and contributors.
+   * Portions Copyright (C) 2011 LivingSocial Inc.
+   * [MIT? license](https://github.com/emberjs/data/blob/master/LICENSE)
  * [handlebarsJS](http://handlebarsjs.com)
    * Copyright © 2011-2014 by Yehuda Katz
    * [MIT license](https://github.com/wycats/handlebars.js/blob/master/LICENSE)
@@ -67,12 +71,12 @@ here to name any 3rd party component that makes up amtc-web (in random order).
    * Copyright © 2014 Marc Harter, <wavded@gmail.com>
    * [MIT license](https://github.com/wavded/humane-js) (see page bottom).
  * [twitter bootstrap](http://getbootstrap.com/)
-   * Copyright © 2011-2014 Twitter, Inc 
+   * Copyright © 2011-2014 Twitter, Inc
    * [MIT license](https://github.com/twbs/bootstrap/blob/master/LICENSE)
- * [FontAwesome](http://fortawesome.github.io/Font-Awesome/) 
+ * [FontAwesome](http://fortawesome.github.io/Font-Awesome/)
    * Dave Gandy, [@davegandy](https://twitter.com/davegandy)
    * [SIL OFL 1.1 license](http://fortawesome.github.io/Font-Awesome/license/)
- * [SB Admin 2](http://startbootstrap.com/template-overviews/sb-admin-2/) 
+ * [SB Admin 2](http://startbootstrap.com/template-overviews/sb-admin-2/)
    * Copyright © 2013-2014 Iron Summit Media Strategies, LLC
    * [Apache 2.0 license](https://github.com/IronSummitMedia/startbootstrap/blob/gh-pages/LICENSE)
    * Included within SB Admin 2:
@@ -80,12 +84,12 @@ here to name any 3rd party component that makes up amtc-web (in random order).
           - Copyright © 2013, Olly Smith
           - [simplified BSD license](http://morrisjs.github.io/morris.js/#license)
      * [flot](http://www.flotcharts.org/)
-          - Copyright © 2007-2014 IOLA and Ole Laursen 
+          - Copyright © 2007-2014 IOLA and Ole Laursen
           - [MIT license](https://github.com/flot/flot/blob/master/LICENSE.txt)
-     * [metisMenu](https://github.com/onokumus/metisMenu) 
+     * [metisMenu](https://github.com/onokumus/metisMenu)
           - Copyright © 2014 Osman Nuri Okumuş
           - [MIT license](https://github.com/onokumus/metisMenu/blob/master/LICENSE)
-     * [raphaelJS](https://github.com/DmitryBaranovskiy/raphael/) 
+     * [raphaelJS](https://github.com/DmitryBaranovskiy/raphael/)
           - Copyright © 2008 Dmitry Baranovskiy
           - [MIT license](http://raphaeljs.com/license.html)
 
@@ -96,5 +100,5 @@ linked against libCURL to do all the horsework of talking to AMT hosts.
    * Copyright © 1996 - 2014, Daniel Stenberg, <daniel@haxx.se>
    * [MIT/X derivate license](http://curl.haxx.se/docs/copyright.html)
 
-As I am as clueless concerning liceneses as one could be, 
+As I am as clueless concerning liceneses as one could be,
 I'm grateful for any hints in case something should be fixed.

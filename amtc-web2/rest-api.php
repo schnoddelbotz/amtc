@@ -442,7 +442,9 @@ $app->put('/jobs/:id', function ($id) {
   $user = $put['job'];
   if ($job = Job::find_one($id)) {
     $job->repeat_days = $user->repeat_days;
+    $job->start_time  = $user->start_time;
     $job->description = $user->description;
+    $job->ou_id       = $user->ou_id;
     $job->save();
     echo json_encode( array('job'=> $job->as_array()) );
   }
@@ -460,6 +462,8 @@ $app->post('/jobs', function () use ($app) {
   if ($job = Job::create()) {
     $job->repeat_days = $user->repeat_days;
     $job->description = $user->description;
+    $job->start_time  = $user->start_time;
+    $job->ou_id       = $user->ou_id;
     $job->job_type = 2; // FIXME use CONSTANT JOBTYPE_SCHEDULED
     $job->user_id = 1; // FIXME!!
     $job->amtc_cmd = 'U'; // FIXME!!
