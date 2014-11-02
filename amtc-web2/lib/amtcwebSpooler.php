@@ -80,7 +80,7 @@ class amtcwebSpooler {
     echo "\n # amtc-web.phpsh - part of amtc-web, part of amtc\n";
     echo " # https://github.com/schnoddelbotz/amtc\n";
     echo "\n Usage:\n  amtc-web.phpsh [short and long options] <action>\n";
-    $sections = ['shortOptions'=>[4,1],'longOptions'=>[15,2],'actions'=>[10,0]];
+    $sections = Array('shortOptions'=>Array(4,1),'longOptions'=>Array(15,2),'actions'=>Array(10,0));
     // produce formatted output of $shortOptions, $longOptions and $actions
     foreach ($sections as $section=>$sd) {
       echo "\n $section:\n";
@@ -99,17 +99,17 @@ class amtcwebSpooler {
     echo "\n";
     $jobs = Model::factory('Job');
     // fxme: mv to job class...
-    $jobTypeMap = [
+    $jobTypeMap = Array(
       self::JOB_INTERACTIVE => 'Interactive',
       self::JOB_SCHEDULED   => 'Scheduled',
       self::JOB_MONITORING  => 'Monitoring'
-    ];
-    $jobStatusMap = [
+    );
+    $jobStatusMap = Array(
       self::STATUS_PENDING  => 'pending',
       self::STATUS_RUNNING  => 'running',
       self::STATUS_DONE     => 'done',
       self::STATUS_ERROR    => 'error'
-    ];
+    );
     $jobFormat = "%6d  %s%s%s%s%s%s%s %12s %8s %6s %13s  %s\n";
     echo " JobId  MTWTFSS     Job type   Status  Start      Last run  Description\n";
     echo "------ -------- ------------ -------- ------ ------------- ------------\n";
@@ -182,7 +182,7 @@ class amtcwebSpooler {
       break;
       case amtcwebSpooler::JOB_MONITORING;
         // find OUs that have monitoring enabled, join by optionset_id
-        $optsetgroup = [];
+        $optsetgroup = Array();
         if (time() < $job->last_started + $job->repeat_interval * 60 ) {
           if (isset($opt['d'])) {
             echo "Skip exec for job ".$job->id.": below interval\n";
@@ -196,7 +196,7 @@ class amtcwebSpooler {
         }
         // now exec amtc -I ... on each group of hosts with same optionset
         foreach ($optsetgroup as $optsetid=>$ou_array) {
-          $hosts = [];
+          $hosts = Array();
           foreach ($ou_array as $ou_id) {
             $hosts = array_merge($hosts, self::getOuHosts($ou_id,false,true));
           }
@@ -225,7 +225,7 @@ class amtcwebSpooler {
     $ou        = Ou::find_one($job->ou_id);
     $optionset = Optionset::find_one($ou->optionset_id);
 
-    $cmd_opts = ['-j']; // amtc shall always produce parsable json output
+    $cmd_opts = Array('-j'); // amtc shall always produce parsable json output
     $optionset->sw_scan22       && $cmd_opts[] = '-s';
     $optionset->sw_scan3389     && $cmd_opts[] = '-r';
     $optionset->sw_v5           && $cmd_opts[] = '-5';
@@ -257,7 +257,7 @@ class amtcwebSpooler {
     isset($opt['d']) && print("[debug] execAmtCommand for job #$job->id: $cmd\n");
     if (isset($opt['n'])) {
       echo "SKIPPING as -n(o action) flag was given:\n  $cmd\n";
-      return [];
+      return Array();
     }
 
     $cwd = '/tmp';
@@ -282,12 +282,12 @@ class amtcwebSpooler {
     // map amtc string output to db-usable open_port(int) value
     $rportmap = array('ssh'=>22, 'rdp'=>3389, 'none'=>0, 'skipped'=>0);
     // fetch last state of all hosts
-    $last = [];
+    $last = Array();
     foreach( Laststate::find_many() as $host ) {
       $last[$host->hostname] = $host->as_array();
     }
     // map hostname -> id (amtc has no clue of those IDs...); improve...
-    $hostnameMap = [];
+    $hostnameMap = Array();
     foreach (Host::find_many() as $host) {
       $hostnameMap[$host->hostname] = $host->id;
     }
@@ -305,10 +305,10 @@ class amtcwebSpooler {
         // save $hostnow->msg here!
       } elseif ( $hostnow->amt  != $last[$host]['state_amt'] ||
                  $hostnow->http != $last[$host]['state_http'] ||
-                 $rportmap[$hostnow->oport] != @$rportmap[$last[$host]['open_port']] ) {
+                 $rportmap[$hostnow->oport] != $last[$host]['open_port'] ) {
         isset($opt['v']) && printf("UPD %s: set [%d|%d|%d] (%s), was [%d|%d|%d]\n", $host,
                                 $hostnow->amt, $hostnow->http, $rportmap[$hostnow->oport], $hostnow->msg,
-                                $last[$host]['state_amt'], $last[$host]['state_http'],@$rportmap[$last[$host]['open_port']]);
+                                $last[$host]['state_amt'], $last[$host]['state_http'], $last[$host]['open_port'] );
         // actually the same as for a new record... to keep record.
         $r = Statelog::create();
         $r->state_amt  = $hostnow->amt;
@@ -327,7 +327,7 @@ class amtcwebSpooler {
 
   // turn ,-separated string list of host IDs to space-separated string list of hostnames
   static function resolveHostIds($ids) {
-    $hosts = [];
+    $hosts = Array();
     foreach (Host::where_id_in(explode(',',$ids))->find_many() as $host) {
       $hosts[] = $host->hostname;
     }
@@ -335,8 +335,8 @@ class amtcwebSpooler {
   }
 
   static function getOuHosts($ouid, $recursive=false, $getIdArray=false) {
-    $hosts = [];
-    $ids = [];
+    $hosts = Array();
+    $ids = Array();
     foreach (Host::where('ou_id', $ouid)->find_many() as $host) {
       $hosts[] = $host->hostname;
       $ids[] = $host->id;
