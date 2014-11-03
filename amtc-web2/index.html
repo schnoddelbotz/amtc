@@ -325,18 +325,11 @@
                           <i class="fa fa-linux fa-5x"></i>
                       </div>
                       <div class="col-xs-9 text-right">
-                          <div class="huge">67</div>
+                          <div class="huge">{{controllers.laststates.stateSSH}}</div>
                           <div>running Linux</div>
                       </div>
                   </div>
               </div>
-              <a href="#">
-                  <div class="panel-footer">
-                      <span class="pull-left">View Details</span>
-                      <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                      <div class="clearfix"></div>
-                  </div>
-              </a>
           </div>
       </div>
       <div class="col-lg-3 col-md-6">
@@ -347,18 +340,11 @@
                           <i class="fa fa-windows fa-5x"></i>
                       </div>
                       <div class="col-xs-9 text-right">
-                          <div class="huge">120</div>
+                          <div class="huge">{{controllers.laststates.stateRDP}}</div>
                           <div>running Windows</div>
                       </div>
                   </div>
               </div>
-              <a href="#">
-                  <div class="panel-footer">
-                      <span class="pull-left">View Details</span>
-                      <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                      <div class="clearfix"></div>
-                  </div>
-              </a>
           </div>
       </div>
       <div class="col-lg-3 col-md-6">
@@ -369,18 +355,11 @@
                           <i class="fa fa-power-off fa-5x"></i>
                       </div>
                       <div class="col-xs-9 text-right">
-                          <div class="huge">34</div>
+                          <div class="huge">{{controllers.laststates.stateOff}}</div>
                           <div>powered down</div>
                       </div>
                   </div>
               </div>
-              <a href="#">
-                  <div class="panel-footer">
-                      <span class="pull-left">View Details</span>
-                      <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                      <div class="clearfix"></div>
-                  </div>
-              </a>
           </div>
       </div>
       <div class="col-lg-3 col-md-6">
@@ -391,11 +370,12 @@
                           <i class="fa fa-frown-o fa-5x"></i>
                       </div>
                       <div class="col-xs-9 text-right">
-                          <div class="huge">13</div>
+                          <div class="huge">{{controllers.laststates.stateUnreachable}}</div>
                           <div>unreachable</div>
                       </div>
                   </div>
               </div>
+              <!-- where to link to? ... knock out atm.
               <a href="#">
                   <div class="panel-footer">
                       <span class="pull-left">View Details</span>
@@ -403,6 +383,7 @@
                       <div class="clearfix"></div>
                   </div>
               </a>
+              -->
           </div>
       </div>
   </div>
@@ -1116,7 +1097,9 @@
       </a>
     </li>
   {{else}}
-    <li {{action "selectNode" node}} {{bind-attr class=isSelected}}><a href="#"><i class="fa fa-caret-right"></i> {{node.name}}</a></li>
+    <li {{action "selectNode" node}} {{bind-attr class=isSelected}}>
+      <a href="#"><!--<i class="fa fa-caret-right"></i>-->{{node.name}}</a>
+    </li>
   {{/if}}
 
   {{#if node.isExpanded}}

@@ -618,16 +618,9 @@ App.LogoutController = Ember.ObjectController.extend({
     this.get('controllers.login').send('doLogout');
   },
 });
-
+// Index/Dashboard
 App.IndexController = Ember.ObjectController.extend({
-  needs: ["notifications"],
-  xxx: Ember.computed.alias("controllers.notifications"),
-
-  /*notifications: function() {
-    return this.get('store').find('notification');
-  }.property(),
-  */
-  ouTree: null, // fixme. remove.
+  needs: ["notifications","laststates"],
 });
 // Index page notification messages ('job completed') et al
 App.NotificationsController = Ember.ArrayController.extend({
@@ -832,7 +825,28 @@ App.LaststatesController = Ember.ArrayController.extend({
   laststates: function() {
     console.log("laststatesController laststates() - fetching.");
     return this.get('store').find('laststate');
-  }.property()
+  }.property(),
+
+  stateSSH: function() {
+    var laststates = this.get('laststates');
+    return laststates.filterBy('open_port', 22).get('length');
+  }.property('laststates.@each.open_port'),
+
+  stateRDP: function() {
+    var laststates = this.get('laststates');
+    return laststates.filterBy('open_port', 3389).get('length');
+  }.property('laststates.@each.open_port'),
+
+  stateOff: function() {
+    var laststates = this.get('laststates');
+    return laststates.filterBy('state_amt', 5).get('length');
+  }.property('laststates.@each.state_amt'),
+
+  stateUnreachable: function() {
+    var laststates = this.get('laststates');
+    return laststates.filterBy('state_http', 0).get('length');
+  }.property('laststates.@each.state_http'),
+
 });
 // AMT Optionsets
 App.OptionsetController = Ember.ObjectController.extend({
