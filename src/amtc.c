@@ -49,7 +49,7 @@ const char *hcmds[] = {
 }; 
 const char *powerstate[] = { /* AMT/ACPI */
  "S0 (on)", "S1 (cpu stop)", "S2 (cpu off)", "S3 (sleep)",
- "S4 (hibernate)", "S5 (sotf-off)", "S4/S5", "MechOff",
+ "S4 (hibernate)", "S5 (soft-off)", "S4/S5", "MechOff",
  "amtcnoclue", "u","v","w","x","y","z", "amtreply_no_match"
 };
 int wsman2acpi[] = { 8,8,0,8,8,8,8,4,5,8,8,8,8,8,8,8,9 };
