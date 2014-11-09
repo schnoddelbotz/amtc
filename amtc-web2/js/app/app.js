@@ -104,7 +104,6 @@ var App = Ember.Application.create({
 });
 
 // Routes
-
 App.Router.map(function() {
   this.route('login');
   this.route('logout');
@@ -191,6 +190,58 @@ App.OuRoute = Ember.Route.extend({
     this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('ou', params.id);
   },
+});
+App.IndexRoute = Ember.Route.extend({
+  setupController: function(controller, model) {
+    var self = this;
+    self._super(controller, model);
+    if (Ember.isNone(self.get('pollster'))) {
+      self.set('pollster', App.Pollster.create({
+        onPoll: function() {
+          console.log('IDXpoll!');
+          self.send('refresh');
+        }
+      }));
+    }
+    self.get('pollster').start();
+  },
+  // This is called upon exiting the Route
+  deactivate: function() {
+    this.get('pollster').stop();
+  },
+  actions: {
+    refresh: function() {
+        // would be model.refresh(), but we need it for the laststates model...
+        this.store.find('laststate');
+        this.store.find('notification'); // me too!
+    }
+  }
+});
+App.OuMonitorRoute = Ember.Route.extend({
+  setupController: function(controller, model) {
+    var self = this;
+    self._super(controller, model);
+    if (Ember.isNone(self.get('pollster'))) {
+      self.set('pollster', App.Pollster.create({
+        onPoll: function() {
+          console.log('OUpoll!');
+          self.send('refresh');
+        }
+      }));
+    }
+    self.get('pollster').start();
+  },
+  // This is called upon exiting the Route
+  deactivate: function() {
+    this.get('pollster').stop();
+  },
+  actions: {
+    refresh: function() {
+        // would be model.refresh(), but we need it for the laststates model...
+        this.store.find('laststate');
+        // this.store.find('notification'); // me too!
+    }
+  }
 });
 App.OusRoute = Ember.Route.extend({
   model: function(params) {
@@ -494,6 +545,31 @@ App.LoginView = Ember.View.extend({
   }
 });
 
+// polling helper for refreshing ember-data models ... from:
+// http://yoranbrondsema.com/live-polling-system-ember-js/
+App.Pollster = Ember.Object.extend({
+  interval: function() {
+    // tbd: make adjustable / reseatable
+    // after submitting control functions, it should be increased.
+    return 7500; // Time between polls (in ms)
+  }.property().readOnly(),
+  // Schedules the function `f` to be executed every `interval` time.
+  schedule: function(f) {
+    return Ember.run.later(this, function() {
+      f.apply(this);
+      this.set('timer', this.schedule(f));
+    }, this.get('interval'));
+  },
+  // Stops the pollster
+  stop: function() {
+    Ember.run.cancel(this.get('timer'));
+  },
+  // Starts the pollster, i.e. executes the `onPoll` function every interval.
+  start: function() {
+    this.set('timer', this.schedule(this.get('onPoll')));
+  }
+});
+
 // Controllers
 // see http://emberjs.com/guides/routing/generated-objects/
 App.ApplicationController = Ember.Controller.extend({
@@ -680,8 +756,7 @@ App.UsersNewController = App.UserEditController;
 App.OuController = Ember.ObjectController.extend({
   needs: ["optionsets","ous"],
   currentOU: null,
-  isEditing: false,
-  ouTree: null,
+  isEditing: false
 });
 App.OuEditController = Ember.ObjectController.extend({
   needs: ["optionsets","ous"],
@@ -712,12 +787,7 @@ App.OuEditController = Ember.ObjectController.extend({
       }
     },
 
-    edit: function() {
-      this.set('isEditing', true);
-    },
-
     doneEditingReturn: function() {
-      this.set('isEditing', false);
       this.get('model').save().then(function() {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
             { timeout: 800 });
@@ -852,7 +922,6 @@ App.LaststatesController = Ember.ArrayController.extend({
 App.OptionsetController = Ember.ObjectController.extend({
   needs: ["optionsets"],
   currentOU: null,
-  isEditing: false,
   ouTree: null,
 
   actions: {
@@ -877,7 +946,6 @@ App.OptionsetController = Ember.ObjectController.extend({
     },
 
     doneEditingReturn: function() {
-      this.set('isEditing', false);
       console.log(this.get('model'));
       this.get('model').save().then(function() {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
@@ -904,7 +972,6 @@ App.OptionsetsController = Ember.ArrayController.extend({
 App.ScheduleController = Ember.ObjectController.extend({
   needs: ["ous"],
   currentOU: null,
-  isEditing: false,
   ouTree: null,
 
   actions: {
@@ -929,8 +996,6 @@ App.ScheduleController = Ember.ObjectController.extend({
     },
 
     doneEditingReturn: function() {
-      this.set('isEditing', false);
-      //console.log(this.get('model'));
       this.get('model').save().then(function() {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
           { timeout: 800 });
