@@ -198,7 +198,7 @@ App.IndexRoute = Ember.Route.extend({
     if (Ember.isNone(self.get('pollster'))) {
       self.set('pollster', App.Pollster.create({
         onPoll: function() {
-          console.log('IDXpoll!');
+          // console.log('IDXpoll!');
           self.send('refresh');
         }
       }));
@@ -224,7 +224,7 @@ App.OuMonitorRoute = Ember.Route.extend({
     if (Ember.isNone(self.get('pollster'))) {
       self.set('pollster', App.Pollster.create({
         onPoll: function() {
-          console.log('OUpoll!');
+          // console.log('OUpoll!');
           self.send('refresh');
         }
       }));
@@ -566,6 +566,10 @@ App.Pollster = Ember.Object.extend({
   },
   // Starts the pollster, i.e. executes the `onPoll` function every interval.
   start: function() {
+    //console.log('Stopping all existing timers');
+    // ensures we don't create more traffic than desired...
+    Ember.run.cancelTimers();
+    //console.log('Starting timer ');
     this.set('timer', this.schedule(this.get('onPoll')));
   }
 });
