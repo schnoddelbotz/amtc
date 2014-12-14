@@ -47,6 +47,12 @@ If no *action* is specified, power state is queried (`-I`).
 AMT_PASSWORD
 :   may be set and will be used if `-p` wasn't given.
 
+# BUGS
+
+Please report new ones on the github issue tracker (see URL below).
+To give this manpage section more meaning, the bug that `-r` and `-s`
+will both not resolve hostnames and simply fail if IPs weren't used
+instead ... is documented/hidden in here.
 
 # SEE ALSO
 

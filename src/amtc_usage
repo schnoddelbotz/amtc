@@ -1,15 +1,16 @@
 
- amtc v0.8.2 - Intel AMT & WS-Man OOB mass management tool 
+ amtc v0.8.3 - Intel AMT & WS-Man OOB mass management tool 
                      https://github.com/schnoddelbotz/amtc
  usage
   amtc [-actions] [-options] host [host ...]
 
  actions
-  -I(nfo)  query powerstate via AMT [default]
-  -U(p)    powerup given host(s) 
-  -D(own)  powerdown
-  -C(ycle) powercycle
-  -R(eset) reset
+  -I(nfo)     query powerstate via AMT [default]
+  -U(p)       powerup given host(s) 
+  -D(own)     powerdown
+  -C(ycle)    powercycle
+  -R(eset)    reset
+  -S(hutdown) using AMT graceful shutdown (AMT 9.0+)
   -L(ist)  valid wsman <classname>s for -E(numeration)
   -E(numerate) <classname> -- enumerate/list settings
 
@@ -23,6 +24,7 @@
   -q(uiet)    only report unsuccessful operations
   -r(DP)-scan probe TCP port 3389 for OS detection
   -s(SH)-scan probe TCP port 22   for OS detection
+  -e(nforce)  rdp/ssh probes, regardless of AMT state
   -t(imeout)  in seconds, for amt and tcp scans [5]
   -g(nutls)   will use TLS and port 16993 [notls/16992]
   -c(acert)   specify TLS CA cert file [/etc/amt-ca.crt]

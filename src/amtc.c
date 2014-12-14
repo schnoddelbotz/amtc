@@ -1,7 +1,7 @@
 /*
   amtc v0.8 - Intel AMT & WS-MAN OOB mass management tool
 
-  written by jan@hacker.ch, 2013 
+  written by jan@hacker.ch, 2013
   http://jan.hacker.ch/projects/amtc/
 */
 #include <stdlib.h>
@@ -20,21 +20,23 @@
 #include <errno.h>
 #include "amt.h"
 
-#define THREAD_ID        pthread_self(  )
-#define CMD_INFO 0
-#define CMD_POWERUP 1
-#define CMD_POWERDOWN 2
+#define THREAD_ID      pthread_self(  )
+#define CMD_INFO       0
+#define CMD_POWERUP    1
+#define CMD_POWERDOWN  2
 #define CMD_POWERRESET 3
 #define CMD_POWERCYCLE 4
-#define CMD_ENUMERATE  5
-#define MAX_HOSTS 255
-#define PORT_SSH 22
-#define PORT_RDP 3389
-#define SCANRESULT_NONE_OPEN 0
-#define SCANRESULT_NO_SCANS  1
-#define SCANRESULT_SSH_OPEN  22
-#define SCANRESULT_NONE_RUN  999
-#define SCANRESULT_RDP_OPEN  3389
+#define CMD_SHUTDOWN   5
+#define CMD_ENUMERATE  6
+#define MAX_HOSTS      255
+#define PORT_SSH       22
+#define PORT_RDP       3389
+#define SCANRESULT_NONE_OPEN   0
+#define SCANRESULT_NO_SCANS    1
+#define SCANRESULT_LOOKUP_FAIL 9
+#define SCANRESULT_SSH_OPEN    22
+#define SCANRESULT_NONE_RUN    999
+#define SCANRESULT_RDP_OPEN    3389
 
 unsigned char *acmds[] = {
   /* SOAP/XML request bodies as included via amt.h, AMT6-8 */
@@ -43,10 +45,10 @@ unsigned char *acmds[] = {
   wsman_info, wsman_up,wsman_down,wsman_reset,wsman_reset,
   /* generic wsman enumerations using -E <classname> */
   wsman_xenum
-}; 
+};
 const char *hcmds[] = {
   "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE"
-}; 
+};
 const char *powerstate[] = { /* AMT/ACPI */
  "S0 (on)", "S1 (cpu stop)", "S2 (cpu off)", "S3 (sleep)",
  "S4 (hibernate)", "S5 (soft-off)", "S4/S5", "MechOff",
@@ -81,6 +83,7 @@ int  probe_one_hostport(int,int,int);
 int  get_enum_context(void*,char*);
 int  get_enum_class(char*);
 void list_wsman_cmds();
+struct addrinfo* lookup_host (const char*);
 static size_t write_memory_callback(void*,size_t,size_t,void*);
 
 sem_t  mutex;
@@ -111,40 +114,42 @@ char  *amtpasswdp = (char*)&amtpasswd;
 char  *grep = (char*)&gre;
 typedef enum { false, true } bool;
 bool  amtv5 = false;
+bool  enforceScans = false; // enforce SSH/RDP scan even if no AMT success
 
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc,char **argv,char **envp) {
   int c;
-    
-  while ((c = getopt(argc, argv, "IUDRCLE:5gndqvjsrp:t:w:m:c:")) != -1)
+
+  while ((c = getopt(argc, argv, "IUDRCLE:5gndeqvjsrp:t:w:m:c:")) != -1)
   switch (c) {
-    case 'I': cmd = CMD_INFO;                break; 
-    case 'U': cmd = CMD_POWERUP;             break; 
-    case 'D': cmd = CMD_POWERDOWN;           break; 
-    case 'C': cmd = CMD_POWERCYCLE;          break; 
-    case 'R': cmd = CMD_POWERRESET;          break; 
-    case 'E': cmd = CMD_ENUMERATE; quiet=1; useWsmanShift=5; do_enumerate=get_enum_class(optarg); break; 
-    case 'L': list_wsman_cmds();             break; 
-    case 's': scan_ssh = 1;                  break; 
-    case 'r': scan_rdp = 1;                  break; 
+    case 'I': cmd = CMD_INFO;                break;
+    case 'U': cmd = CMD_POWERUP;             break;
+    case 'D': cmd = CMD_POWERDOWN;           break;
+    case 'C': cmd = CMD_POWERCYCLE;          break;
+    case 'R': cmd = CMD_POWERRESET;          break;
+    case 'E': cmd = CMD_ENUMERATE; quiet=1; useWsmanShift=5; do_enumerate=get_enum_class(optarg); break;
+    case 'L': list_wsman_cmds();             break;
+    case 's': scan_ssh = 1;                  break;
+    case 'r': scan_rdp = 1;                  break;
+    case 'e': enforceScans = true;           break;
     case 'j': produceJSON = 1;               break;
     case 'q': quiet = 1;                     break;
     case 'g': useTLS = 1; amtPort = 16993;   break;
     case 'n': noVerifyCert = 1;              break;
-    case 'm': maxThreads = atoi(optarg);     break; 
-    case 'p': amtpasswdfilep = optarg;       break; 
-    case 'c': cacertfilep = optarg;          break; 
-    case 't': connectTimeout = atoi(optarg); break; 
+    case 'm': maxThreads = atoi(optarg);     break;
+    case 'p': amtpasswdfilep = optarg;       break;
+    case 'c': cacertfilep = optarg;          break;
+    case 't': connectTimeout = atoi(optarg); break;
     case 'v': verbosity += 1;                break;
     case 'd': useWsmanShift = 5;             break;
-    case 'w': waitDelay = atof(optarg);      break; 
+    case 'w': waitDelay = atof(optarg);      break;
     case '5': amtv5 = true;                  break;
   }
 
   strcpy(portnames[SCANRESULT_NONE_OPEN],"none"); /* no open ports found */
   strcpy(portnames[SCANRESULT_NONE_RUN], "skipped"); /* skipped, eg. pwrd off */
   strcpy(portnames[SCANRESULT_NO_SCANS], "noscan"); /* neither -S nor -W */
-  strcpy(portnames[SCANRESULT_SSH_OPEN], "ssh"); 
+  strcpy(portnames[SCANRESULT_SSH_OPEN], "ssh");
   strcpy(portnames[SCANRESULT_RDP_OPEN], "rdp");
 
   build_hostlist(argc,argv);
@@ -166,13 +171,13 @@ int main(int argc,char **argv,char **envp) {
   }
   if (cmd==CMD_INFO) {
     snprintf(grep,sizeof gre, useWsmanShift ?
-      "<h:PowerState>" : 
+      "<h:PowerState>" :
       "<b:Status>0</b:Status><b:SystemPowerState>");
     if (amtv5)
      snprintf(grep,sizeof gre, "<s0:Status>0</s0:Status><s0:SystemPowerState>");
   } else {
-    snprintf(grep,sizeof gre, useWsmanShift ? 
-      "<g:RequestPowerStateChange_OUTPUT><g:ReturnValue>" : 
+    snprintf(grep,sizeof gre, useWsmanShift ?
+      "<g:RequestPowerStateChange_OUTPUT><g:ReturnValue>" :
       "<b:RemoteControlResponse><b:Status>");
   }
   if (cmd==CMD_ENUMERATE) {
@@ -189,7 +194,7 @@ int main(int argc,char **argv,char **envp) {
         classnum=1;
       else if (strncmp(wsman_classes[do_enumerate], "IPS_", 4) == 0)
         classnum=2;
-      
+
       sprintf(wsman_class_uri, wsmuris[classnum], wsman_classes[do_enumerate]);
       sprintf(xenumTxt, (char*)wsman_xenum, wsman_class_uri);
   }
@@ -229,7 +234,6 @@ void list_wsman_cmds() {
   exit(0);
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 static void *process_single_client(void* num) {
   int hostid = (int)(intptr_t)num;
@@ -241,8 +245,8 @@ static void *process_single_client(void* num) {
   struct MemoryStruct chunk;
   int amt_result = -1;
   chunk.memory = malloc(1);
-  chunk.size = 0; 
-  int os_port = SCANRESULT_NO_SCANS; 
+  chunk.size = 0;
+  int os_port = SCANRESULT_NO_SCANS;
 
   curl = curl_easy_init();
 
@@ -263,14 +267,14 @@ static void *process_single_client(void* num) {
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "amtc (libcurl)");
   curl_easy_setopt(curl, CURLOPT_URL, host->url);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, (verbosity>2?1:0));
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT, connectTimeout); 
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, connectTimeout);
   curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
   curl_easy_setopt(curl, CURLOPT_USERNAME, "admin"  );
   curl_easy_setopt(curl, CURLOPT_PASSWORD, amtpasswdp);
   curl_easy_setopt(curl, CURLOPT_POST , 1);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER , headers);
 
-  if (cmd==CMD_ENUMERATE) 
+  if (cmd==CMD_ENUMERATE)
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS , xenumTxt);
   else
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS , acmds[cmd+useWsmanShift]);
@@ -280,12 +284,12 @@ static void *process_single_client(void* num) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
   } else if (useTLS) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
-    curl_easy_setopt(curl, CURLOPT_CAINFO, cacertfilep ? 
-                           cacertfilep : "/etc/amt-ca.crt"); 
+    curl_easy_setopt(curl, CURLOPT_CAINFO, cacertfilep ?
+                           cacertfilep : "/etc/amt-ca.crt");
   }
   // http://stackoverflow.com/questions/9191668/error-longjmp-causes-uninitialized-stack-frame
-  curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); 
-  
+  curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+
   res = curl_easy_perform(curl);
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
@@ -320,14 +324,14 @@ static void *process_single_client(void* num) {
   else {
     amt_result = get_amt_response_status(chunk.memory);
 
-    if(useWsmanShift) 
+    if(useWsmanShift)
       amt_result = wsman2acpi[amt_result];
-    else 
+    else
       amt_result = amt_result & 0x0f;
 
-    snprintf((char*)&umsg, sizeof umsg, "OK %s%s", 
+    snprintf((char*)&umsg, sizeof umsg, "OK %s%s",
       (cmd==CMD_INFO) ? powerstate[amt_result] : "",
-      (cmd!=CMD_INFO && amt_result==0) ? "success" : "" 
+      (cmd!=CMD_INFO && amt_result==0) ? "success" : ""
     );
 
     if (verbosity>1)
@@ -341,7 +345,7 @@ static void *process_single_client(void* num) {
   }
 
   // fixme: this needs to be duplicated in the function head to eg. reset only SSH boxes (CLI)
-  if ( (scan_ssh||scan_rdp) && (cmd==CMD_INFO && amt_result==0) ) {
+  if ( ((scan_ssh||scan_rdp) && (cmd==CMD_INFO && amt_result==0)) || enforceScans ) {
     os_port=SCANRESULT_NONE_OPEN;
     if (scan_rdp)
       os_port = probe_one_hostport(hostid,PORT_RDP,os_port);
@@ -362,7 +366,7 @@ static void *process_single_client(void* num) {
   hostlist[hostid].amt_result=(int)amt_result;
   hostlist[hostid].osport = os_port;
   snprintf(hostlist[hostid].usrmsg, 100, "%s", umsgp);
-  if (verbosity>1) 
+  if (verbosity>1)
     printf("singleClient(%11d=%04ldb|http%03d): tr decreased to %3d by %s\n",
       (int)THREAD_ID,(long)chunk.size,(int)http_code,
       threadsRunning,(char*)host->url);
@@ -392,9 +396,9 @@ int get_amt_response_status(void* chunk) {
 int get_enum_context(void* chunk,char* result) {
   char *pos = NULL;
   pos = strstr(chunk, "<g:EnumerateResponse><g:EnumerationContext>"/*len=44*/);
-  if (pos==NULL) 
+  if (pos==NULL)
     return 0;
-  else 
+  else
     strncpy(result, pos+43, 36 /*ctx str len,fixme: hopefully*/ );
   return 1;
 }
@@ -404,18 +408,18 @@ int get_enum_context(void* chunk,char* result) {
 static size_t write_memory_callback(void *contents, size_t size, size_t nmemb, void *userp) {
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
- 
+
   mem->memory = realloc(mem->memory, mem->size + realsize + 1);
   if(mem->memory == NULL) {
-    /* out of memory! */ 
+    /* out of memory! */
     printf("not enough memory (realloc returned NULL)\n");
     return 0;
   }
- 
+
   memcpy(&(mem->memory[mem->size]), contents, realsize);
   mem->size += realsize;
   mem->memory[mem->size] = 0;
- 
+
   return realsize;
 }
 
@@ -423,7 +427,8 @@ static size_t write_memory_callback(void *contents, size_t size, size_t nmemb, v
 int probe_one_hostport(int hostid, int port, int alreadyFound) {
   int sockfd,c;
   struct sockaddr_in servaddr;
-  struct timeval timeout;      
+  struct timeval timeout;
+  struct addrinfo *query;
   timeout.tv_sec = connectTimeout;
   timeout.tv_usec = 0;
 
@@ -435,17 +440,33 @@ int probe_one_hostport(int hostid, int port, int alreadyFound) {
     printf("setsockopt failed\n");
   if (setsockopt (sockfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
     printf("setsockopt failed\n");
+  // has no effect on OSX -- use TCP_CONNECTIONTIMEOUT; man tcp(4) ?
+
+  if ((query = lookup_host(hostlist[hostid].hostname)) == NULL) {
+    if (verbosity>1)
+      printf("Error resolving host %s for portscan (%d)!\n",
+              hostlist[hostid].hostname, port);
+    return SCANRESULT_LOOKUP_FAIL;
+  }
+  struct in_addr *ptr;
+  ptr = &((struct sockaddr_in *) query->ai_addr)->sin_addr;
+
+  if (verbosity>1)
+    printf ("SCAN IP ADDR: IPv%d address: %s => %s\n",
+        query->ai_family == PF_INET6 ? 6 : 4,
+        query->ai_canonname, inet_ntoa((struct in_addr)*ptr));
 
   bzero(&servaddr,sizeof(servaddr));
-  servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr=inet_addr(hostlist[hostid].hostname);
+  servaddr.sin_family = query->ai_family;
+  //servaddr.sin_addr.s_addr=inet_addr(hostlist[hostid].hostname);
+  servaddr.sin_addr.s_addr=ptr->s_addr;
   servaddr.sin_port=htons(port);
 
   c=connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
   close(sockfd);
   if (verbosity>1)
     printf("SCAN %d on %15s - %d\n", port, hostlist[hostid].hostname, c);
-  
+
   // read ssh greeting?
   return (c==0) ? port : SCANRESULT_NONE_OPEN;
 }
@@ -464,7 +485,7 @@ void process_hostlist() {
     sem_wait(&mutex);
     threadsRunning++;
     sem_post(&mutex);
-    
+
     while ((threadsRunning+1)>maxThreads) {
         if (verbosity>3)
           printf(" ... threads waiting for free slot (%d/%d running) ...\n",
@@ -472,7 +493,7 @@ void process_hostlist() {
 
         usleep(10000);
     }
-     
+
     if (waitDelay)
       usleep(waitDelay * 1000000);
   }
@@ -485,8 +506,6 @@ void process_hostlist() {
 ///////////////////////////////////////////////////////////////////////////////
 void build_hostlist(int argc,char **argv) {
   int a;
-  // http://www.logix.cz/michal/devel/various/getaddrinfo.c.xp
-  // resolve IP/hostnames (for/if OS probing) FIXME
   for(a = 0; a < MAX_HOSTS; a++) {
     hostlist[a].id = a;
     hostlist[a].http_result = -1;
@@ -511,7 +530,7 @@ void dump_hostlist() {
   int a;
   if (produceJSON) {
     printf("{");
-    for(a = 0; a < numHosts; a++) 
+    for(a = 0; a < numHosts; a++)
       printf("%s\"%s\":{\"amt\":\"%d\",\"http\":\"%d\",\"oport\":\"%s\",\"msg\":\"%s\"}",
          a==0?"":",", hostlist[a].hostname, hostlist[a].amt_result,
          hostlist[a].http_result, portnames[hostlist[a].osport], hostlist[a].usrmsg);
@@ -519,7 +538,7 @@ void dump_hostlist() {
   } else {
     for(a = 0; a < numHosts; a++) {
       if (!quiet || (quiet && hostlist[a].http_result!=200))
-      printf("%s %-15s OS:%-7s AMT:%02d HTTP:%03d %s\n", hcmds[cmd], 
+      printf("%s %-15s OS:%-7s AMT:%02d HTTP:%03d %s\n", hcmds[cmd],
         hostlist[a].hostname, portnames[hostlist[a].osport] ,
         hostlist[a].amt_result, hostlist[a].http_result, hostlist[a].usrmsg);
     }
@@ -546,4 +565,39 @@ void get_amt_pw() {
     printf("Set your AMT_PASSWORD environment variable [or use -p].\n");
     exit(3);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+struct addrinfo* lookup_host (const char *host) {
+  // more or less just http://www.logix.cz/michal/devel/various/getaddrinfo.c.xp
+  // resolve hostnames (for OS probing)
+  struct addrinfo hints, *res;
+  int errcode;
+  void *ptr;
+
+  memset (&hints, 0, sizeof (hints));
+  hints.ai_family = PF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags |= AI_CANONNAME;
+
+  errcode = getaddrinfo (host, NULL, &hints, &res);
+  if (errcode != 0) {
+    return NULL;
+  }
+
+  while (res) {
+    switch (res->ai_family) {
+      case AF_INET:
+        ptr = &((struct sockaddr_in *) res->ai_addr)->sin_addr;
+        break;
+      case AF_INET6:
+        ptr = &((struct sockaddr_in6 *) res->ai_addr)->sin6_addr;
+        break;
+    }
+    // fixme ... totally untested with v6
+    return res;
+    res = res->ai_next;
+  }
+
+  return NULL;
 }
