@@ -50,9 +50,8 @@ AMT_PASSWORD
 # BUGS
 
 Please report new ones on the github issue tracker (see URL below).
-To give this manpage section more meaning, the bug that `-r` and `-s`
-will both not resolve hostnames and simply fail if IPs weren't used
-instead ... is documented/hidden in here.
+On OSX, connection timeout does currently not affect OS probes.
+IPv6 OS probes need to be fixed. And more.
 
 # SEE ALSO
 
