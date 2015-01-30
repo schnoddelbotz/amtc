@@ -11,8 +11,8 @@ export JQUERYUI    = 1.11.1
 export BOOTSTRAP   = 3.2.0
 export HANDLEBARS  = 1.3.0
 export EMBERJS     = 1.7.0
-export EMBERDATA   = 1.0.0-beta.11
-export FONTAWESOME = 4.2.0
+export EMBERDATA   = 1.0.0-beta.14.1
+export FONTAWESOME = 4.3.0
 
 SHELL = bash
 
