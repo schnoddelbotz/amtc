@@ -96,10 +96,10 @@ fonts/fontawesome-webfont.woff:
 	rm -rf fa.zip font-awesome-$(FONTAWESOME)
 
 lib/Slim/Slim.php:
-	curl -Lso slim.zip https://github.com/codeguy/Slim/zipball/master
+	curl -Lso slim.zip https://github.com/slimphp/Slim/zipball/master
 	unzip -q slim.zip
-	mv codeguy-Slim-*/Slim lib
-	rm -rf codeguy-Slim-* slim.zip
+	mv slimphp-Slim-*/Slim lib
+	rm -rf slimphp-Slim-* slim.zip
 
 # install example/default .htpasswd + .htaccess
 basic-auth/.htaccess:
