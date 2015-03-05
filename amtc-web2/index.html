@@ -1276,7 +1276,7 @@
   <div class="row">
       <div class="col-lg-12" id="hosts">
         {{#each host in controller.hosts}}
-          <div {{bind-attr class=":pc host.laststate.amtStateCssClass host.laststate.openPortCssClass"}}>
+          <div {{bind-attr class=":pc host.laststate.amtStateCssClass host.laststate.openPortCssClass" hostDbId=host.id}}>
             <div>
               <span class="porticon">
                 {{#if host.laststate}}

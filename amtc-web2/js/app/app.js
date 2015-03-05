@@ -879,18 +879,25 @@ App.OuMonitorController = Ember.ObjectController.extend({
   needs: ["hosts","ous","laststates"],
   commandActions: ["powerdown","powerup","powercycle","reset"],
 
-  selectedAction: null,
-  selectedHosts: {},
+  selectedCmd: null,
+  selectedHosts: [], // EMBER.MUTABLEARRAY?
   selectedHostsCount: 0,
 
   laststates: Ember.computed.alias("controllers.laststates"),
 
   actions: {
     updateSelectedHosts: function() {
-      this.set('selectedHosts', $('#hosts .ui-selected'));
+      var selection = [];
+      $("#hosts .ui-selected").each( function(i) {
+        selection.push( $(this).attr("hostDbId") );
+      });
+      this.set('selectedHosts', selection);
       this.set('selectedHostsCount', $(".ui-selected").length);
     },
-    submitJob: function() { alert("Not yet, sorry: " + this.get('selectedCmd')); }
+    submitJob: function() {
+      alert("Not yet, sorry: " + this.get('selectedCmd') +' for ' + this.get('selectedHosts'));
+      // FIXME json put job...
+    }
   }
 });
 App.LaststatesController = Ember.ArrayController.extend({
