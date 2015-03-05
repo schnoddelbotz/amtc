@@ -43,7 +43,7 @@ usage
   -L(ist)  valid wsman <classname>s for -E(numeration)
   -E(numerate)<classname>       enumerate/list settings
   -M(odify)   <setting>=<value> modify wsman settings
-              where supported settings: webui or sol
+              where supported settings: webui,sol or ping
               and supported values    : on or off
  options
   -5          for AMT 5.0 hosts

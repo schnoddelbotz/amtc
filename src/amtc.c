@@ -46,9 +46,10 @@ unsigned char *acmds[] = {
   wsman_info, wsman_up,wsman_down,wsman_reset,wsman_reset,
   /* generic wsman enumerations using -E <classname> */
   wsman_xenum,
-  /* AMT config settings via wsman -- cfgcmd -1..2  */
+  /* AMT config settings via wsman -- cfgcmd -1..4  */
   wsman_solredir_disable, wsman_solredir_enable,
-  wsman_webui_disable, wsman_webui_enable
+  wsman_webui_disable, wsman_webui_enable,
+  wsman_ping_disable, wsman_ping_enable
 };
 const char *hcmds[] = {
   "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE"
@@ -215,6 +216,10 @@ int main(int argc,char **argv,char **envp) {
       cfgcmd=1;
     } else if (strcmp(do_modify,"webui=on")==0) {
       cfgcmd=2;
+    } else if (strcmp(do_modify,"ping=off")==0) {
+      cfgcmd=3;
+    } else if (strcmp(do_modify,"ping=on")==0) {
+      cfgcmd=4;
     } else {
       printf("Bad config command\n");
       exit(1); 
