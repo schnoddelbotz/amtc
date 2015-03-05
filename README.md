@@ -28,36 +28,47 @@ usage
 =====
 
 ```
-
- amtc v0.8.2 - Intel AMT & WS-Man OOB mass management tool
+ amtc v0.8.4 - Intel AMT & WS-Man OOB mass management tool
                      https://github.com/schnoddelbotz/amtc
  usage
   amtc [-actions] [-options] host [host ...]
 
  actions
-  -I(nfo)  query powerstate via AMT [default]
-  -U(p)    powerup given host(s)
-  -D(own)  powerdown
-  -C(ycle) powercycle
-  -R(eset) reset
+  -I(nfo)     query powerstate via AMT [default]
+  -U(p)       powerup given host(s)
+  -D(own)     powerdown
+  -C(ycle)    powercycle
+  -R(eset)    reset
+  -S(hutdown) using AMT graceful shutdown (AMT 9.0+)
   -L(ist)  valid wsman <classname>s for -E(numeration)
-  -E(numerate) <classname> -- enumerate/list settings
-
+  -E(numerate)<classname>       enumerate/list settings
+  -M(odify)   <setting>=<value> modify wsman settings
+              where supported settings: webui or sol
+              and supported values    : on or off
  options
+  -5          for AMT 5.0 hosts
   -d          for AMT 9.0+ hosts - use WS-Man/DASH
-  -b(oot)     specify boot device ('pxe' or 'hdd')
   -m(aximum)  number of parallel workers to use [40]
   -p(asswdfile) specify file containing AMT password
   -j(son)     produces JSON output of host states
   -q(uiet)    only report unsuccessful operations
   -r(DP)-scan probe TCP port 3389 for OS detection
   -s(SH)-scan probe TCP port 22   for OS detection
+  -e(nforce)  rdp/ssh probes, regardless of AMT state
   -t(imeout)  in seconds, for amt and tcp scans [5]
   -g(nutls)   will use TLS and port 16993 [notls/16992]
   -c(acert)   specify TLS CA cert file [/etc/amt-ca.crt]
   -n(oVerify) will skip cert verification for TLS
   -v(erbose)  detailed progress, debug by using -vvv
   -w(ait)     in seconds / float, after each pc. one thread.
+
+ examples
+  query powerstate of <AMT-9.0-hosts named host-a and host-b
+   $ amtc host-a host-b
+  power up some AMT 9.0 hosts using wsman and 5-second-delay
+   $ amtc -dUw 5 host-c host-d host-e
+  enable SOL (Serial over LAN on TCP port 16994)
+   $ amtc -M sol=on host-f
 
 ```
 
@@ -94,6 +105,8 @@ test amtc-web not only by clicking around but by turning your own home
 PC on or off using that demo website, you have to set your AMT password 
 to the one stated above. Also note that every full hour, a sane default 
 test database will be restored.
+
+I'll try to put some more time into amtc-web2 to get the new GUI ready soon...
 
 
 building

@@ -28,6 +28,7 @@
 #define CMD_POWERCYCLE 4
 #define CMD_SHUTDOWN   5
 #define CMD_ENUMERATE  6
+#define CMD_MODIFY     7
 #define MAX_HOSTS      255
 #define PORT_SSH       22
 #define PORT_RDP       3389
@@ -44,7 +45,10 @@ unsigned char *acmds[] = {
   /* WS-MAN / DASH / AMT6-9+ versions */
   wsman_info, wsman_up,wsman_down,wsman_reset,wsman_reset,
   /* generic wsman enumerations using -E <classname> */
-  wsman_xenum
+  wsman_xenum,
+  /* AMT config settings via wsman -- cfgcmd -1..2  */
+  wsman_solredir_disable, wsman_solredir_enable,
+  wsman_webui_disable, wsman_webui_enable
 };
 const char *hcmds[] = {
   "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE"
@@ -92,6 +96,7 @@ int   verbosity = 0;
 int   scan_ssh = 0;
 int   scan_rdp = 0;
 int   cmd = 0;
+int   cfgcmd = 0;
 int   do_enumerate = 0;
 int   num_wsman_cmds = 261;
 int   numHosts = 0;
@@ -100,7 +105,7 @@ int   noVerifyCert = 0;
 int   amtPort = 16992;
 int   useTLS = 0;
 int   threadsRunning = 0;
-int   connectTimeout = 5;
+int   connectTimeout = 10;
 float waitDelay = -1;
 int   maxThreads = 40;
 int   produceJSON = 0;
@@ -109,6 +114,7 @@ char  amtpasswdfile[255];
 char  amtpasswd[32];
 char  gre[64];
 char  *amtpasswdfilep = NULL;
+char  *do_modify = NULL;
 char  *cacertfilep = NULL;
 char  *amtpasswdp = (char*)&amtpasswd;
 char  *grep = (char*)&gre;
@@ -120,7 +126,7 @@ bool  enforceScans = false; // enforce SSH/RDP scan even if no AMT success
 int main(int argc,char **argv,char **envp) {
   int c;
 
-  while ((c = getopt(argc, argv, "IUDRCLE:5gndeqvjsrp:t:w:m:c:")) != -1)
+  while ((c = getopt(argc, argv, "IUDRCLE:M:5gndeqvjsrp:t:w:m:c:")) != -1)
   switch (c) {
     case 'I': cmd = CMD_INFO;                break;
     case 'U': cmd = CMD_POWERUP;             break;
@@ -128,6 +134,7 @@ int main(int argc,char **argv,char **envp) {
     case 'C': cmd = CMD_POWERCYCLE;          break;
     case 'R': cmd = CMD_POWERRESET;          break;
     case 'E': cmd = CMD_ENUMERATE; quiet=1; useWsmanShift=5; do_enumerate=get_enum_class(optarg); break;
+    case 'M': cmd = CMD_MODIFY; useWsmanShift=5; do_modify=optarg; break;
     case 'L': list_wsman_cmds();             break;
     case 's': scan_ssh = 1;                  break;
     case 'r': scan_rdp = 1;                  break;
@@ -197,6 +204,21 @@ int main(int argc,char **argv,char **envp) {
 
       sprintf(wsman_class_uri, wsmuris[classnum], wsman_classes[do_enumerate]);
       sprintf(xenumTxt, (char*)wsman_xenum, wsman_class_uri);
+  }
+  if (cmd==CMD_MODIFY) {
+    // yuck, make nicer...
+    if (strcmp(do_modify,"sol=off")==0) {
+      cfgcmd=-1;
+    } else if (strcmp(do_modify,"sol=on")==0) {
+      cfgcmd=0;
+    } else if (strcmp(do_modify,"webui=off")==0) {
+      cfgcmd=1;
+    } else if (strcmp(do_modify,"webui=on")==0) {
+      cfgcmd=2;
+    } else {
+      printf("Bad config command\n");
+      exit(1); 
+    }
   }
 
   get_amt_pw();
@@ -277,7 +299,7 @@ static void *process_single_client(void* num) {
   if (cmd==CMD_ENUMERATE)
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS , xenumTxt);
   else
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS , acmds[cmd+useWsmanShift]);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS , acmds[cmd+useWsmanShift+cfgcmd]);
 
   if (noVerifyCert) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);

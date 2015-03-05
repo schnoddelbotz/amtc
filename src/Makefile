@@ -12,7 +12,9 @@ OS=$(shell uname -s)
 
 HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset \
 	cmd_powercycle wsman_info wsman_info_step2 wsman_up wsman_down \
-	wsman_reset wsman_xenum wsman_xenum_step2
+	wsman_reset wsman_xenum wsman_xenum_step2 \
+        wsman_solredir_enable wsman_solredir_disable \
+        wsman_webui_enable wsman_webui_disable
 
 amtc: amtc.c
 
