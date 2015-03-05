@@ -877,6 +877,7 @@ App.OuHostsController = Ember.ObjectController.extend({
 });
 App.OuMonitorController = Ember.ObjectController.extend({
   needs: ["hosts","ous","laststates"],
+  commandActions: ["powerdown","powerup","powercycle","reset"],
 
   selectedAction: null,
   selectedHosts: {},
@@ -889,10 +890,7 @@ App.OuMonitorController = Ember.ObjectController.extend({
       this.set('selectedHosts', $('#hosts .ui-selected'));
       this.set('selectedHostsCount', $(".ui-selected").length);
     },
-    setActionPowerup:    function() { this.set('selectedAction', 'U'); },
-    setActionPowerdown:  function() { this.set('selectedAction', 'D'); },
-    setActionReset:      function() { this.set('selectedAction', 'R'); },
-    setActionPowercycle: function() { this.set('selectedAction', 'C'); },
+    submitJob: function() { alert("Not yet, sorry: " + this.get('selectedCmd')); }
   }
 });
 App.LaststatesController = Ember.ArrayController.extend({
@@ -1331,6 +1329,24 @@ App.TreeMenuNodeComponent = Ember.Component.extend({
     //console.log("'" + this.get('selectedNode') + "' :: '" + this.get('node.id') + "'");
     return this.get('selectedNode') === this.get('node.id');
   }.property('selectedNode', 'node.id')
+});
+
+// https://gist.github.com/pwfisher/b4d27d984ad5868baab6
+// {{ radio-button name='dish' value='spam' groupValue=selectedDish }} Spam
+// {{ radio-button name='dish' value='eggs' groupValue=selectedDish }} Eggs
+//
+App.RadioButtonComponent = Ember.Component.extend({
+  tagName: 'input',
+  type: 'radio',
+  attributeBindings: [ 'checked', 'name', 'type', 'value' ],
+
+  checked: function () {
+    return this.get('value') === this.get('groupValue');
+  }.property('value', 'groupValue'),
+
+  change: function () {
+    this.set('groupValue', this.get('value'));
+  }
 });
 
 // Handlebars helpers

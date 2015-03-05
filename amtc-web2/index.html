@@ -228,7 +228,7 @@
                             {{#linkTo 'users' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-users fa-fw"></i> Users</a>{{/linkTo}}
 
                             <li>
-                                <a href="#/systemhealth"><i class="fa fa-plug fa-fw"></i> Scheduler Log and Status</a>
+                                <a href="#/systemhealth"><i class="fa fa-heartbeat fa-fw"></i> Scheduler Log and Status</a>
                             </li>
                             {{#linkTo 'optionsets' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>{{/linkTo}}
                         </ul>
@@ -1320,12 +1320,13 @@
           <div id="ctrl">
             <h5>Action for selected <span id="numselected">{{selectedHostsCount}}</span>&nbsp;hosts</h5>
             <form>
-             <input type="radio" name="cmd" id="powerdown" value="D"><label for="powerdown">powerdown</label>
-             <input type="radio" name="cmd" id="powerup" value="U"><label for="powerup">powerup</label>
-             <input type="radio" name="cmd" id="powercycle" value="C"><label for="powercycle">powercycle</label>
-             <input type="radio" name="cmd" id="reset" value="R"><label for="reset">reset</label>
-             ... using a inter-command-delay of <input id="delay" type="text"  name="delay" value="5" size=3> seconds
-             <input type="button" id="ctrlSubmit" value="Do it" name="bar">
+              {{#each cmd in commandActions}}
+                <label>{{radio-button name='cmd' value=cmd groupValue=selectedCmd}} {{cmd}}</label>
+              {{/each}}
+              ... using a inter-command-delay of <input id="delay" type="text"  name="delay" value="5" size=3> seconds
+              {{#if selectedCmd}}
+                <button class="btn btn-default" {{action 'submitJob'}}> <i class="fa fa-thumbs-up"></i> Do it</button>
+              {{/if}}
             </form>
           </div>
         {{/if}}
@@ -1349,7 +1350,7 @@
     <div class="col-lg-12" id="cfghosts">
       {{#if controllers.hosts.hosts.content}}
           {{#each controller.hosts}}
-              <div class="pc">{{hostname}}</div>
+              <div class="pc"><i class="fa fa-desktop"></i> {{hostname}}</div>
           {{/each}}
       {{else}}
           No hosts found in this room.
@@ -1408,7 +1409,7 @@
         <h3>Preview</h3>
         <div id="addHostsPreview">
           {{#each host in hostsToAdd}}
-            <div class="pc preview">{{host}}</div>
+            <div class="pc preview"><i class="fa fa-desktop"></i> {{host}}</div>
           {{/each}}
           <div class="clearfix"><br><br></div>
         </div>
