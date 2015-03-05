@@ -52,7 +52,8 @@ unsigned char *acmds[] = {
   wsman_ping_disable, wsman_ping_enable
 };
 const char *hcmds[] = {
-  "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE"
+  "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE",
+  "SHUTDOWN","ENUMERATE","MODIFY"
 };
 const char *powerstate[] = { /* AMT/ACPI */
  "S0 (on)", "S1 (cpu stop)", "S2 (cpu off)", "S3 (sleep)",
