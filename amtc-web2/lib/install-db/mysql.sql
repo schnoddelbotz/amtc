@@ -82,7 +82,6 @@ CREATE TABLE IF NOT EXISTS optionset (
   sw_scan3389       INTEGER,
   sw_usetls         INTEGER,
   sw_skipcertchk    INTEGER,
-  opt_maxthreads    INTEGER,
   opt_timeout       INTEGER,
   opt_passfile      VARCHAR(128),
   opt_cacertfile    VARCHAR(128)

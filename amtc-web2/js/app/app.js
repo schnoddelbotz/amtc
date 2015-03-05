@@ -415,7 +415,6 @@ App.OuMonitorView = Ember.View.extend({
       var icon = osicons[value] ? osicons[value] : '';
       $("#hselect").append('<div id="'+value+'" class="'+key+' pc">'+icon+value+'</div>');
       $("#"+value).click(function() {
-        console.log('modifySelection ....');
         modifySelection(value,$(this).attr("class").split(' ')[0]);
       });
     });
@@ -882,6 +881,7 @@ App.OuMonitorController = Ember.ObjectController.extend({
   selectedCmd: null,
   selectedHosts: [], // EMBER.MUTABLEARRAY?
   selectedHostsCount: 0,
+  selectedDelay: 5,
 
   laststates: Ember.computed.alias("controllers.laststates"),
 
@@ -895,7 +895,8 @@ App.OuMonitorController = Ember.ObjectController.extend({
       this.set('selectedHostsCount', $(".ui-selected").length);
     },
     submitJob: function() {
-      alert("Not yet, sorry: " + this.get('selectedCmd') +' for ' + this.get('selectedHosts'));
+      alert("Not yet, sorry: " + this.get('selectedCmd') +
+       ' (delay '+ this.get('selectedDelay') +'s) for hosts with IDs ' + this.get('selectedHosts'));
       // FIXME json put job...
     }
   }
@@ -1193,7 +1194,6 @@ App.Optionset = DS.Model.extend({
   sw_scan3389: attr('boolean'),
   sw_usetls: attr('boolean'),
   sw_skipcertchk: attr('boolean'),
-  opt_maxthreads: attr('string'),
   opt_timeout: attr('string'),
   opt_passfile: attr('string'),
   opt_cacertfile: attr('string')

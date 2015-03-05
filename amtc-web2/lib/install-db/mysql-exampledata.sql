@@ -9,11 +9,11 @@ INSERT INTO notification VALUES(NULL,NULL,2,'envelope','daily status report sent
 INSERT INTO notification VALUES(NULL,NULL,2,'warning','More than 10 hosts unreachable!');
 
 -- some amtc option sets
-INSERT INTO optionset VALUES(1,'DASH / No TLS','Uses DASH',0,1,1,1,0,0,200,10,'/tmp/test2.pass','');
-INSERT INTO optionset VALUES(2,'DASH / TLS / VerifyCertSkip','Skips TLS certificate verification',0,1,1,1,1,1,175,10,'/tmp/test2.pass','');
-INSERT INTO optionset VALUES(3,'DASH / TLS / VerifyCert','Most secure optionset',0,1,1,1,1,0,150,15,'/tmp/test3.pass','/tmp/my.ca.crt');
-INSERT INTO optionset VALUES(4,'EOI / No TLS - AMT v5','For old hardware with AMT 5.0 (around 2008)',1,0,0,0,0,0,100,10,'/tmp/testv5.pass',NULL);
-INSERT INTO optionset VALUES(5,'EOI / No TLS - AMT v6-8','EOI + No TLS = the fastest. But only does digest auth via http.',0,0,1,1,0,0,250,6,'/tmp/test1.pass','');
+INSERT INTO optionset VALUES(1,'DASH / No TLS','Uses DASH',0,1,1,1,0,0,10,'/tmp/test2.pass','');
+INSERT INTO optionset VALUES(2,'DASH / TLS / VerifyCertSkip','Skips TLS certificate verification',0,1,1,1,1,1,10,'/tmp/test2.pass','');
+INSERT INTO optionset VALUES(3,'DASH / TLS / VerifyCert','Most secure optionset',0,1,1,1,1,0,15,'/tmp/test3.pass','/tmp/my.ca.crt');
+INSERT INTO optionset VALUES(4,'EOI / No TLS - AMT v5','For old hardware with AMT 5.0 (around 2008)',1,0,0,0,0,0,10,'/tmp/testv5.pass',NULL);
+INSERT INTO optionset VALUES(5,'EOI / No TLS - AMT v6-8','EOI + No TLS = the fastest. But only does digest auth via http.',0,0,1,1,0,0,6,'/tmp/test1.pass','');
 
 -- example OUs ...
 -- comes in via minimal already:

@@ -233,11 +233,13 @@ class amtcwebSpooler {
     $optionset->sw_usetls       && $cmd_opts[] = '-g';
     $optionset->sw_skiptcertchk && $cmd_opts[] = '-n';
     $optionset->opt_timeout     && $cmd_opts[] = '-t '.$optionset->opt_timeout;
-    $optionset->opt_maxthreads  && $cmd_opts[] = '-m '.$optionset->opt_maxthreads;
     $optionset->opt_passfile    && $cmd_opts[] = '-p '.$optionset->opt_passfile;
     $optionset->opt_cacertfile  && $cmd_opts[] = '-c '.$optionset->opt_cacertfile;
     $job->amtc_delay            && $cmd_opts[] = '-w '.$job->amtc_delay;
     #$job->amtc_bootdevice      && $cmd_opts[] = '-b '.$job->amtc_bootdevice;
+    # FIXME
+    # maxThreads was a per-optionset setting, but should be global/config
+    # $optionset->opt_maxthreads  && $cmd_opts[] = '-m '.$optionset->opt_maxthreads;
 
     // decide whether to act on whole OU or a given list of hosts
     if ($job->amtc_hosts) {

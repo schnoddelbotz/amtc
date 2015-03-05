@@ -949,7 +949,6 @@
         <th>TLS CA crt</th>
         <th>AMT password file</th>
         <th>Timeout</th>
-        <th>MaxThreads</th>
       </tr>
     </thead>
     {{#each model}}
@@ -965,7 +964,6 @@
         <td>{{opt_cacertfile}}</td>
         <td>{{opt_passfile}}</td>
         <td>{{opt_timeout}}</td>
-        <td>{{opt_maxthreads}}</td>
       </td></tr>
     {{/each}}
   </table>
@@ -1016,10 +1014,6 @@
       <div class="form-group">
         <label for "description">AMT password file</label>
           {{input class="form-control" type="text" value=opt_passfile insert-newline="doneEditingReturn" placeholder="/path/to/file"}}
-      </div>
-      <div class="form-group">
-        <label for "description">Maximum number of threads</label>
-          {{input class="form-control" type="text" value=opt_maxthreads insert-newline="doneEditingReturn" size=2 placeholder="170"}}
       </div>
       <div class="form-group">
         <label for "description">Connection timeout [s]</label>
@@ -1323,7 +1317,7 @@
               {{#each cmd in commandActions}}
                 <label>{{radio-button name='cmd' value=cmd groupValue=selectedCmd}} {{cmd}}</label>
               {{/each}}
-              ... using a inter-command-delay of <input id="delay" type="text"  name="delay" value="5" size=3> seconds
+              ... using a inter-command-delay of {{input type="text" size=3 value=selectedDelay}} seconds
               {{#if selectedCmd}}
                 <button class="btn btn-default" {{action 'submitJob'}}> <i class="fa fa-thumbs-up"></i> Do it</button>
               {{/if}}

@@ -109,7 +109,7 @@ int   useTLS = 0;
 int   threadsRunning = 0;
 int   connectTimeout = 10;
 float waitDelay = -1;
-int   maxThreads = 40;
+int   maxThreads = 180;
 int   produceJSON = 0;
 int   useWsmanShift = 0;
 char  amtpasswdfile[255];

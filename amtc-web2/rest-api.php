@@ -386,7 +386,6 @@ $app->put('/optionsets/:id', function ($id) {
     $dev->sw_skipcertchk = $udev->sw_skipcertchk;
     $dev->sw_usetls = $udev->sw_usetls;
     $dev->opt_cacertfile = $udev->opt_cacertfile;
-    $dev->opt_maxthreads = $udev->opt_maxthreads;
     $dev->opt_passfile = $udev->opt_passfile;
     $dev->opt_timeout = $udev->opt_timeout;
     $dev->save();
