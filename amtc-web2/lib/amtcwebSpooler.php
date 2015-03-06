@@ -69,7 +69,15 @@ class amtcwebSpooler {
     if ($match = preg_grep($actionPattern, $argv)) {
       // run matched action method
       $action = array_shift($match);
-      self::$action($options);
+      if (isset($options['l']/*[l]oop*/)) {
+        for ($i=0; $i<5; $i++) {
+          self::$action($options);
+          sleep(10);
+          // this polling sucks a bit ... improve, later...
+        }
+      } else {
+        self::$action($options);
+      }
     } else {
       // bad usage, show help
       self::showUsage();
