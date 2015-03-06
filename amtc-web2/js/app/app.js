@@ -877,6 +877,7 @@ App.OuHostsController = Ember.ObjectController.extend({
 App.OuMonitorController = Ember.ObjectController.extend({
   needs: ["hosts","ous","laststates"],
   commandActions: ["powerdown","powerup","powercycle","reset"],
+  shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R"},
 
   selectedCmd: null,
   selectedHosts: [], // EMBER.MUTABLEARRAY?
@@ -895,15 +896,15 @@ App.OuMonitorController = Ember.ObjectController.extend({
       this.set('selectedHostsCount', $(".ui-selected").length);
     },
     submitJob: function() {
-      var postdata = {
+      var postdata = { job: {
         ou_id: this.get('model').id,
-        command: this.get('selectedCmd'),
+        command: this.get('shortActions')[this.get('selectedCmd')],
         delay: this.get('selectedDelay'),
         hosts: this.get('selectedHosts'),
         repeat_days: null,
         type: 1, // interactive
         description: "Interactive",
-      };
+      }};
       $.ajax({type:"POST", url:"rest-api.php/jobs",
               data:JSON.stringify(postdata), dataType:"json"}).then(function(response) {
         if (typeof response.errorMsg != "undefined")

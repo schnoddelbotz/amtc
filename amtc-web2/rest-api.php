@@ -463,9 +463,10 @@ $app->post('/jobs', function () use ($app) {
     $job->description = $user->description;
     $job->start_time  = $user->start_time;
     $job->ou_id       = $user->ou_id;
-    $job->job_type = 2; // FIXME use CONSTANT JOBTYPE_SCHEDULED
-    $job->user_id = 1; // FIXME!!
-    $job->amtc_cmd = 'U'; // FIXME!!
+    $job->job_type    = $user->type;
+    $job->user_id     = 1; // FIXME!!
+    $job->amtc_cmd    = $user->command;
+    $job->amtc_hosts  = implode(',',$user->hosts); // fixme, at least allow int only...
     $job->save();
     echo json_encode( array('job'=> $job->as_array()) );
   }
