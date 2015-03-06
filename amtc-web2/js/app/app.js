@@ -895,9 +895,27 @@ App.OuMonitorController = Ember.ObjectController.extend({
       this.set('selectedHostsCount', $(".ui-selected").length);
     },
     submitJob: function() {
-      alert("Not yet, sorry: " + this.get('selectedCmd') +
-       ' (delay '+ this.get('selectedDelay') +'s) for hosts with IDs ' + this.get('selectedHosts'));
-      // FIXME json put job...
+      var postdata = {
+        ou_id: this.get('model').id,
+        command: this.get('selectedCmd'),
+        delay: this.get('selectedDelay'),
+        hosts: this.get('selectedHosts'),
+        repeat_days: null,
+        type: 1, // interactive
+        description: "Interactive",
+      };
+      $.ajax({type:"POST", url:"rest-api.php/jobs",
+              data:JSON.stringify(postdata), dataType:"json"}).then(function(response) {
+        if (typeof response.errorMsg != "undefined")
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Submission failed: <br>'+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
+        else {
+          humane.log('<i class="glyphicon glyphicon-saved"></i> Submitted!', { timeout: 1000 });
+        }
+      }, function(response){
+        console.log(response);
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.'+response.responseText,
+            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+      });
     }
   }
 });
