@@ -143,6 +143,7 @@ class amtcwebSpooler {
     isset($opt['onlyScheduled'])   && $jobs->where('job_type', self::JOB_SCHEDULED);
     isset($opt['onlyMonitoring'])  && $jobs->where('job_type', self::JOB_MONITORING);
 
+    $j=Array();
     foreach ($jobs->find_many() as $job) {
       // skip non-interactive jobs that don't have to run today; better do it in SQL?
       if ( ($job->job_type == self::JOB_SCHEDULED || $job->job_type == self::JOB_MONITORING)  &&
@@ -200,15 +201,30 @@ class amtcwebSpooler {
           foreach ($ou_array as $ou_id) {
             $hosts = array_merge($hosts, self::getOuHosts($ou_id,false,true));
           }
-          // FIXME:  only take $optionSet->maxThreads ... while ...
-          $job->amtc_hosts = implode(',', $hosts);
-          $job->ou_id = $ou_id; // one OU setting fits all here, as it's the same...
-
-          if (isset($opt['n'])) {
-            echo "Dry-Run-Skip: execJob MONITORING: ".$job->amtc_hosts."\n";
-          }
-          else {
-            self::updateHostState( self::execAmtCommand($job,$opt), $opt );
+          $maxThreads = 180; // FIXME: make cfg setting
+          if (count($hosts) < $maxThreads) {
+            $job->amtc_hosts = implode(',', $hosts);
+            $job->ou_id = $ou_id; // one OU setting fits all here, as it's the same...
+            if (isset($opt['n'])) {
+              echo "Dry-Run-Skip: execJob MONITORING: ".$job->amtc_hosts."\n";
+            }
+            else {
+              self::updateHostState( self::execAmtCommand($job,$opt), $opt );
+            }
+          } else {
+            // more than maxThreads hosts to scan, slice hosts array
+            $hostsCompleted = 0;
+            while ($hostsCompleted<count($hosts)) {
+              $workpack = array_slice($hosts, $hostsCompleted, $maxThreads);
+              $hostsCompleted += count($workpack);
+              $job->amtc_hosts = implode(',', $workpack);
+              if (isset($opt['n'])) {
+                echo "Dry-Run-Skip: execJob MONITORING: ".$job->amtc_hosts."\n";
+              }
+              else {
+                self::updateHostState( self::execAmtCommand($job,$opt), $opt );
+              }
+            }
           }
         }
         $job->last_done = time();

@@ -469,6 +469,8 @@ $app->post('/jobs', function () use ($app) {
     $job->amtc_hosts  = implode(',',$user->hosts); // fixme, at least allow int only...
     $job->save();
     echo json_encode( array('job'=> $job->as_array()) );
+    // if this is a interactive/type-1 job with cmd != info,
+    // add scan jobs to monitor job progress w/o manual page reloads
   }
 });
 
