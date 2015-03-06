@@ -902,6 +902,7 @@ App.OuMonitorController = Ember.ObjectController.extend({
         delay: this.get('selectedDelay'),
         hosts: this.get('selectedHosts'),
         repeat_days: null,
+        start_time: null,
         type: 1, // interactive
         description: "Interactive",
       }};
