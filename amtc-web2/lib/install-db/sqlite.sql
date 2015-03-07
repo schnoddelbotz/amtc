@@ -85,7 +85,7 @@ CREATE TABLE "optionset" (
   "opt_cacertfile"    VARCHAR(128)
 );
 
-
+-- monitoring / scheduled tasks / interactive jobs
 CREATE TABLE "job" (
   "id"                INTEGER      NOT NULL PRIMARY KEY,
   "job_type"          INTEGER,     -- 1=interactive, 2=scheduled, 3=monitor

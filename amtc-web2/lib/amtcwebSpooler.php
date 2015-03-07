@@ -8,22 +8,12 @@
  */
 
 class amtcwebSpooler {
-
-  const JOB_INTERACTIVE = 1;
-  const JOB_SCHEDULED   = 2;
-  const JOB_MONITORING  = 3;
-
-  const STATUS_PENDING  = 0;
-  const STATUS_RUNNING  = 1;
-  const STATUS_DONE     = 2;
-  const STATUS_ERROR    = 9;
-
   static $now_wday;       // inited by CLI_main, current week day
   static $now_wday_mask;  // bitmask for current weekday
   static $now_hours;      // current time (hours)
   static $now_minutes;    // current time (minutes)
   static $now_hm;         // 60*now_hours + now_minutes
-  static $now_unix;       // 60*now_hours + now_minutes
+  static $now_unix0;      // today at 00:00 as unix timestamp
 
   static $shortOptions = Array(
     'l' => 'Loop 10 times, sleeping 5 seconds',
@@ -60,6 +50,7 @@ class amtcwebSpooler {
     self::$now_hours     = $now['hours'];
     self::$now_minutes   = $now['minutes'];
     self::$now_hm        = $now['hours'] * 60 + $now['minutes'];
+    self::$now_unix0     = mktime(0,0,0,$now['mon'],$now['mday'],$now['year']);
     $options = getopt(join(array_keys(self::$shortOptions)),
                       array_keys(self::$longOptions));
     $actionPattern = '/^(' . implode('|', array_keys(self::$actions)) . ')$/';
@@ -106,24 +97,12 @@ class amtcwebSpooler {
   static function listJobs($opt) {
     echo "\n";
     $jobs = Model::factory('Job');
-    // fxme: mv to job class...
-    $jobTypeMap = Array(
-      self::JOB_INTERACTIVE => 'Interactive',
-      self::JOB_SCHEDULED   => 'Scheduled',
-      self::JOB_MONITORING  => 'Monitoring'
-    );
-    $jobStatusMap = Array(
-      self::STATUS_PENDING  => 'pending',
-      self::STATUS_RUNNING  => 'running',
-      self::STATUS_DONE     => 'done',
-      self::STATUS_ERROR    => 'error'
-    );
-    $jobFormat = "%6d  %s%s%s%s%s%s%s %12s %8s %6s %13s  %s\n";
-    echo " JobId  MTWTFSS     Job type   Status  Start      Last run  Description\n";
-    echo "------ -------- ------------ -------- ------ ------------- ------------\n";
-    isset($opt['onlyInteractive']) && $jobs->where('job_type', self::JOB_INTERACTIVE);
-    isset($opt['onlyScheduled'])   && $jobs->where('job_type', self::JOB_SCHEDULED);
-    isset($opt['onlyMonitoring'])  && $jobs->where('job_type', self::JOB_MONITORING);
+    $jobFormat = "%6d  %s%s%s%s%s%s%s %12s %8s %8s %6s %13s  %s\n";
+    echo " JobId  MTWTFSS     Job type  Command   Status  Start      Last run  Description\n";
+    echo "------ -------- ------------ -------- -------- ------ ------------- ------------\n";
+    isset($opt['onlyInteractive']) && $jobs->where('job_type', Job::JOB_INTERACTIVE);
+    isset($opt['onlyScheduled'])   && $jobs->where('job_type', Job::JOB_SCHEDULED);
+    isset($opt['onlyMonitoring'])  && $jobs->where('job_type', Job::JOB_MONITORING);
     foreach ($jobs->find_many() as $record) {
       $r = $record->as_array();
       printf($jobFormat,  $record->id,
@@ -134,8 +113,9 @@ class amtcwebSpooler {
                           $record->repeat_days & 32 ? 'x' : '-',
                           $record->repeat_days & 64 ? 'x' : '-', // sat
                           $record->repeat_days & 1  ? 'x' : '-', // sun
-                          $jobTypeMap[$record->job_type],
-                          $jobStatusMap[$record->job_status],
+                          Job::$jobTypeMap[$record->job_type],
+                          $record->amtc_cmd,
+                          Job::$jobStatusMap[$record->job_status],
                           self::stringifyDayMinute($record->start_time),
                           $record->last_started ? date("M d H:i",$record->last_started) : 'n/a',
                           $record->description);
@@ -144,18 +124,29 @@ class amtcwebSpooler {
   }
 
   static function runJobs($opt) {
-    //echo "Running jobs --- -n(o-action) / test run: ".(isset($opt['n'])?'Yes':'NO!')."\n";
-    $jobs = Job::order_by_asc('job_type')->where('job_status',self::STATUS_PENDING);
+    $jobs = Job::order_by_asc('job_type')->where('job_status',Job::STATUS_PENDING);
 
-    isset($opt['onlyInteractive']) && $jobs->where('job_type', self::JOB_INTERACTIVE);
-    isset($opt['onlyScheduled'])   && $jobs->where('job_type', self::JOB_SCHEDULED);
-    isset($opt['onlyMonitoring'])  && $jobs->where('job_type', self::JOB_MONITORING);
+    isset($opt['onlyInteractive']) && $jobs->where('job_type', Job::JOB_INTERACTIVE);
+    isset($opt['onlyScheduled'])   && $jobs->where('job_type', Job::JOB_SCHEDULED);
+    isset($opt['onlyMonitoring'])  && $jobs->where('job_type', Job::JOB_MONITORING);
 
     $j=Array();
     foreach ($jobs->find_many() as $job) {
       // skip non-interactive jobs that don't have to run today; better do it in SQL?
-      if ( ($job->job_type == self::JOB_SCHEDULED || $job->job_type == self::JOB_MONITORING)  &&
+      if ( ($job->job_type == Job::JOB_SCHEDULED || $job->job_type == Job::JOB_MONITORING)  &&
             ! (self::$now_wday_mask & $job->repeat_days) ) {
+        continue;
+      }
+      // skip sched jobs if daytime not reached yet ... or already run (only once / day)
+      if ($job->job_type == Job::JOB_SCHEDULED && (self::$now_hm < $job->start_time || $job->last_done > self::$now_unix0 )) {
+        continue;
+      }
+      // skip sched jobs if should have run way earlier today (e.g. cfg change...)
+      if ($job->job_type == Job::JOB_SCHEDULED && $job->start_time + 30 < self::$now_hm) {
+        continue;
+      }
+      // skip monitoring if this script was re-executed below repeat_interval minutes
+      if ($job->job_type == Job::JOB_MONITORING && time() < $job->last_started + $job->repeat_interval * 60 ) {
         continue;
       }
       $j[] = $job;
@@ -168,37 +159,38 @@ class amtcwebSpooler {
 
   static function execJob($job,$opt) {
     switch ($job->job_type) {
-      case amtcwebSpooler::JOB_INTERACTIVE:
+      case Job::JOB_INTERACTIVE:
         if (isset($opt['n']))
           echo "Dry-Run-Skip: execJob INTERACTIVE: ".$job->id."  ".$job->description."\n";
         else {
-          $job->job_status = self::STATUS_RUNNING;
+          $job->job_status = Job::STATUS_RUNNING;
           $job->last_started = time();
           $job->save();
           $result = self::execAmtCommand($job,$opt);
-          // if job->amt_cmd==I then
-          // self::updateHostState( $result, $opt );
-          // else ... control U/D/R/C...
-          // print_r($result);
           $job->last_done = time();
-          $job->job_status = self::STATUS_DONE;
+          $job->job_status = Job::STATUS_DONE;
+          $job->save();
+          // how to trigger increased monitoring until job completed?
+        }
+      break;
+      case Job::JOB_SCHEDULED:
+        if (isset($opt['n']))
+          echo "Dry-Run-Skip: execJob SCHEDULED: ".$job->id."  ".$job->description."\n";
+        else {
+          $job->job_status = Job::STATUS_RUNNING;
+          $job->last_started = time();
+          $job->save();
+          $result = self::execAmtCommand($job,$opt);
+          $job->last_done = time();
+          $job->job_status = Job::STATUS_PENDING;
           $job->save();
         }
       break;
-      case amtcwebSpooler::JOB_SCHEDULED:
-        //echo "SKIP: not-yet: execJob SCHEDULED: ".$job->id."  ".$job->description."\n";
-        #self::execAmtCommand($job,$opt);
-      break;
-      case amtcwebSpooler::JOB_MONITORING;
+      case Job::JOB_MONITORING;
         // find OUs that have monitoring enabled, join by optionset_id
         $optsetgroup = Array();
-        if (time() < $job->last_started + $job->repeat_interval * 60 ) {
-          if (isset($opt['d'])) {
-            echo "Skip exec for job ".$job->id.": below interval\n";
-          }
-          return;
-        }
         $job->last_started = time();
+        $job->job_status = Job::STATUS_RUNNING;
         $job->save();
         foreach (Ou::where('logging',1)->find_many() as $ou) {
           $optsetgroup[$ou->optionset_id][] = $ou->id;
@@ -236,6 +228,7 @@ class amtcwebSpooler {
           }
         }
         $job->last_done = time();
+        $job->job_status = Job::STATUS_PENDING;
         $job->ou_id = NULL;
         $job->amtc_hosts = NULL;
         $job->save();
@@ -248,6 +241,8 @@ class amtcwebSpooler {
   static function buildAmtcCommandline($job,$opt) {
     $ou        = Ou::find_one($job->ou_id);
     $optionset = Optionset::find_one($ou->optionset_id);
+
+    // FIXME throw if $optionset is nil (fresh install...)
 
     $cmd_opts = Array('-j'); // amtc shall always produce parsable json output
     $optionset->sw_scan22       && $cmd_opts[] = '-s';

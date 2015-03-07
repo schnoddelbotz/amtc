@@ -87,21 +87,29 @@ CREATE TABLE IF NOT EXISTS optionset (
   opt_cacertfile    VARCHAR(128)
 );
 
-
--- amtc-web v1 ... tbd
--- undone... scheduled tasks should create jobs, too (not only interactive...)?
+-- monitoring / scheduled tasks / interactive jobs
 CREATE TABLE job (
   id                INTEGER      NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  cmd_state         INTEGER      DEFAULT '0',
+  job_type          INTEGER,     -- 1=interactive, 2=scheduled, 3=monitor
+  job_status        INTEGER      DEFAULT '0',
   createdat         TIMESTAMP,
-  username          TEXT,
+  user_id           INTEGER      NOT NULL,
+
   amtc_cmd          CHAR(1)      NOT NULL,  -- U/D/R/C
-  amtc_hosts        TEXT, -- now ids of hosts...? FIXME tbd
-  startedat         INTEGER(4)   DEFAULT NULL,
-  doneat            INTEGER(4)   DEFAULT NULL,
   amtc_delay        REAL,
-  bootdevice        CHAR(1)      DEFAULT NULL, -- tbd; no support in amtc yet
+  amtc_bootdevice   CHAR(1)      DEFAULT NULL, -- tbd; no support in amtc yet
+
+  amtc_hosts        TEXT, -- now ids of hosts...? FIXME tbd
   ou_id             INTEGER, -- req'd to determine optionset; allow override?
 
-  FOREIGN KEY(ou_id) REFERENCES ou(id)
+  start_time        INTEGER(4)   DEFAULT NULL, -- start time at day; tbd= minutes?
+  repeat_interval   INTEGER, -- minutes
+  repeat_days       INTEGER, -- pow(2, getdate()[wday])
+  last_started      INTEGER(4)   DEFAULT NULL,
+  last_done         INTEGER(4)   DEFAULT NULL,
+  proc_pid          INTEGER, -- process id of currently running job
+
+  description       VARCHAR(32), -- to reference it e.g. in logs (insb. sched)
+  FOREIGN KEY(ou_id) REFERENCES ou(id),
+  FOREIGN KEY(user_id) REFERENCES user(id)
 );
