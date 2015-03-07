@@ -22,7 +22,9 @@ require 'paris.php';
 require 'Slim/Slim.php';
 
 // Initialize http://j4mie.github.io/idiormandparis/
-ORM::configure(AMTC_PDOSTRING);
+if (defined("AMTC_PDOSTRING")) {
+  ORM::configure(AMTC_PDOSTRING);
+}
 
 // Initialize http://www.slimframework.com/
 \Slim\Slim::registerAutoloader();

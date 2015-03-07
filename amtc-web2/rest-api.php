@@ -8,7 +8,7 @@
  */
 
 // sleep(2);
-error_reporting(E_ALL); ini_set('display_errors','stdout');
+// error_reporting(E_ALL); ini_set('display_errors','stdout');
 // set up autoloader, include required libs, init ORM & Slim
 require 'lib/app_bootstrap.php';
 
@@ -21,7 +21,7 @@ $allowUnauthenticated = Array('authenticate', 'rest-config.js', 'pages',
                               'phptests', 'submit-configuration');
 $_route = explode('/', $app->request()->getPathInfo());
 $route  = $_route[1];
-if ($_SESSION['authenticated'] == true ||
+if (!empty($_SESSION['authenticated']) && $_SESSION['authenticated'] == true ||
     in_array($route, $allowUnauthenticated )) {
     // echo "Authenticated or request that is allowed without...";
 } else {
