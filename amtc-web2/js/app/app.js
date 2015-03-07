@@ -896,28 +896,28 @@ App.OuMonitorController = Ember.ObjectController.extend({
       this.set('selectedHostsCount', $(".ui-selected").length);
     },
     submitJob: function() {
-      var postdata = { job: {
-        ou_id: this.get('model').id,
-        command: this.get('shortActions')[this.get('selectedCmd')],
-        delay: this.get('selectedDelay'),
-        hosts: this.get('selectedHosts'),
-        repeat_days: null,
-        start_time: null,
-        type: 1, // interactive
-        description: "Interactive",
-      }};
-      $.ajax({type:"POST", url:"rest-api.php/jobs",
-              data:JSON.stringify(postdata), dataType:"json"}).then(function(response) {
-        if (typeof response.errorMsg != "undefined")
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Submission failed: <br>'+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
-        else {
-          humane.log('<i class="glyphicon glyphicon-saved"></i> Submitted!', { timeout: 1000 });
-        }
+      var record = this.store.createRecord('job');
+      record.set('amtc_cmd', this.get('shortActions')[this.get('selectedCmd')]);
+      record.set('amtc_delay', this.get('selectedDelay'));
+      record.set('hosts', this.get('selectedHosts'));
+      record.set('ou_id', this.get('model'));
+      record.set('description', "Interactive");
+      record.set('job_type', 1 /*interactive*/);
+      record.save().then(function() {
+        humane.log('<i class="glyphicon glyphicon-saved"></i> Submitted',
+          { timeout: 1000 });
+        // de-uglify:
+         $("#hosts .pc").removeClass("ui-selected");
+        var controller = App.__container__.lookup("controller:ouMonitor");
+        controller.send('updateSelectedHosts')
       }, function(response){
-        console.log(response);
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.'+response.responseText,
-            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      });
+        var res = jQuery.parseJSON(response.responseText);
+        var msg = (typeof res.exceptionMessage=='undefined') ?
+                   'Check console, please.' : res.exceptionMessage;
+        humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+                   '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
+        }
+      );
     }
   }
 });
@@ -1003,6 +1003,14 @@ App.ScheduleController = Ember.ObjectController.extend({
   needs: ["ous"],
   currentOU: null,
   ouTree: null,
+  commandActions: ["powerdown","powerup","powercycle","reset"],
+  shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R"},
+  validCommands: [
+    {cmd: "powerdown", cchar: "D"},
+    {cmd: "powerup",   cchar: "U"},
+    {cmd: "reset",     cchar: "R"},
+    {cmd: "cycle",     cchar: "C"}
+  ],
 
   actions: {
     removeSchedule: function () {
@@ -1026,9 +1034,10 @@ App.ScheduleController = Ember.ObjectController.extend({
     },
 
     doneEditingReturn: function() {
+      this.set('job_type', 2 /* scheduled task */ );
       this.get('model').save().then(function() {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
-          { timeout: 800 });
+          { timeout: 1000 });
         window.location.href = '#/schedules';
       }, function(response){
         var res = jQuery.parseJSON(response.responseText);
@@ -1269,6 +1278,7 @@ App.Job = DS.Model.extend({
   ou_id: DS.belongsTo('ou', {async:false}),//, {inverse: null}),
   job_type: attr('number'), // 1=interactive, 2=scheduled, 3=monitor
   description: attr('string'),
+  hosts: attr(),
   start_time: attr('number'),
   amtc_cmd: attr('string'),
   amtc_delay: attr('number'),

@@ -608,7 +608,15 @@
         {{/if}}
       </div>
 
-      todo: + action chooser...
+      <div class="form-group">
+        <label for "action">Action</label>
+        {{view Ember.Select value=amtc_cmd content=validCommands optionValuePath="content.cchar" optionLabelPath="content.cmd"}}
+      </div>
+
+      <div class="form-group">
+        <label>Delay</label>
+          {{input class="form-control" type="text" value=amtc_delay insert-newline="doneEditingReturn" placeholder="Delay in seconds between each PC"}}
+      </div>
 
    </fieldset>
   </form>

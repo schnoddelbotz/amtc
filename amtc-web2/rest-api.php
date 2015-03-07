@@ -8,7 +8,7 @@
  */
 
 // sleep(2);
-// error_reporting(E_ALL); ini_set('display_errors','stdout');
+error_reporting(E_ALL); ini_set('display_errors','stdout');
 // set up autoloader, include required libs, init ORM & Slim
 require 'lib/app_bootstrap.php';
 
@@ -462,10 +462,11 @@ $app->post('/jobs', function () use ($app) {
     $job->description = $user->description;
     $job->start_time  = $user->start_time;
     $job->ou_id       = $user->ou_id;
-    $job->job_type    = $user->type;
+    $job->job_type    = $user->job_type; //amtcwebSpooler::JOB_INTERACTIVE=1,SCHED=2,MON=3
     $job->user_id     = 1; // FIXME!!
-    $job->amtc_cmd    = $user->command;
-    $job->amtc_hosts  = implode(',',$user->hosts); // fixme, at least allow int only...
+    $job->amtc_cmd    = $user->amtc_cmd;
+    $job->amtc_delay  = $user->amtc_delay;
+    isset($user->hosts) && $job->amtc_hosts  = implode(',',$user->hosts); // fixme, at least allow int only...
     $job->save();
     echo json_encode( array('job'=> $job->as_array()) );
     // if this is a interactive/type-1 job with cmd != info,
