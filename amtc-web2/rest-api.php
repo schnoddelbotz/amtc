@@ -80,6 +80,8 @@ $app->post('/submit-configuration', function () use ($app) {
     $x = array("message"=>"Configuration written successfully");
     $cfgTpl = "<?php\n\n".
               "define('AMTC_PDOSTRING', '%s');\n".
+              "define('AMTC_DBUSER', '%s');\n".
+              "define('AMTC_DBPASS', '%s');\n".
               "define('AMTC_BIN', '%s');\n".
               "define('AMTC_AUTH_URL', '%s');\n".
               "define('AMTC_TZ', '%s');\n".
@@ -94,21 +96,21 @@ $app->post('/submit-configuration', function () use ($app) {
     }
     if ($wanted['DBTYPE'] == 'MySQL') {
       // mysql://user:pass@host[:port]/dbname)
-      $mUser = preg_replace('/[^A-Za-z]/', '',    $_POST['mysqlUser']);
-      $mPass = preg_replace('/[^A-Za-z]/', '',    $_POST['mysqlPassword']);
-      $mHost = preg_replace('/[^A-Za-z]/', '',    $_POST['mysqlHost']);
-      $mDB   = preg_replace('/[^A-Za-z]/', '',    $_POST['mysqlDB']);
+      $wanted['DBUSER'] = $_POST['mysqlUser'];
+      $wanted['DBPASS'] = $_POST['mysqlPassword'];
+      $mHost = $_POST['mysqlHost'];
+      $mDB   = $_POST['mysqlDB'];
       $wanted['PDOSTRING'] = sprintf('mysql:host=%s;dbname=%s', $mHost, $mDB);
-      // FIXME ... paris needs own function calls for setup... :-/
-      //$wanted['PHPARSTRING'] = sprintf('mysql://%s:%s@%s/%s',
-      //                                    $mUser, $mPass, $mHost, $mDB);
-      $dbh = new PDO($wanted['PDOSTRING'], $mUser, $mPass);
-      $dbh->exec('CREATE DATABASE IF NOT EXISTS '.$mDB.';');
+      $tmp = new PDO(sprintf('mysql:host=%s', $mHost), $wanted['DBUSER'], $wanted['DBPASS']);
+      $tmp->exec('CREATE DATABASE IF NOT EXISTS '.$mDB.';');
+      $tmp = NULL;
+      $dbh = new PDO($wanted['PDOSTRING'], $wanted['DBUSER'], $wanted['DBPASS']);
     }
     // stuff below will only happen if PDO connect was ok...
 
-    $cfg = sprintf($cfgTpl, $wanted['PDOSTRING'], $wanted['AMTCBIN'],
-                   $wanted['AUTHURL'], $wanted['TIMEZONE'], $wanted['DATADIR']);
+    $cfg = sprintf($cfgTpl, $wanted['PDOSTRING'], $wanted['DBUSER'],
+                  $wanted['DBPASS'], $wanted['AMTCBIN'], $wanted['AUTHURL'],
+                  $wanted['TIMEZONE'], $wanted['DATADIR']);
 
     if (!is_writable(dirname(AMTC_CFGFILE))) {
       $x = array("errorMsg"=>"Config directory ".AMTC_CFGFILE." not writable!");

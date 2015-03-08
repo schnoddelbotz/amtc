@@ -24,6 +24,8 @@ require 'Slim/Slim.php';
 // Initialize http://j4mie.github.io/idiormandparis/
 if (defined("AMTC_PDOSTRING")) {
   ORM::configure(AMTC_PDOSTRING);
+  ORM::configure('username', AMTC_DBUSER);
+  ORM::configure('password', AMTC_DBPASS);
 }
 
 // Initialize http://www.slimframework.com/
