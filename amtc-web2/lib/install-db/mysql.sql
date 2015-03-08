@@ -58,13 +58,14 @@ CREATE TABLE IF NOT EXISTS host (
 -- state logging of hosts. log occurs upon state change.
 CREATE TABLE IF NOT EXISTS statelog (
   host_id           INTEGER      NOT NULL,
-  state_begin       TIMESTAMP,
+  state_begin       INTEGER,
   open_port         INTEGER      DEFAULT NULL,
   state_amt         INTEGER(1),
   state_http        INTEGER(2),
 
   FOREIGN KEY(host_id) REFERENCES host(id)
 );
+CREATE TRIGGER timestampTrigger BEFORE INSERT ON statelog FOR EACH ROW SET new.state_begin = UNIX_TIMESTAMP(NOW());
 CREATE INDEX logdata_ld ON statelog (state_begin);
 CREATE INDEX logdata_pd ON statelog (host_id);
 CREATE VIEW  laststate  AS   -- ... including fake id column to make e-d happy

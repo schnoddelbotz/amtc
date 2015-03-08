@@ -292,7 +292,7 @@ class amtcwebSpooler {
     }
     if ($retval!=0) {
       fwrite(STDERR,"ABORTING at job #$job->id! Fatal error #$retval returned by amtc: $res");
-      exit($retval);
+      exit($retval); // FIXME -- evil -- e.g. will break monitoring as state remains=running
     }
 
     // decode amtc json output
