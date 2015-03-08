@@ -68,9 +68,12 @@ CREATE TABLE IF NOT EXISTS statelog (
 CREATE TRIGGER timestampTrigger BEFORE INSERT ON statelog FOR EACH ROW SET new.state_begin = UNIX_TIMESTAMP(NOW());
 CREATE INDEX logdata_ld ON statelog (state_begin);
 CREATE INDEX logdata_pd ON statelog (host_id);
-CREATE VIEW  laststate  AS   -- ... including fake id column to make e-d happy
-  SELECT host_id AS id, host_id,max(state_begin) AS state_begin,open_port,state_amt,state_http
-  FROM statelog GROUP BY host_id;
+CREATE VIEW laststate AS     -- ... including fake id column to make e-d happy
+	SELECT s.host_id as id,s.*,h.hostname
+	FROM statelog s, host h
+	WHERE (s.host_id,s.state_begin) IN
+		( SELECT host_id, MAX(state_begin) FROM statelog GROUP BY host_id )
+		AND h.id=s.host_id;
 
 -- amt(c) option sets
 CREATE TABLE IF NOT EXISTS optionset (
