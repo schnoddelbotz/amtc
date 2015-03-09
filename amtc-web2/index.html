@@ -322,7 +322,7 @@
               <div class="panel-heading">
                   <div class="row">
                       <div class="col-xs-3">
-                          <i class="fa fa-linux fa-5x"></i>
+                          <i class="fa fa-linux fa-5x" {{bindAttr title="controllers.laststates.stateSSHList"}}></i>
                       </div>
                       <div class="col-xs-9 text-right">
                           <div class="huge">{{controllers.laststates.stateSSH}}</div>
@@ -337,7 +337,7 @@
               <div class="panel-heading">
                   <div class="row">
                       <div class="col-xs-3">
-                          <i class="fa fa-windows fa-5x"></i>
+                          <i class="fa fa-windows fa-5x" {{bindAttr title="controllers.laststates.stateRDPList"}}></i>
                       </div>
                       <div class="col-xs-9 text-right">
                           <div class="huge">{{controllers.laststates.stateRDP}}</div>
@@ -352,7 +352,7 @@
               <div class="panel-heading">
                   <div class="row">
                       <div class="col-xs-3">
-                          <i class="fa fa-power-off fa-5x"></i>
+                          <i class="fa fa-power-off fa-5x" {{bindAttr title="controllers.laststates.stateOffList"}}></i>
                       </div>
                       <div class="col-xs-9 text-right">
                           <div class="huge">{{controllers.laststates.stateOff}}</div>
@@ -367,7 +367,7 @@
               <div class="panel-heading">
                   <div class="row">
                       <div class="col-xs-3">
-                          <i class="fa fa-frown-o fa-5x"></i>
+                          <i class="fa fa-frown-o fa-5x" {{bindAttr title="controllers.laststates.stateUnreachableList"}}></i>
                       </div>
                       <div class="col-xs-9 text-right">
                           <div class="huge">{{controllers.laststates.stateUnreachable}}</div>
@@ -1168,7 +1168,9 @@
     {{#link-to "ou.monitor" tagName="li"}}
       <a {{bind-attr href="view.href"}}>Control</a>
     {{/link-to}}
-    <li><a href="#profile-pills" data-toggle="tab">State Log</a></li>
+    {{#link-to "ou.statelog" tagName="li"}}
+      <a {{bind-attr href="view.href"}}>State Log</a>
+    {{/link-to}}
     <li><a href="#messages-pills" data-toggle="tab">Energy</a></li>
     {{#link-to "ou.edit" tagName="li"}}
       <a {{bind-attr href="view.href"}}>Edit OU</a>
@@ -1361,7 +1363,21 @@
   </div>
 
   {{partial "addHostsWizard"}}
+</script>
 
+<script type="text/x-handlebars" data-template-name='ou/statelog'>
+  More to come ...
+  <div class="row">
+    <div class="col-lg-12" id="cfghosts">
+      {{#if controllers.hosts.hosts.content}}
+          {{#each controller.hosts}}
+              <div class="pc"><i class="fa fa-desktop"></i> {{hostname}}</div>
+          {{/each}}
+      {{else}}
+          No hosts found in this room.
+      {{/if}}
+    </div>
+  </div>
 </script>
 
 <script type="text/x-handlebars" data-template-name="addHostsWizard">

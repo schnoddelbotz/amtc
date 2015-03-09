@@ -120,6 +120,7 @@ App.Router.map(function() {
     this.route('edit');
     this.route('hosts');
     this.route('monitor');
+    this.route('statelog');
   });
 
   this.resource('users', function() {
@@ -254,9 +255,6 @@ App.OusNewRoute = Ember.Route.extend({
     console.log("OusNewRoute model() creating new OU");
     return this.store.createRecord('ou');
   }
-});
-App.LivestatesRoute = Ember.Route.extend({
-  /// RETURN live powerstates via AMTC
 });
 App.LaststatesRoute = Ember.Route.extend({
   // RETURN last states via db view laststates (->table statelogs)
@@ -921,6 +919,10 @@ App.OuMonitorController = Ember.ObjectController.extend({
     }
   }
 });
+App.OuStatelogController = Ember.ObjectController.extend({
+  needs: ["hosts","ous"],
+
+});
 App.LaststatesController = Ember.ArrayController.extend({
   laststates: function() {
     console.log("laststatesController laststates() - fetching.");
@@ -947,6 +949,45 @@ App.LaststatesController = Ember.ArrayController.extend({
     return laststates.filterBy('state_http', 0).get('length');
   }.property('laststates.@each.state_http'),
 
+  stateOffList: function() {
+    var list = [];
+    var laststates = this.get('laststates');
+    hosts = laststates.filterBy('state_amt', 5);
+    for (var i=0; i<hosts.get('length'); i++) {
+      list.push(hosts[i]._data.hostname);
+    }
+    return list.join();
+  }.property('laststates.@each.state_amt'),
+
+  stateUnreachableList: function() {
+    var list = [];
+    var laststates = this.get('laststates');
+    hosts = laststates.filterBy('state_http', 0);
+    for (var i=0; i<hosts.get('length'); i++) {
+      list.push(hosts[i]._data.hostname);
+    }
+    return list.join();
+  }.property('laststates.@each.state_http'),
+
+  stateRDPList: function() {
+    var list = [];
+    var laststates = this.get('laststates');
+    hosts = laststates.filterBy('open_port', 22);
+    for (var i=0; i<hosts.get('length'); i++) {
+      list.push(hosts[i]._data.hostname);
+    }
+    return list.join();
+  }.property('laststates.@each.open_port'),
+
+  stateSSHList: function() {
+    var list = [];
+    var laststates = this.get('laststates');
+    hosts = laststates.filterBy('open_port', 22);
+    for (var i=0; i<hosts.get('length'); i++) {
+      list.push(hosts[i]._data.hostname);
+    }
+    return list.join();
+  }.property('laststates.@each.open_port'),
 });
 // AMT Optionsets
 App.OptionsetController = Ember.ObjectController.extend({
