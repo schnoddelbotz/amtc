@@ -45,8 +45,8 @@ unsigned char *acmds[] = {
   /* WS-MAN / DASH / AMT6-9+ versions */
   wsman_info, wsman_up,wsman_down,wsman_reset,wsman_reset,
   /* generic wsman enumerations using -E <classname> */
-  wsman_xenum,
-  /* AMT config settings via wsman -- cfgcmd -1..4  */
+  wsman_shutdown_graceful, wsman_xenum,
+  /* AMT config settings via wsman -- cfgcmd 0..5  */
   wsman_solredir_disable, wsman_solredir_enable,
   wsman_webui_disable, wsman_webui_enable,
   wsman_ping_disable, wsman_ping_enable
@@ -128,13 +128,14 @@ bool  enforceScans = false; // enforce SSH/RDP scan even if no AMT success
 int main(int argc,char **argv,char **envp) {
   int c;
 
-  while ((c = getopt(argc, argv, "IUDRCLE:M:5gndeqvjsrp:t:w:m:c:")) != -1)
+  while ((c = getopt(argc, argv, "IUDRSCLE:M:5gndeqvjsrp:t:w:m:c:")) != -1)
   switch (c) {
     case 'I': cmd = CMD_INFO;                break;
     case 'U': cmd = CMD_POWERUP;             break;
     case 'D': cmd = CMD_POWERDOWN;           break;
     case 'C': cmd = CMD_POWERCYCLE;          break;
     case 'R': cmd = CMD_POWERRESET;          break;
+    case 'S': cmd = CMD_SHUTDOWN; useWsmanShift=5; break;
     case 'E': cmd = CMD_ENUMERATE; quiet=1; useWsmanShift=5; do_enumerate=get_enum_class(optarg); break;
     case 'M': cmd = CMD_MODIFY; useWsmanShift=5; do_modify=optarg; break;
     case 'L': list_wsman_cmds();             break;
@@ -210,17 +211,17 @@ int main(int argc,char **argv,char **envp) {
   if (cmd==CMD_MODIFY) {
     // yuck, make nicer...
     if (strcmp(do_modify,"sol=off")==0) {
-      cfgcmd=-1;
-    } else if (strcmp(do_modify,"sol=on")==0) {
       cfgcmd=0;
-    } else if (strcmp(do_modify,"webui=off")==0) {
+    } else if (strcmp(do_modify,"sol=on")==0) {
       cfgcmd=1;
-    } else if (strcmp(do_modify,"webui=on")==0) {
+    } else if (strcmp(do_modify,"webui=off")==0) {
       cfgcmd=2;
-    } else if (strcmp(do_modify,"ping=off")==0) {
+    } else if (strcmp(do_modify,"webui=on")==0) {
       cfgcmd=3;
-    } else if (strcmp(do_modify,"ping=on")==0) {
+    } else if (strcmp(do_modify,"ping=off")==0) {
       cfgcmd=4;
+    } else if (strcmp(do_modify,"ping=on")==0) {
+      cfgcmd=5;
     } else {
       printf("Bad config command\n");
       exit(1); 
