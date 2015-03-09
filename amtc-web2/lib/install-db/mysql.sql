@@ -71,11 +71,10 @@ CREATE TRIGGER timestampTrigger BEFORE INSERT ON statelog FOR EACH ROW SET new.s
 CREATE INDEX logdata_ld ON statelog (state_begin);
 CREATE INDEX logdata_pd ON statelog (host_id);
 CREATE VIEW laststate AS     -- ... including fake id column to make e-d happy
-	SELECT s.host_id as id,s.*,h.hostname
-	FROM statelog s, host h
-	WHERE (s.host_id,s.state_begin) IN
-		( SELECT host_id, MAX(state_begin) FROM statelog GROUP BY host_id )
-		AND h.id=s.host_id;
+        SELECT s1.*,h.hostname,h.id AS id
+        FROM host h, statelog s1
+        LEFT JOIN statelog s2 ON s1.host_id=s2.host_id AND s1.state_begin < s2.state_begin
+        WHERE h.id=s1.host_id AND s2.state_begin IS NULL ORDER BY s1.host_id;
 
 -- amt(c) option sets
 CREATE TABLE IF NOT EXISTS optionset (
