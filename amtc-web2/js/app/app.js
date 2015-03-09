@@ -972,7 +972,7 @@ App.LaststatesController = Ember.ArrayController.extend({
   stateRDPList: function() {
     var list = [];
     var laststates = this.get('laststates');
-    hosts = laststates.filterBy('open_port', 22);
+    hosts = laststates.filterBy('open_port', 3389);
     for (var i=0; i<hosts.get('length'); i++) {
       list.push(hosts[i]._data.hostname);
     }
