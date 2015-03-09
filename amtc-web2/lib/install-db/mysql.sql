@@ -10,13 +10,15 @@ SET foreign_key_checks = 0;
 -- notifications: Short messages for dashboard
 CREATE TABLE IF NOT EXISTS notification (
   id                INTEGER      NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  tstamp            TIMESTAMP,
+  tstamp            INTEGER,
   user_id           INT          NOT NULL,
   ntype             VARCHAR(12),
   message           VARCHAR(64),
 
   FOREIGN KEY(user_id) REFERENCES user(id)
 );
+CREATE TRIGGER tstampTrigger BEFORE INSERT ON notification FOR EACH ROW SET new.tstamp = UNIX_TIMESTAMP(NOW());
+
 
 -- organizational units / rooms
 CREATE TABLE IF NOT EXISTS ou (

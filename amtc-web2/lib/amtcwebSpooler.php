@@ -171,6 +171,12 @@ class amtcwebSpooler {
           $job->job_status = Job::STATUS_DONE;
           $job->save();
           // how to trigger increased monitoring until job completed?
+          if ($notification = Notification::create()) {
+            $notification->message = "Job $job->id completed";
+            $notification->ntype = "envelope";
+            $notification->user_id = 2; // hardcoded spooler user
+            $notification->save();
+          }
         }
       break;
       case Job::JOB_SCHEDULED:
@@ -184,6 +190,12 @@ class amtcwebSpooler {
           $job->last_done = time();
           $job->job_status = Job::STATUS_PENDING;
           $job->save();
+          if ($notification = Notification::create()) {
+            $notification->message = "$job->description completed";
+            $notification->ntype = "envelope";
+            $notification->user_id = 2; // hardcoded spooler user
+            $notification->save();
+          }
         }
       break;
       case Job::JOB_MONITORING;
