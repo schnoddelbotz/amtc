@@ -209,7 +209,7 @@
                     </li>
                     <li>
                         <a {{bindAttr href="view.href"}}>
-                            <i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts<span class="fa arrow">
+                            <i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts
                         </a>
                         <ul class="nav nav-second-level in">
                             {{partial "ouSelection"}}
@@ -539,7 +539,7 @@
         <td>{{amtc_cmd}}</td>
         <td>{{ou_id.name}}</td>
         <td>{{delay}}</td>
-      </td></tr>
+      </tr>
     {{/if}}
     {{/each}}
   </table>
@@ -831,7 +831,7 @@
         <td>{{check-mark is_enabled}}</td>
         <td>{{check-mark is_admin}}</td>
         <td>{{check-mark can_control}}</td>
-      </td></tr>
+      </tr>
     {{/each}}
   </table>
 </script>
@@ -972,7 +972,7 @@
         <td>{{opt_cacertfile}}</td>
         <td>{{opt_passfile}}</td>
         <td>{{opt_timeout}}</td>
-      </td></tr>
+      </tr>
     {{/each}}
   </table>
 </script>
@@ -1127,7 +1127,7 @@
           <li>{{#link-to 'ous.new'}}Add room{{/link-to}}</li>
       </ul>
     </div>
-  </div class="row">
+  </div>
 </script>
 
 <script type="text/x-handlebars" id="ous/index">
@@ -1157,7 +1157,7 @@
         <td>{{check-mark logging}}</td>
         <td>{{idle_power}}</td>
         <td>{{#link-to 'ou.hosts' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
-      </td></tr>
+      </tr>
     {{/each}}
   </table>
   {{/if}}
