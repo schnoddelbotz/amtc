@@ -579,7 +579,7 @@
   <form id="optionsetEditForm">
    <fieldset>
       <div class="form-group">
-        <label for "description">Description</label>
+        <label for="description">Description</label>
           {{input class="form-control" type="text" value=description insert-newline="doneEditingReturn" placeholder="Power-Up|Down Room when ..."}}
       </div>
 
@@ -592,7 +592,7 @@
       <div class="checkbox"><label>{{input type="checkbox" checked=on_sunday}} Sunday</label></div>
 
       <div class="form-group">
-        <label for "start_time">Start time</label>
+        <label for="start_time">Start time</label>
         {{input class="form-control" type="time" value=human_start_time insert-newline="doneEditingReturn"}}
       </div>
 
@@ -609,7 +609,7 @@
       </div>
 
       <div class="form-group">
-        <label for "action">Action</label>
+        <label for="action">Action</label>
         {{view Ember.Select value=amtc_cmd content=validCommands optionValuePath="content.cchar" optionLabelPath="content.cmd"}}
       </div>
 
@@ -882,15 +882,15 @@
   <form id="userEditForm">
    <fieldset>
       <div class="form-group">
-        <label for "name">Username</label>
+        <label for="name">Username</label>
         {{input class="form-control" type="text" value=name insert-newline="doneEditingReturn" placeholder="username"}}
       </div>
       <div class="form-group">
-        <label for "name">Full name</label>
+        <label for="name">Full name</label>
         {{input class="form-control" type="text" value=fullname insert-newline="doneEditingReturn" placeholder="John Doe"}}
       </div>
       <div class="form-group">
-        <label for "optionset">Root OU</label>
+        <label for="optionset">Root OU</label>
         {{#if controllers.ous.ous.content}}
         {{view Ember.Select content=controllers.ous.ous.content
                             class="form-control"
@@ -1011,20 +1011,20 @@
   <form id="optionsetEditForm">
    <fieldset>
       <div class="form-group">
-        <label for "name">Option set name</label>
+        <label for="name">Option set name</label>
         {{input class="form-control" type="text" value=name insert-newline="doneEditingReturn" placeholder="shorthand name"}}
         <p class="help-block">Choose a simple name that reflects settings below.</p>
       </div>
       <div class="form-group">
-        <label for "description">Description</label>
+        <label for="description">Description</label>
           {{input class="form-control" type="text" value=description insert-newline="doneEditingReturn" placeholder="..."}}
       </div>
       <div class="form-group">
-        <label for "description">AMT password file</label>
+        <label for="description">AMT password file</label>
           {{input class="form-control" type="text" value=opt_passfile insert-newline="doneEditingReturn" placeholder="/path/to/file"}}
       </div>
       <div class="form-group">
-        <label for "description">Connection timeout [s]</label>
+        <label for="description">Connection timeout [s]</label>
           {{input class="form-control" type="text" value=opt_timeout insert-newline="doneEditingReturn" size=2 placeholder="10"}}
       </div>
       {{#unless sw_dash}}
@@ -1064,7 +1064,7 @@
         </div>
         {{#unless sw_skipcertchk}}
           <div class="form-group">
-            <label for "description">TLS CA cert file</label>
+            <label for="description">TLS CA cert file</label>
               {{input class="form-control" type="text" value=opt_cacertfile insert-newline="doneEditingReturn"}}
           </div>
         {{/unless}}
@@ -1387,7 +1387,7 @@
       <form id="addHostsWizardForm">
         <fieldset>
           <div class="form-group">
-            <label for "name">Hostname</label>
+            <label for="name">Hostname</label>
             {{input class="form-control" type="text" placeholder="my-example" value=hostname insert-newline="saveNewHosts"}}
             <p class="help-block">For a single host, provide the FQDN</p>
           </div>
@@ -1401,20 +1401,20 @@
           </div>
           {{#if addMultiple}}
             <div class="form-group">
-              <label for "description">Number of hosts to add</label>
+              <label for="description">Number of hosts to add</label>
               {{input class="form-control" type="number" value=numHosts insert-newline="saveNewHosts"}}
             </div>
             <div class="form-group">
-              <label for "description">Start at host number...</label>
+              <label for="description">Start at host number...</label>
               {{input class="form-control" type="number" value=startNum insert-newline="saveNewHosts"}}
             </div>
             <div class="form-group">
-              <label for "description">Pad host number with this amount of zeros</label>
+              <label for="description">Pad host number with this amount of zeros</label>
               {{input class="form-control" type="number" value=padNum insert-newline="saveNewHosts"}}
               <p class="help-block"></p>
             </div>
             <div class="form-group">
-              <label for "description">Domain name</label>
+              <label for="description">Domain name</label>
               {{input class="form-control" type="text" placeholder="example.com" value=domainName insert-newline="saveNewHosts"}}
               <p class="help-block"></p>
             </div>
