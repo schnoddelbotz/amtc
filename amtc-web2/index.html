@@ -1215,17 +1215,17 @@
       <form id="ouEditForm">
        <fieldset>
           <div class="form-group">
-            <label for "name">OU / room name</label>
+            <label for="name">OU / room name</label>
             {{input class="form-control" type="text" value=name insert-newline="doneEditingReturn"}}
             <p class="help-block">e.g. D 23.2</p>
           </div>
           <div class="form-group">
-            <label for "description">OU description</label>
+            <label for="description">OU description</label>
             {{input class="form-control" type="text" value=description insert-newline="doneEditingReturn"}}
             <p class="help-block"></p>
           </div>
           <div class="form-group">
-            <label for "optionset">Parent OU</label>
+            <label for="optionset">Parent OU</label>
             {{#if controllers.ous.ous.content}}
             {{view Ember.Select content=controllers.ous.ous.content
                                 class="form-control"
@@ -1238,7 +1238,7 @@
             <p class="help-block">Choose the parent OU (or "folder") for this room</p>
           </div>
           <div class="form-group">
-            <label for "optionset">AMT option set</label>
+            <label for="optionset">AMT option set</label>
             {{#if controllers.optionsets.optionsets.content}}
             {{view Ember.Select content=controllers.optionsets.optionsets.content
                                 class="form-control"
@@ -1251,7 +1251,7 @@
             <p class="help-block">Optionsets may be created ...here... They will NOT be inherited.</p>
           </div>
           <div class="form-group">
-            <label for "description">PC idle power rating</label>
+            <label for="description">PC idle power rating</label>
             {{input class="form-control" type="text" value=idle_power insert-newline="doneEditingReturn"}}
             <p class="help-block">Provide idle power rating to allow generation of approximate energy consumption charts</p>
           </div>
