@@ -442,9 +442,11 @@ $app->put('/jobs/:id', function ($id) {
   $user = $put['job'];
   if ($job = Job::find_one($id)) {
     $job->repeat_days = $user->repeat_days;
-    $job->start_time  = $user->start_time;
     $job->description = $user->description;
+    $job->start_time  = $user->start_time;
     $job->ou_id       = $user->ou_id;
+    $job->amtc_cmd    = $user->amtc_cmd;
+    $job->amtc_delay  = $user->amtc_delay;
     $job->save();
     echo json_encode( array('job'=> $job->as_array()) );
   }
