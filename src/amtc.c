@@ -60,7 +60,7 @@ const char *powerstate[] = { /* AMT/ACPI */
  "S4 (hibernate)", "S5 (soft-off)", "S4/S5", "MechOff",
  "amtcnoclue", "u","v","w","x","y","z", "amtreply_no_match"
 };
-int wsman2acpi[] = { 8,8,0,8,8,8,8,4,5,8,8,8,8,8,8,8,9 };
+int wsman2acpi[] = { 8,8,0,8,3,8,8,4,5,8,8,8,8,8,8,8,9 };
 char portnames[3390][8];
 struct host {
   int id;
