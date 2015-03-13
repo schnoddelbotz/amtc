@@ -11,11 +11,13 @@
 js/jquery.min.js http://code.jquery.com/jquery-${JQUERY}.min.js
 js/jquery.min.map http://code.jquery.com/jquery-${JQUERY}.min.map
 js/emberjs.min.js http://builds.emberjs.com/tags/v${EMBERJS}/ember.min.js
+js/ember-template-compiler.js http://builds.emberjs.com/tags/v${EMBERJS}/ember-template-compiler.js
 js/ember-data.min.js http://builds.emberjs.com/tags/v${EMBERDATA}/ember-data.min.js
-js/handlebars.js http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v${HANDLEBARS}.js
 js/showdown.js https://github.com/coreyti/showdown/raw/master/src/showdown.js
 js/moment.js http://momentjs.com/downloads/moment.js
 js/humane.min.js https://raw.githubusercontent.com/wavded/humane-js/master/humane.min.js
+#drop me:
+js/handlebars.js http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v${HANDLEBARS}.js
 
 # Styles (CSS / Fonts)
 fonts/fontawesome-webfont.woff http://fortawesome.github.io/Font-Awesome/assets/${FA}.zip
