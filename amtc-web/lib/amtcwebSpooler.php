@@ -313,7 +313,7 @@ class amtcwebSpooler {
 
   static function updateHostState($data /* = amtc json_decoded output */,$opt) {
     // map amtc string output to db-usable open_port(int) value
-    $rportmap = array('ssh'=>22, 'rdp'=>3389, 'none'=>0, 'skipped'=>0);
+    $rportmap = array('ssh'=>22, 'rdp'=>3389, 'none'=>0, 'skipped'=>0, 'noscan'=>0);
     // fetch last state of all hosts
     $last = Array();
     foreach( Laststate::find_many() as $host ) {
