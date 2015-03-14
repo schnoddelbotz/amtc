@@ -594,7 +594,7 @@ App.ApplicationController = Ember.Controller.extend({
   },
 });
 
-App.LoginController = Ember.ObjectController.extend({
+App.LoginController = Ember.Controller.extend({
   needs: ["user"],
 
   isLoggingIn: false,
@@ -686,7 +686,7 @@ App.LoginController = Ember.ObjectController.extend({
     }
   },
 });
-App.LogoutController = Ember.ObjectController.extend({
+App.LogoutController = Ember.Controller.extend({
   needs: ["user", "login"],
   init: function() {
     var cuser = App.readCookie("username");
@@ -696,7 +696,7 @@ App.LogoutController = Ember.ObjectController.extend({
   },
 });
 // Index/Dashboard
-App.IndexController = Ember.ObjectController.extend({
+App.IndexController = Ember.Controller.extend({
   needs: ["notifications","laststates"],
 });
 // Index page notification messages ('job completed') et al
@@ -709,7 +709,7 @@ App.NotificationsController = Ember.ArrayController.extend({
 // Users
 
 // Organizational Units
-App.UserEditController = Ember.ObjectController.extend({
+App.UserEditController = Ember.Controller.extend({
   needs: ["ous"],
 
   actions: {
@@ -754,12 +754,12 @@ App.UserEditController = Ember.ObjectController.extend({
 });
 App.UsersNewController = App.UserEditController;
 // Organizational Units
-App.OuController = Ember.ObjectController.extend({
+App.OuController = Ember.Controller.extend({
   needs: ["optionsets","ous"],
   currentOU: null,
   isEditing: false
 });
-App.OuEditController = Ember.ObjectController.extend({
+App.OuEditController = Ember.Controller.extend({
   needs: ["optionsets","ous"],
   actions: {
     removeOu: function () {
@@ -809,7 +809,7 @@ App.OusController = Ember.ArrayController.extend({
     return this.get('store').find('ou');
   }.property()
 });
-App.OusIndexController = Ember.ObjectController.extend({
+App.OusIndexController = Ember.Controller.extend({
   needs: ["ous","optionsets"],
   // needs: ['application'],
   // currentUser: Ember.computed.alias('controllers.application.currentUser'),
@@ -825,7 +825,7 @@ App.HostsController = Ember.ArrayController.extend({
     return this.get('store').find('host');
   }.property()
 });
-App.OuHostsController = Ember.ObjectController.extend({
+App.OuHostsController = Ember.Controller.extend({
   needs: ["hosts"],
   addMultiple: false,
   numHosts: 5,
@@ -856,7 +856,7 @@ App.OuHostsController = Ember.ObjectController.extend({
 
   actions: {
     saveNewHosts: function() {
-      var ouid = this.get('id');
+      var ouid = this.get('model.id');
       //var ou = this.store.find('ou', ouid); // async
       var ou = this.store.getById('ou', ouid); // https://github.com/emberjs/data/issues/2150
       var add = this.get('hostsToAdd');
@@ -872,7 +872,7 @@ App.OuHostsController = Ember.ObjectController.extend({
     }
   }
 });
-App.OuMonitorController = Ember.ObjectController.extend({
+App.OuMonitorController = Ember.Controller.extend({
   needs: ["hosts","ous","laststates"],
   commandActions: ["powerdown","powerup","powercycle","reset","shutdown"],
   shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R", shutdown:"S"},
@@ -919,7 +919,7 @@ App.OuMonitorController = Ember.ObjectController.extend({
     }
   }
 });
-App.OuStatelogController = Ember.ObjectController.extend({
+App.OuStatelogController = Ember.Controller.extend({
   needs: ["hosts","ous"],
 
 });
@@ -990,7 +990,7 @@ App.LaststatesController = Ember.ArrayController.extend({
   }.property('laststates.@each.open_port'),
 });
 // AMT Optionsets
-App.OptionsetController = Ember.ObjectController.extend({
+App.OptionsetController = Ember.Controller.extend({
   needs: ["optionsets"],
   currentOU: null,
   ouTree: null,
@@ -1040,7 +1040,7 @@ App.OptionsetsController = Ember.ArrayController.extend({
   }.property()
 });
 // Scheduled Tasks
-App.ScheduleController = Ember.ObjectController.extend({
+App.ScheduleController = Ember.Controller.extend({
   needs: ["ous"],
   currentOU: null,
   ouTree: null,
@@ -1094,7 +1094,7 @@ App.ScheduleController = Ember.ObjectController.extend({
 });
 App.SchedulesNewController = App.ScheduleController; // FIXME: evil? dumb...?
 // Controller for /#setup (Installer)
-App.SetupController = Ember.ObjectController.extend({
+App.SetupController = Ember.Controller.extend({
   // Controller used for initial installation page #setup
   selectedDB: null,
   sqlitePath: 'data/amtc-web.db',
@@ -1128,45 +1128,47 @@ App.SetupController = Ember.ObjectController.extend({
     return (this.get('selectedDB')=='PostgreSQL') ? true : false;
   }.property('selectedDB'),
 
-  doneEditing: function() {
-    var d = {
-      datadir: this.get('datadir'),
-      timezone: this.get('timezone'),
-      selectedDB: this.get('selectedDB'),
-      sqlitePath: this.get('sqlitePath'),
-      mysqlUser: this.get('mysqlUser'),
-      mysqlHost: this.get('mysqlHost'),
-      mysqlPassword: this.get('mysqlPassword'),
-      mysqlDB: this.get('mysqlDB'),
-      amtcbin: this.get('amtcbin'),
-      authurl: this.get('authurl'),
-      importDemo: this.get('importDemo'),
-      installHtaccess: this.get('installHtaccess'),
-    };
-    $.ajax({type:"POST", url:"rest-api.php/submit-configuration",
-            data:jQuery.param(d), dataType:"json"}).then(function(response) {
-      console.log(response);
-      if (typeof response.errorMsg != "undefined")
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Save failed: <br>'+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
-      else {
-        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully! Warping into amtc-web!', { timeout: 1500 });
-        window.setTimeout( function(){
-          window.location.href = 'index.html';
-        }, 2000);
-      }
-    }, function(response){
-      console.log("what happened?");
-      console.log(response);
-      if (response.responseText=='INSTALLTOOL_LOCKED') {
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Setup is LOCKED!<br>'+
-          'Setup is intended for initial installation only.<br>'+
-          'Remove <code>config/siteconfig.php</code> to re-enable setup.',
-          { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      } else {
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.'+response.responseText,
-          { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
-      }
-    });
+  actions: {
+    doneEditing: function() {
+      var d = {
+        datadir: this.get('datadir'),
+        timezone: this.get('timezone'),
+        selectedDB: this.get('selectedDB'),
+        sqlitePath: this.get('sqlitePath'),
+        mysqlUser: this.get('mysqlUser'),
+        mysqlHost: this.get('mysqlHost'),
+        mysqlPassword: this.get('mysqlPassword'),
+        mysqlDB: this.get('mysqlDB'),
+        amtcbin: this.get('amtcbin'),
+        authurl: this.get('authurl'),
+        importDemo: this.get('importDemo'),
+        installHtaccess: this.get('installHtaccess'),
+      };
+      $.ajax({type:"POST", url:"rest-api.php/submit-configuration",
+              data:jQuery.param(d), dataType:"json"}).then(function(response) {
+        console.log(response);
+        if (typeof response.errorMsg != "undefined")
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Save failed: <br>'+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
+        else {
+          humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully! Warping into amtc-web!', { timeout: 1500 });
+          window.setTimeout( function(){
+            window.location.href = 'index.html';
+          }, 2000);
+        }
+      }, function(response){
+        console.log("what happened?");
+        console.log(response);
+        if (response.responseText=='INSTALLTOOL_LOCKED') {
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Setup is LOCKED!<br>'+
+            'Setup is intended for initial installation only.<br>'+
+            'Remove <code>config/siteconfig.php</code> to re-enable setup.',
+            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+        } else {
+          humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.'+response.responseText,
+            { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
+        }
+      });
+    }
   }
 });
 

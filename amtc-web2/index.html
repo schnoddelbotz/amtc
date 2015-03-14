@@ -580,27 +580,27 @@
    <fieldset>
       <div class="form-group">
         <label for="description">Description</label>
-          {{input class="form-control" type="text" value=description insert-newline="doneEditingReturn" placeholder="Power-Up|Down Room when ..."}}
+          {{input class="form-control" type="text" value=model.description insert-newline="doneEditingReturn" placeholder="Power-Up|Down Room when ..."}}
       </div>
 
-      <div class="checkbox"><label>{{input type="checkbox" checked=on_monday}} Monday</label></div>
-      <div class="checkbox"><label>{{input type="checkbox" checked=on_tuesday}} Tuesday</label></div>
-      <div class="checkbox"><label>{{input type="checkbox" checked=on_wednesday}} Wednesday</label></div>
-      <div class="checkbox"><label>{{input type="checkbox" checked=on_thursday}} Thursday</label></div>
-      <div class="checkbox"><label>{{input type="checkbox" checked=on_friday}} Friday</label></div>
-      <div class="checkbox"><label>{{input type="checkbox" checked=on_saturday}} Saturday</label></div>
-      <div class="checkbox"><label>{{input type="checkbox" checked=on_sunday}} Sunday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_monday}} Monday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_tuesday}} Tuesday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_wednesday}} Wednesday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_thursday}} Thursday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_friday}} Friday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_saturday}} Saturday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_sunday}} Sunday</label></div>
 
       <div class="form-group">
         <label for="start_time">Start time</label>
-        {{input class="form-control" type="time" value=human_start_time insert-newline="doneEditingReturn"}}
+        {{input class="form-control" type="time" value=model.human_start_time insert-newline="doneEditingReturn"}}
       </div>
 
       <div class="form-group">
         {{#if controllers.ous.ous.content}}
         {{view Ember.Select content=controllers.ous.ous.content
                             class="form-control"
-                            value=ou_id.id
+                            value=model.ou_id.id
                             selection=ou_id
                             prompt="Choose OU"
                             optionValuePath="content.id"
@@ -610,12 +610,12 @@
 
       <div class="form-group">
         <label for="action">Action</label>
-        {{view Ember.Select value=amtc_cmd content=validCommands optionValuePath="content.cchar" optionLabelPath="content.cmd"}}
+        {{view Ember.Select value=model.amtc_cmd content=validCommands optionValuePath="content.cchar" optionLabelPath="content.cmd"}}
       </div>
 
       <div class="form-group">
         <label>Delay</label>
-          {{input class="form-control" type="text" value=amtc_delay insert-newline="doneEditingReturn" placeholder="Delay in seconds between each PC"}}
+          {{input class="form-control" type="number" step="any" min="0" value=model.amtc_delay insert-newline="doneEditingReturn" placeholder="Delay in seconds between each PC"}}
       </div>
 
    </fieldset>
@@ -758,6 +758,8 @@
                   </div>
                   {{#if selectedDB}}
                   <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Write configuration</button>
+                  {{else}}
+                  <i>A PHP DBO driver must be selected before proceeding.</i>
                   {{/if}}
                 </div>
             </form>
@@ -860,7 +862,7 @@
 <script type="text/x-handlebars" id="user/edit">
   <div class="row">
     <div class="col-lg-12">
-        <h1 class="page-header">Edit User <b>{{name}}</b></h1>
+        <h1 class="page-header">Edit User <b>{{model.name}}</b></h1>
     </div>
   </div>
   <div class="row">
@@ -883,18 +885,18 @@
    <fieldset>
       <div class="form-group">
         <label for="name">Username</label>
-        {{input class="form-control" type="text" value=name insert-newline="doneEditingReturn" placeholder="username"}}
+        {{input class="form-control" type="text" value=model.name insert-newline="doneEditingReturn" placeholder="username"}}
       </div>
       <div class="form-group">
         <label for="name">Full name</label>
-        {{input class="form-control" type="text" value=fullname insert-newline="doneEditingReturn" placeholder="John Doe"}}
+        {{input class="form-control" type="text" value=model.fullname insert-newline="doneEditingReturn" placeholder="John Doe"}}
       </div>
       <div class="form-group">
         <label for="optionset">Root OU</label>
         {{#if controllers.ous.ous.content}}
         {{view Ember.Select content=controllers.ous.ous.content
                             class="form-control"
-                            value=ou_id.id
+                            value=model.ou_id.id
                             selection=ou_id
                             prompt="Choose OU"
                             optionValuePath="content.id"
@@ -904,17 +906,17 @@
       </div>
       <div class="checkbox">
         <label>
-          {{input type="checkbox" checked=is_admin}} User has admin privileges
+          {{input type="checkbox" checked=model.is_admin}} User has admin privileges
         </label>
       </div>
       <div class="checkbox">
         <label>
-          {{input type="checkbox" checked=is_enabled}} Enable account
+          {{input type="checkbox" checked=model.is_enabled}} Enable account
         </label>
       </div>
       <div class="checkbox">
         <label>
-          {{input type="checkbox" checked=can_control}} Has permission to power-control (view only otherwise)
+          {{input type="checkbox" checked=model.can_control}} Has permission to power-control (view only otherwise)
         </label>
       </div>
    </fieldset>
@@ -1012,60 +1014,60 @@
    <fieldset>
       <div class="form-group">
         <label for="name">Option set name</label>
-        {{input class="form-control" type="text" value=name insert-newline="doneEditingReturn" placeholder="shorthand name"}}
+        {{input class="form-control" type="text" value=model.name insert-newline="doneEditingReturn" placeholder="shorthand name"}}
         <p class="help-block">Choose a simple name that reflects settings below.</p>
       </div>
       <div class="form-group">
         <label for="description">Description</label>
-          {{input class="form-control" type="text" value=description insert-newline="doneEditingReturn" placeholder="..."}}
+          {{input class="form-control" type="text" value=model.description insert-newline="doneEditingReturn" placeholder="..."}}
       </div>
       <div class="form-group">
         <label for="description">AMT password file</label>
-          {{input class="form-control" type="text" value=opt_passfile insert-newline="doneEditingReturn" placeholder="/path/to/file"}}
+          {{input class="form-control" type="text" value=model.opt_passfile insert-newline="doneEditingReturn" placeholder="/path/to/file"}}
       </div>
       <div class="form-group">
         <label for="description">Connection timeout [s]</label>
-          {{input class="form-control" type="text" value=opt_timeout insert-newline="doneEditingReturn" size=2 placeholder="10"}}
+          {{input class="form-control" type="text" value=model.opt_timeout insert-newline="doneEditingReturn" size=2 placeholder="10"}}
       </div>
       {{#unless sw_dash}}
         <div class="checkbox">
           <label>
-            {{input type="checkbox" checked=sw_v5}} Enforce AMT v5 EOI (see also: <a href="http://en.wikipedia.org/wiki/Intel_AMT_versions">Intel AMT versions</a>)
+            {{input type="checkbox" checked=model.sw_v5}} Enforce AMT v5 EOI (see also: <a href="http://en.wikipedia.org/wiki/Intel_AMT_versions">Intel AMT versions</a>)
           </label>
         </div>
       {{/unless}}
       {{#unless sw_v5}}
         <div class="checkbox">
           <label>
-            {{input type="checkbox" checked=sw_dash}} Enforce DASH/WsMan; required for AMT 9.0 and greater. Slower.
+            {{input type="checkbox" checked=model.sw_dash}} Enforce DASH/WsMan; required for AMT 9.0 and greater. Slower.
           </label>
         </div>
       {{/unless}}
       <div class="checkbox">
         <label>
-          {{input type="checkbox" checked=sw_scan22}} Enable SSH portscan
+          {{input type="checkbox" checked=model.sw_scan22}} Enable SSH portscan
         </label>
       </div>
       <div class="checkbox">
         <label>
-          {{input type="checkbox" checked=sw_scan3389}} Enbale RDP portscan
+          {{input type="checkbox" checked=model.sw_scan3389}} Enbale RDP portscan
         </label>
       </div>
       <div class="checkbox">
         <label>
-          {{input type="checkbox" checked=sw_usetls}} use HTTPS/TLS (TCP port 16993)
+          {{input type="checkbox" checked=model.sw_usetls}} use HTTPS/TLS (TCP port 16993)
         </label>
       </div>
       {{#if sw_usetls}}
         <div class="checkbox">
           <label>
-            {{input type="checkbox" checked=sw_skipcertchk}} Skip TLS cert verification
+            {{input type="checkbox" checked=model.sw_skipcertchk}} Skip TLS cert verification
           </label>
         </div>
         {{#unless sw_skipcertchk}}
           <div class="form-group">
             <label for="description">TLS CA cert file</label>
-              {{input class="form-control" type="text" value=opt_cacertfile insert-newline="doneEditingReturn"}}
+              {{input class="form-control" type="text" value=model.opt_cacertfile insert-newline="doneEditingReturn"}}
           </div>
         {{/unless}}
       {{/if}}
@@ -1216,12 +1218,12 @@
        <fieldset>
           <div class="form-group">
             <label for="name">OU / room name</label>
-            {{input class="form-control" type="text" value=name insert-newline="doneEditingReturn"}}
+            {{input class="form-control" type="text" value=model.name insert-newline="doneEditingReturn"}}
             <p class="help-block">e.g. D 23.2</p>
           </div>
           <div class="form-group">
             <label for="description">OU description</label>
-            {{input class="form-control" type="text" value=description insert-newline="doneEditingReturn"}}
+            {{input class="form-control" type="text" value=model.description insert-newline="doneEditingReturn"}}
             <p class="help-block"></p>
           </div>
           <div class="form-group">
@@ -1229,7 +1231,7 @@
             {{#if controllers.ous.ous.content}}
             {{view Ember.Select content=controllers.ous.ous.content
                                 class="form-control"
-                                value=parent_id.id
+                                value=model.parent_id.id
                                 selection=parent_id
                                 prompt="Choose OU"
                                 optionValuePath="content.id"
@@ -1242,7 +1244,7 @@
             {{#if controllers.optionsets.optionsets.content}}
             {{view Ember.Select content=controllers.optionsets.optionsets.content
                                 class="form-control"
-                                value=optionsetid.id
+                                value=model.optionsetid.id
                                 selection=optionset_id
                                 prompt="Choose AMT Option set"
                                 optionValuePath="content.id"
@@ -1252,12 +1254,12 @@
           </div>
           <div class="form-group">
             <label for="description">PC idle power rating</label>
-            {{input class="form-control" type="text" value=idle_power insert-newline="doneEditingReturn"}}
+            {{input class="form-control" type="text" value=model.idle_power insert-newline="doneEditingReturn"}}
             <p class="help-block">Provide idle power rating to allow generation of approximate energy consumption charts</p>
           </div>
           <div class="checkbox">
             <label>
-              {{input type="checkbox" checked=logging}} Allow PC state logging via scheduler
+              {{input type="checkbox" checked=model.logging}} Allow PC state logging via scheduler
             </label>
           </div>
        </fieldset>
@@ -1279,7 +1281,7 @@
 {{! amtc-web ... live view / monitor + control mode }}
   <div class="row">
       <div class="col-lg-12" id="hosts">
-        {{#each host in controller.hosts}}
+        {{#each host in controller.model.hosts}}
           <div {{bind-attr class=":pc host.laststate.amtStateCssClass host.laststate.openPortCssClass" hostDbId=host.id}}>
             <div>
               <span class="porticon">
@@ -1353,7 +1355,7 @@
   <div class="row">
     <div class="col-lg-12" id="cfghosts">
       {{#if controllers.hosts.hosts.content}}
-          {{#each controller.hosts}}
+          {{#each controller.model.hosts}}
               <div class="pc"><i class="fa fa-desktop"></i> {{hostname}}</div>
           {{/each}}
       {{else}}
