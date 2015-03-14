@@ -66,7 +66,7 @@ It uses jQuery client-side and supports PHP PDO databases server-side.
 /etc/httpd/conf.d
 /usr/share/amtc-web
 %dir %attr(0770,apache,amtc-web) /etc/amtc-web
-%dir %attr(0770,apache,amtc-web) /var/lib/amtc-web
+%dir %attr(2770,apache,amtc-web) /var/lib/amtc-web
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/cron.d/amtc-web
 %config(noreplace) %{_sysconfdir}/amtc-web/.htpasswd
 %config(noreplace) %{_sysconfdir}/amtc-web/amtc-web_httpd.conf

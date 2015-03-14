@@ -89,6 +89,7 @@ $app->post('/submit-configuration', function () use ($app) {
 
     if ($wanted['DBTYPE'] == 'SQLite') {
       // create db if non-existant
+      umask(0);
       @touch($_POST['sqlitePath']); // grr should be called sqlitefile not path
       $wanted['SQLITEPATH'] = realpath($_POST['sqlitePath']);
       $wanted['PDOSTRING'] = sprintf('sqlite:%s', $wanted['SQLITEPATH']);
