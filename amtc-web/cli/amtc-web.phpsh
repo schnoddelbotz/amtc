@@ -18,8 +18,13 @@ PHP_CODE="require '$DIR/../lib/app_bootstrap.php'; amtcwebSpooler::CLI_main();"
 LOGFILE=${AMTC_LOGFILE:-$DIR/../data/amtc-web-cli.log}
 [ -z "$AMTC_NOLOG" ] || LOGFILE=/dev/null
 
+if [ ! -f "$DIR/../config/siteconfig.php" ]; then
+  echo "$(date +"$DATE_FMT") $WHO WARN: amtc-web seems unconfigured" >> $LOGFILE
+  exit 0
+fi
+
 # log start time/user of any action
-echo "$(date +"$DATE_FMT") $WHO started with args: '$@'" >> $LOGFILE
+BEGIN="$(date +"$DATE_FMT")"
 
 # execute amtc cli command
 if [ "$1" = "--quiet" ]; then
@@ -33,7 +38,7 @@ fi
 
 # get/log return value from php execution
 PHP_RETVAL=${PIPESTATUS[0]}
-echo "$(date +"$DATE_FMT") $WHO completed; retval: $PHP_RETVAL" >> $LOGFILE
+echo "$BEGIN - $(date +"$DATE_FMT") $WHO completed '$@'; retval: $PHP_RETVAL" >> $LOGFILE
 
 
 # disregarding --quiet, produce a mail once when a cron job fails fatally
