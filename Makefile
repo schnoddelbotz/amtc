@@ -148,7 +148,8 @@ install-package: package
 purge:
 ifeq ($(PKGTYPE),osxpkg)
 	-sudo pkgutil --forget ch.hacker.amtc
-	-sudo launchctl unbootstrap system/ch.hacker.amtc-web
+	-sudo launchctl disable system/ch.hacker.amtc-web
+	-sudo launchctl remove ch.hacker.amtc-web
 else ifeq ($(PKGTYPE),deb)
 	-sudo apt-get purge -y amtc
 else ifeq ($(PKGTYPE),rpm)

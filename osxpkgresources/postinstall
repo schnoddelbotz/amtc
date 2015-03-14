@@ -12,7 +12,9 @@ httpd -v | grep 'Apache/2.4' && perl -pi -e 'BEGIN{undef $/;} s@Order allow,deny
 httpd -v | grep 'Apache/2.4' && perl -pi -e 'BEGIN{undef $/;} s@Order allow,deny\n\s+Deny from all@Require all denied@smg' /etc/amtc-web/amtc-web_httpd.conf 
 
 apachectl restart
-launchctl bootstrap system /Library/LaunchDaemons/ch.hacker.amtc-web.plist
+
+# fixme: handle already installed/upgrade?
 launchctl enable system/ch.hacker.amtc-web
+launchctl bootstrap system /Library/LaunchDaemons/ch.hacker.amtc-web.plist
 launchctl kickstart -kp system/ch.hacker.amtc-web
 
