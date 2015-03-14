@@ -92,6 +92,8 @@ $app->post('/submit-configuration', function () use ($app) {
       @touch($_POST['sqlitePath']); // grr should be called sqlitefile not path
       $wanted['SQLITEPATH'] = realpath($_POST['sqlitePath']);
       $wanted['PDOSTRING'] = sprintf('sqlite:%s', $wanted['SQLITEPATH']);
+      $wanted['DBUSER'] = '';
+      $wanted['DBPASS'] = '';
       $dbh = new PDO($wanted['PDOSTRING']);
     }
     if ($wanted['DBTYPE'] == 'MySQL') {

@@ -63,12 +63,24 @@ It uses jQuery client-side and supports PHP PDO databases server-side.
 
 %files web
 %defattr(-,root,root,-)
-/usr/share/amtc-web
-/etc/amtc-web
 /etc/httpd/conf.d
-/var/lib/amtc-web
+/usr/share/amtc-web
+%dir %attr(0770,apache,amtc-web) /etc/amtc-web
+%dir %attr(0770,apache,amtc-web) /var/lib/amtc-web
+%config(noreplace) %attr(0644,root,root) %{_sysconfdir}/cron.d/amtc-web
+%config(noreplace) %{_sysconfdir}/amtc-web/.htpasswd
+%config(noreplace) %{_sysconfdir}/amtc-web/amtc-web_httpd.conf
+%attr(0755,root,root) /var/lib/amtc-web/.htaccess
+
+%pre web
+/usr/bin/getent group amtc-web >/dev/null || \
+  /usr/sbin/groupadd -r amtc-web
+/usr/bin/getent passwd amtc-web >/dev/null || \
+  /usr/sbin/useradd -r -g amtc-web -d /var/lib/amtc-web -s /sbin/nologin \
+    -c "amtc-web user" amtc-web
+exit 0
 
 %post web
-chown apache /etc/amtc-web /var/lib/amtc-web
 chcon -R -t httpd_sys_rw_content_t /etc/amtc-web
 service httpd reload || service httpd start
+exit 0

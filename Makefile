@@ -72,12 +72,13 @@ install: dist
 dist: amtc amtc-web
 	echo "Preparing clean distribution in dist/"
 	rm -rf dist
-	mkdir -p dist/$(BINDIR) dist/$(WWWDIR) dist/$(ETCDIR) dist/$(DATADIR)
+	mkdir -p dist/$(BINDIR) dist/$(WWWDIR) dist/$(ETCDIR)/cron.d dist/$(DATADIR)
 	cp src/amtc dist/$(BINDIR)
 	cp -R $(AMTCWEBDIR)/* dist/$(WWWDIR)
 	cd dist/$(WWWDIR) && make distclean && mv _htaccess_example .htaccess && \
 	   rm -f basic-auth/_htaccess.default config/_htpasswd.default data/amtc-web.db \
 	   config/siteconfig.php build.sh Makefile Makefile.Sources
+	cd dist && mv $(WWWDIR)/crontab-example.txt $(ETCDIR)/cron.d/amtc-web
 	cd dist && mv $(WWWDIR)/config $(ETCDIR)/amtc-web && mv $(WWWDIR)/data $(DATADIR)/amtc-web
 	cd dist/$(WWWDIR) && ln -s /$(ETCDIR)/amtc-web config && ln -s /$(DATADIR)/amtc-web data
 	cd dist/$(WWWDIR) && perl -pi -e "s@AuthUserFile .*@AuthUserFile /$(ETCDIR)/amtc-web/.htpasswd@" basic-auth/.htaccess

@@ -1,0 +1,13 @@
+
+# crontab for amtc-web.
+# executes regular scans and commands submitted by users via web.
+
+# trigger any pending scans or commands every minute, sequentially.
+* * * * * amtc-web /usr/share/amtc-web/cli/amtc-web.phpsh runJobs
+
+# parallel execution of interactive, scheduled and monitoring tasks.
+# not recommended for sqlite ... but for mysql.
+#* * * * * amtc-web /usr/share/amtc-web/cli/amtc-web.phpsh --onlyMonitoring runJobs
+#* * * * * amtc-web /usr/share/amtc-web/cli/amtc-web.phpsh --onlyScheduled runJobs
+#* * * * * amtc-web /usr/share/amtc-web/cli/amtc-web.phpsh --onlyInteractive -l runJobs
+
