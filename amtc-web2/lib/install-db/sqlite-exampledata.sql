@@ -25,10 +25,10 @@ INSERT INTO "ou" VALUES(5,1,NULL,'Course rooms','Playground',0,0);
 INSERT INTO "ou" VALUES(6,5,NULL,'WOS D 12.1','No optionset yet',0,0);
 INSERT INTO "ou" VALUES(7,5,NULL,'WIT G 14','Testing ... No optionset, too',0,0);
 -- and some real rooms
-INSERT INTO "ou" VALUES(8,3,3,'E 19','',24.5,1);
+INSERT INTO "ou" VALUES(8,3,3,'E 19','',24.5,0);
 INSERT INTO "ou" VALUES(9,3,2,'E 20','',32.3,0);
 INSERT INTO "ou" VALUES(10,4,4,'D 11','',24.5,0);
-INSERT INTO "ou" VALUES(11,3,1,'E 27','',32.3,1);
+INSERT INTO "ou" VALUES(11,3,1,'E 27','',32.3,0);
 
 -- put some hosts into two of the rooms
 INSERT INTO "host" VALUES(1,11,'labpc-e27-160',1);
