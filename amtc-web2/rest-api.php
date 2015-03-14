@@ -25,7 +25,7 @@ if (!empty($_SESSION['authenticated']) && $_SESSION['authenticated'] == true ||
     in_array($route, $allowUnauthenticated )) {
     // echo "Authenticated or request that is allowed without...";
 } else {
-  echo "{error:'Unauthenticated'}";
+  echo '{"notifications":[], "error":"unauthenticated"}';
   exit(0);
 }
 
@@ -318,6 +318,8 @@ $app->get('/users', function () {
 });
 $app->get('/users/:id', function ($uid) use ($app) {
   if ($user = User::find_one($uid)) {
+    echo json_encode( array('user'=> $user->as_array()) );
+  } elseif ($user = User::where('name',$uid)->find_one()) {
     echo json_encode( array('user'=> $user->as_array()) );
   }
 });
