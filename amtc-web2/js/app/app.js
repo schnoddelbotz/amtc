@@ -1076,7 +1076,7 @@ App.ScheduleController = Ember.Controller.extend({
     },
 
     doneEditingReturn: function() {
-      this.set('job_type', 2 /* scheduled task */ );
+      this.set('model.job_type', 2 /* scheduled task */ );
       this.get('model').save().then(function() {
         humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
           { timeout: 1000 });

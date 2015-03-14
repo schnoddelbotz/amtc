@@ -550,7 +550,7 @@
     {{! Display a single OU }}
   <div class="row">
     <div class="col-lg-12">
-        <h1 class="page-header">Edit Job {{description}}</h1>
+        <h1 class="page-header">Edit Job {{model.description}}</h1>
     </div>
   </div>
   <div class="row">
@@ -601,7 +601,7 @@
         {{view Ember.Select content=controllers.ous.ous.content
                             class="form-control"
                             value=model.ou_id.id
-                            selection=ou_id
+                            selection=model.ou_id
                             prompt="Choose OU"
                             optionValuePath="content.id"
                             optionLabelPath="content.name" }}
@@ -897,7 +897,7 @@
         {{view Ember.Select content=controllers.ous.ous.content
                             class="form-control"
                             value=model.ou_id.id
-                            selection=ou_id
+                            selection=model.ou_id
                             prompt="Choose OU"
                             optionValuePath="content.id"
                             optionLabelPath="content.name" }}
@@ -1210,10 +1210,6 @@
 <script type="text/x-handlebars" data-template-name='ou/edit'>
   <div class="row">
     <div class="col-lg-12">
-      {{! Edit/Display EXISTING display form (only) }}
-      {{! http://emberjs.com/api/classes/Ember.Select.html }}
-      <!-- <h3>Edit OU / Room</h3> -->
-
       <form id="ouEditForm">
        <fieldset>
           <div class="form-group">
@@ -1232,7 +1228,7 @@
             {{view Ember.Select content=controllers.ous.ous.content
                                 class="form-control"
                                 value=model.parent_id.id
-                                selection=parent_id
+                                selection=model.parent_id
                                 prompt="Choose OU"
                                 optionValuePath="content.id"
                                 optionLabelPath="content.name" }}
@@ -1245,7 +1241,7 @@
             {{view Ember.Select content=controllers.optionsets.optionsets.content
                                 class="form-control"
                                 value=model.optionsetid.id
-                                selection=optionset_id
+                                selection=model.optionset_id
                                 prompt="Choose AMT Option set"
                                 optionValuePath="content.id"
                                 optionLabelPath="content.name" }}
