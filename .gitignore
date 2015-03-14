@@ -3,26 +3,26 @@
 Distribution.xml
 *.pkg
 
-amtc-web2/js/*.js
-amtc-web2/css/*.css
+amtc-web/js/*.js
+amtc-web/css/*.css
 
-amtc-web2/basic-auth/.htaccess
-amtc-web2/config/.htpasswd
-amtc-web2/config/siteconfig.php
-amtc-web2/data/amtc-web.db
-amtc-web2/data/amtc-*.log
+amtc-web/basic-auth/.htaccess
+amtc-web/config/.htpasswd
+amtc-web/config/siteconfig.php
+amtc-web/data/amtc-web.db
+amtc-web/data/amtc-*.log
 
-amtc-web2/fonts/
-amtc-web2/css/plugins/
-amtc-web2/js/plugins/
-amtc-web2/lib/Slim/
+amtc-web/fonts/
+amtc-web/css/plugins/
+amtc-web/js/plugins/
+amtc-web/lib/Slim/
 
-amtc-web2/lib/idiorm.php
-amtc-web2/lib/paris.php
+amtc-web/lib/idiorm.php
+amtc-web/lib/paris.php
 
-amtc-web2/css/styles.css.gz
-amtc-web2/index.html.gz
-amtc-web2/js/jslibs.js.gz
+amtc-web/css/styles.css.gz
+amtc-web/index.html.gz
+amtc-web/js/jslibs.js.gz
 
 src/amt.h
 src/amtc

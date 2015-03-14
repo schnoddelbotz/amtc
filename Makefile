@@ -31,7 +31,7 @@ BINDIR    ?= usr/bin
 WWWDIR    ?= usr/share/amtc-web
 ETCDIR    ?= etc
 DATADIR   ?= var/lib
-AMTCWEBDIR = amtc-web2
+AMTCWEBDIR = amtc-web
 
 # for farmbuild target - build hosts
 HOSTS_deb  = debian7 ubuntu14 raspbian7
@@ -117,9 +117,10 @@ rpmfixup:
 # build OSX .pkg (into ./); use SecureTransport;
 # postinst enables system apache's php5 module
 osxpkg: clean
-	mkdir -p osxpkgscripts osxpkgroot
+	mkdir -p osxpkgscripts osxpkgroot/Library/LaunchDaemons
 	DESTDIR=osxpkgroot make install
 	cp osxpkgresources/postinstall osxpkgscripts
+	cp osxpkgresources/ch.hacker.amtc-web.plist osxpkgroot/Library/LaunchDaemons
 	chmod +x osxpkgscripts/postinstall
 	mv osxpkgroot/etc/apache2/conf.d osxpkgroot/etc/apache2/other
 	pkgbuild --root osxpkgroot --scripts osxpkgscripts \
@@ -147,12 +148,13 @@ install-package: package
 purge:
 ifeq ($(PKGTYPE),osxpkg)
 	-sudo pkgutil --forget ch.hacker.amtc
+	-sudo launchctl unbootstrap system/ch.hacker.amtc-web
 else ifeq ($(PKGTYPE),deb)
 	-sudo apt-get purge -y amtc
 else ifeq ($(PKGTYPE),rpm)
 	-sudo yum remove -y amtc amtc-web amtc-debuginfo
 endif
-	sudo rm -rf /etc/amtc-web /var/lib/amtc-web /usr/share/amtc-web /etc/{httpd,apache2}/{other,conf.d}/amtc-web_httpd.conf
+	sudo rm -rf /etc/amtc-web /var/lib/amtc-web /usr/share/amtc-web /etc/{httpd,apache2}/{other,conf.d}/amtc-web_httpd.conf /Library/LaunchDaemons/ch.hacker.amtc-web.plist
 
 
 # build farm / 'internal' use only: build and fetch releases on/from remote VMs

@@ -1,174 +1,1453 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="utf-8">
- <title>amtc - remote power management</title>
- <link type="text/css" rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css">
- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
- <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
- <script src="sorttable.js"></script>
- <link type="text/css" rel="stylesheet" href="amtc-web.css">
- <script src="amtc-web.js"></script>
+  <!--
+    index.html - part of amtc-web, part of amtc
+    https://github.com/schnoddelbotz/amtc
+  -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Intel AMT/vPro remote power Management">
+  <meta name="author" content="schnoddelbotz">
+  <link rel="shortcut icon" type="image/x-icon" href="amtc-favicon.png" />
+  <title>amtc-web - AMT/DASH remote power management</title>
+  <link href="css/styles.css" rel="stylesheet">
+  <link href="css/amtc-web.css" rel="stylesheet">
 </head>
 <body>
 
-<h2 id="pageheader">AMT remote power management<img id="wheel" src="img/wheel.gif"></h2>
+<!-- startup splash screen -->
+<div id="backdrop" class="modal-backdrop fade in"></div>
+<div class="modal fade in" id="splash" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="false" style="display:block">
+  <div class="modal-dialog">
+    <div class="modal-content" style="text-align:center; margin:20px; font-size:8em; background-color:transparent; border:0; box-shadow:none; text-shadow: 2px 2px #444;">
+        <span style="color:white; font-weight:bold">amtc</span><br>
+        <div class="modal-body" >
+          <span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x grey"></i>
+            <i class="fa fa-bolt fa-fw fa-stack-1x flash"></i>
+          </span>
+        </div>
+        <span style="color:white; font-weight:bold">web</span>
+    </div>
+  </div>
+</div>
+
+<script type="text/x-handlebars">
+  <div id="wrapper">
+    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="index.html">
+              <span class="brand">{{appName}}</span>
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x lightgrey"></i>
+                <i id="bolt" class="fa fa-bolt fa-fw fa-stack-1x grey flash"></i>
+              </span>
+              <i class="hidden-xs">remote. power. management.</i>
+            </a>
+        </div>
+        <!-- /.navbar-header -->
+
+        <ul class="nav navbar-top-links navbar-right">
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="fa fa-bell fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-messages">
+                  {{#if controllers.notifications.notifications}}
+                    {{#each msg in controllers.notifications.notifications.content}}
+                      <li>
+                        <a href="#">
+                          <div>
+                            <strong>FIXME {{msg.user_id.fullname}}</strong>
+                            <span class="pull-right text-muted">
+                                <em>{{format-from-now msg.tstamp}}</em>
+                            </span>
+                          </div>
+                          <div><i {{bind-attr class=msg.cssClass}}></i> {{msg.message}}</div>
+                        </a>
+                      </li>
+                      <li class="divider"></li>
+                    {{/each}}
+                  {{else}}
+                    <i class="fa fa-spinner fa-spin"></i> Loading latest notifications ...
+                  {{/if}}
+                  <li>
+                      <a class="text-center" href="#">
+                          <strong>read all notifications</strong>
+                          <i class="fa fa-angle-right"></i>
+                      </a>
+                  </li>
+                </ul>
+                <!-- /.dropdown-messages -->
+            </li>
+            <!-- /.dropdown -->
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="fa fa-tasks fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-tasks">
+                    <li>
+                        <a href="#">
+                            <div>
+                                <p>
+                                    <strong>Task 1</strong>
+                                    <span class="pull-right text-muted">40% Complete</span>
+                                </p>
+                                <div class="progress progress-striped active">
+                                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                                        <span class="sr-only">40% Complete (success)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="#">
+                            <div>
+                                <p>
+                                    <strong>Task 2</strong>
+                                    <span class="pull-right text-muted">20% Complete</span>
+                                </p>
+                                <div class="progress progress-striped active">
+                                    <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
+                                        <span class="sr-only">20% Complete</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="#">
+                            <div>
+                                <p>
+                                    <strong>Task 3</strong>
+                                    <span class="pull-right text-muted">60% Complete</span>
+                                </p>
+                                <div class="progress progress-striped active">
+                                    <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%">
+                                        <span class="sr-only">60% Complete (warning)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="#">
+                            <div>
+                                <p>
+                                    <strong>Task 4</strong>
+                                    <span class="pull-right text-muted">80% Complete</span>
+                                </p>
+                                <div class="progress progress-striped active">
+                                    <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
+                                        <span class="sr-only">80% Complete (danger)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a class="text-center" href="#">
+                            <strong>See All Tasks</strong>
+                            <i class="fa fa-angle-right"></i>
+                        </a>
+                    </li>
+                </ul>
+                <!-- /.dropdown-tasks -->
+            </li>
+            <!-- /.dropdown -->
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-user">
+                    <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                    </li>
+                    <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                    </li>
+                    <li class="divider"></li>
+                    <li><a href="#/logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                    <!-- {{controllers.login}} -->
+                    </li>
+                </ul>
+                <!-- /.dropdown-user -->
+            </li>
+            <!-- /.dropdown -->
+        </ul>
+        <!-- /.navbar-top-links -->
+
+        <div class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav navbar-collapse">
+                <ul class="nav" id="side-menu">
+                <!--
+                    <li class="sidebar-search">
+                        <div class="input-group custom-search-form">
+                            <input type="text" class="form-control" placeholder="Search host or room">
+                            <span class="input-group-btn">
+                            <button class="btn btn-default" type="button">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
+                        </div>
+                    </li>
+                -->
+                {{#if controllers.login.isLoggedIn}} <!-- hide menu items that require login -->
+                    <li>
+                        <a href="#"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                    </li>
+                    <li>
+                        <a {{bindAttr href="view.href"}}>
+                            <i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts
+                        </a>
+                        <ul class="nav nav-second-level in">
+                            {{partial "ouSelection"}}
+                        </ul>
+                    </li>
+                    {{#linkTo 'logs' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>{{/linkTo}}
+                    {{#linkTo 'energy' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-area-chart fa-fw"></i> Energy Consumption</a>{{/linkTo}}
+                    <li>
+                        <a href="#"><i class="fa fa-wrench fa-fw"></i> Administration<span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level">
+
+                            {{#linkTo 'ous' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>{{/linkTo}}
+
+                            {{#linkTo 'schedules' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Power Schedule</a>{{/linkTo}}
+
+                            {{#linkTo 'users' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-users fa-fw"></i> Users</a>{{/linkTo}}
+
+                            <li>
+                                <a href="#/systemhealth"><i class="fa fa-heartbeat fa-fw"></i> Scheduler Log and Status</a>
+                            </li>
+                            {{#linkTo 'optionsets' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>{{/linkTo}}
+                        </ul>
+                        <!-- /.nav-second-level -->
+                    </li>
+                {{else}}
+                 <li><a href="#/login"><i class="fa fa-user fa-fw"></i> Login</a></li>
+                {{/if}} <!-- / hide menu items that require login -->
+                    <li>
+                        <a href="#"><i class="fa fa-ambulance fa-fw"></i> Help<span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level">
+                            <li> <a href="#/page/configure-amt"><i class="fa fa-wrench fa-fw"></i> Configuring AMT</a> </li>
+                            <li> <a href="#/page/first-steps"><i class="fa fa-child fa-fw"></i> {{appName}} First Steps</a> </li>
+                            <li> <a href="#/page/about"><i class="fa fa-github fa-fw"></i> About, Feedback, ...</a> </li>
+                        </ul>
+                        <!-- /.nav-second-level -->
+                    </li>
+                </ul>
+            </div>
+            <!-- /.sidebar-collapse -->
+        </div>
+        <!-- /.navbar-static-side -->
+    </nav>
+
+    <div id="page-wrapper">
+        {{outlet}}
+    </div>
+
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="login">
+  <div class="row">
+    <div class="col-lg-12">
+
+    </div>
+    <div class="col-lg-4">
+    </div>
+    <div class="col-lg-4">
+      <h1 class="page-header">Login</h1>
+      {{#if isAuthenticated}}
+        Hi, {{username}} !
+        <button class="btn btn-default" {{action 'doLogout'}}><span class="fa fa-fw fa-sign-out"></span> Logout</button>
+      {{else}}
+       <p>
+        {{input id="username" type="text" value=username autofocus=true insert-newline="doLogin" class="form-control" placeholder="username"}}
+       </p>
+       <p>
+        {{input id="password" type="password" value=password insert-newline="doLogin" class="form-control" placeholder="password"}}
+       </p>
+        <button class="btn btn-default pull-right" {{action 'doLogin'}}><span class="fa fa-fw fa-sign-in"></span> sign in</button>
+
+        {{#if authFailed}}Bad username or password!{{/if}}
+      {{/if}}
+    </div>
+    <div class="col-lg-4">
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="logout">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Sign out</h1>
+    </div>
+    <div class="col-lg-12">
+        <p>
+          {{#if controllers.login.isLoggedIn}}
+              Thanks for logging out... See you soon!
+            {{else}}
+              You have not signed in yet. Why log out, eh?
+          {{/if}}
+        </p>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="index">
+ <div class="row">
+      <div class="col-lg-12">
+          <h1 class="page-header">Dashboard</h1>
+      </div>
+      <!-- /.col-lg-12 -->
+  </div>
+  <!-- /.row -->
+
+  <!-- Colorful big numbers OS header-->
+  <div class="row">
+      <div class="col-lg-3 col-md-6">
+          <div class="panel panel-primary">
+              <div class="panel-heading">
+                  <div class="row">
+                      <div class="col-xs-3">
+                          <i class="fa fa-linux fa-5x" {{bindAttr title="controllers.laststates.stateSSHList"}}></i>
+                      </div>
+                      <div class="col-xs-9 text-right">
+                          <div class="huge">{{controllers.laststates.stateSSH}}</div>
+                          <div>running Linux</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+          <div class="panel panel-green">
+              <div class="panel-heading">
+                  <div class="row">
+                      <div class="col-xs-3">
+                          <i class="fa fa-windows fa-5x" {{bindAttr title="controllers.laststates.stateRDPList"}}></i>
+                      </div>
+                      <div class="col-xs-9 text-right">
+                          <div class="huge">{{controllers.laststates.stateRDP}}</div>
+                          <div>running Windows</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+          <div class="panel" style="background-color:#aaa">
+              <div class="panel-heading">
+                  <div class="row">
+                      <div class="col-xs-3">
+                          <i class="fa fa-power-off fa-5x" {{bindAttr title="controllers.laststates.stateOffList"}}></i>
+                      </div>
+                      <div class="col-xs-9 text-right">
+                          <div class="huge">{{controllers.laststates.stateOff}}</div>
+                          <div>powered down</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+          <div class="panel panel-red">
+              <div class="panel-heading">
+                  <div class="row">
+                      <div class="col-xs-3">
+                          <i class="fa fa-frown-o fa-5x" {{bindAttr title="controllers.laststates.stateUnreachableList"}}></i>
+                      </div>
+                      <div class="col-xs-9 text-right">
+                          <div class="huge">{{controllers.laststates.stateUnreachable}}</div>
+                          <div>unreachable</div>
+                      </div>
+                  </div>
+              </div>
+              <!-- where to link to? ... knock out atm.
+              <a href="#">
+                  <div class="panel-footer">
+                      <span class="pull-left">View Details</span>
+                      <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                      <div class="clearfix"></div>
+                  </div>
+              </a>
+              -->
+          </div>
+      </div>
+  </div>
+  <!-- 1st col: Stats Graph and "Recent OS / power..." (tbd) and, 2nd col: Notifications -->
+  <div class="row">
+      <div class="col-lg-8">
+          <!-- Operational Hosts Log: -->
+          <div class="panel panel-default">
+              <div class="panel-heading">
+                  <i class="fa fa-bar-chart-o fa-fw"></i> Operational Hosts Log
+                  <div class="pull-right">
+                      <div class="btn-group">
+                          <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                              Show ...
+                              <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu pull-right" role="menu">
+                              <li><a href="#">Four hours</a>
+                              </li>
+                              <li><a href="#">One day</a>
+                              </li>
+                              <li><a href="#">A week</a>
+                              </li>
+                              <li><a href="#">A month</a>
+                              </li>
+                          </ul>
+                      </div>
+                  </div>
+              </div>
+              <!-- /.panel-heading -->
+              <div class="panel-body">
+                  <div id="morris-area-chart"></div>
+              </div>
+              <!-- /.panel-body -->
+          </div>
+          <!-- /.panel -->
+          <!-- Energy stats: -->
+          <div class="panel panel-default">
+              <div class="panel-heading">
+                  <i class="fa fa-clock-o fa-fw"></i> Current energy statistics
+              </div>
+              <!-- /.panel-heading -->
+              <div class="panel-body">
+                  <i>None yet</i>
+              </div>
+              <!-- /.panel-body -->
+          </div>
+          <!-- /.panel -->
+      </div>
+      <!-- /.col-lg-8 -->
+      <!-- Notifications: -->
+      <div class="col-lg-4">
+          <div class="panel panel-default">
+              <div class="panel-heading">
+                  <i class="fa fa-bell fa-fw"></i> Notifications Panel
+              </div>
+              <!-- /.panel-heading -->
+              <div class="panel-body">
+                  <div class="list-group">
+                      {{#if controllers.notifications.notifications}}
+                        {{#each msg in controllers.notifications.notifications.content}}
+                          <a href="#" class="list-group-item">
+                           <i {{bind-attr class=msg.cssClass}}></i> {{msg.message}}
+                           <span class="pull-right text-muted small"><em>{{format-from-now msg.tstamp}}</em></span>
+                          </a>
+                        {{/each}}
+                      {{else}}
+                        <i class="fa fa-spinner fa-spin"></i> Loading latest notifications ...
+                      {{/if}}
+                  </div>
+                  <!-- /.list-group -->
+                  <a href="#" class="btn btn-default btn-block">View All Alerts</a>
+              </div>
+              <!-- /.panel-body -->
+          </div>
+      </div>
+      <!-- /.col-lg-4 -->
+  </div>
+  <!-- /.row -->
+</script>
+
+<script type="text/x-handlebars" id="logs">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">OS / availability logs</h1>
+    </div>
+    <div class="col-lg-12">
+        <p>Hello world</p>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="energy">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Energy consumption charts</h1>
+    </div>
+    <div class="col-lg-12">
+        <p>Approx....!</p>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="schedules">
+{{! Manage scheduled power-ups/downs }}
+  <div class="row">
+    <div class="col-lg-10">
+      {{outlet}} <!-- see schedule/index -->
+    </div>
+    <div class="col-lg-2">
+      <h3>Actions</h3>
+      <ul>
+          <li>{{#link-to 'schedules'}}Show schedule{{/link-to}}</li>
+          <li>{{#link-to 'schedules.new'}}Add item{{/link-to}}</li>
+      </ul>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="schedules/index">
+  {{! Display a table with (only) all scheduled job items }}
+  <h1 class="page-header">Scheduled power management</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Job Description</th>
+        <th>Mon</th>
+        <th>Tue</th>
+        <th>Wed</th>
+        <th>Thu</th>
+        <th>Fri</th>
+        <th>Sat</th>
+        <th>Sun</th>
+        <th>Time</th>
+        <th>Action</th>
+        <th>OU</th>
+        <th>Delay</th>
+      </tr>
+    </thead>
+    {{#each model}}
+    {{#if isScheduledTask}}
+      <tr>
+        <td>{{#link-to 'schedule.edit' this}}<i class="glyphicon glyphicon-edit"></i> {{/link-to}}&nbsp;
+        {{#link-to 'schedule.edit' this}}{{description}}{{/link-to}}</td>
+        <td>{{check-mark on_monday}}</td>
+        <td>{{check-mark on_tuesday}}</td>
+        <td>{{check-mark on_wednesday}}</td>
+        <td>{{check-mark on_thursday}}</td>
+        <td>{{check-mark on_friday}}</td>
+        <td>{{check-mark on_saturday}}</td>
+        <td>{{check-mark on_sunday}}</td>
+        <td>{{human_start_time}}</td>
+        <td>{{amtc_cmd}}</td>
+        <td>{{ou_id.name}}</td>
+        <td>{{amtc_delay}}</td>
+      </tr>
+    {{/if}}
+    {{/each}}
+  </table>
+</script>
+
+<script type="text/x-handlebars" id="schedule">
+  {{! Display a single scheduler item }}
+    {{! Display a single OU }}
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Edit Job {{model.description}}</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      {{partial "scheduleEdit"}}
+      <div id="editbutton">
+        <button {{action "removeSchedule"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete Job</button>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+        {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
+      </div>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="schedules/new">
+  <h1 class="page-header">Create a new scheduled task</h1>
+  <p>
+    Create a new scheduled task here - a remote power control job that is executed
+    in the interval you specify here. Provide a description, select days the job should apply on.
+  </p>
+  {{partial "scheduleEdit"}}
+  <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save task</button>
+</script>
+
+<script type="text/x-handlebars" data-template-name='_scheduleEdit'>
+  <form id="optionsetEditForm">
+   <fieldset>
+      <div class="form-group">
+        <label for="description">Description</label>
+          {{input class="form-control" type="text" value=model.description insert-newline="doneEditingReturn" placeholder="Power-Up|Down Room when ..."}}
+      </div>
+
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_monday}} Monday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_tuesday}} Tuesday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_wednesday}} Wednesday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_thursday}} Thursday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_friday}} Friday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_saturday}} Saturday</label></div>
+      <div class="checkbox"><label>{{input type="checkbox" checked=model.on_sunday}} Sunday</label></div>
+
+      <div class="form-group">
+        <label for="start_time">Start time</label>
+        {{input class="form-control" type="time" value=model.human_start_time insert-newline="doneEditingReturn"}}
+      </div>
+
+      <div class="form-group">
+        {{#if controllers.ous.ous.content}}
+        {{view Ember.Select content=controllers.ous.ous.content
+                            class="form-control"
+                            value=model.ou_id.id
+                            selection=model.ou_id
+                            prompt="Choose OU"
+                            optionValuePath="content.id"
+                            optionLabelPath="content.name" }}
+        {{/if}}
+      </div>
+
+      <div class="form-group">
+        <label for="action">Action</label>
+        {{view Ember.Select value=model.amtc_cmd content=validCommands optionValuePath="content.cchar" optionLabelPath="content.cmd"}}
+      </div>
+
+      <div class="form-group">
+        <label>Delay</label>
+          {{input class="form-control" type="number" step="any" min="0" value=model.amtc_delay insert-newline="doneEditingReturn" placeholder="Delay in seconds between each PC"}}
+      </div>
+
+   </fieldset>
+  </form>
+  <div class="clearboth"></div><br>
+</script>
+
+
+<script type="text/x-handlebars" id="setup">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">amtc-web Installation</h1>
+    </div>
+  </div>
+  {{#if freshsetup}}
+    {{#unless preconditionsMet}}
+      <div class="row">
+        <div class="col-lg-12">
+            <h3>Installation precondition tests</h3>
+            At least one PHP PDO driver is required.
+            <ul id="phptests">
+              {{#if phptests}}
+              {{#each phptests}}
+                <li>
+                  {{check-mark result}} {{description}}
+                  {{#unless result}}(potential fix: {{remedy}}){{/unless}}
+                </li>
+              {{/each}}
+              {{else}}
+                <i class="fa fa-spinner fa-spin"></i> <i>running tests...</i>
+              {{/if}}
+            </ul>
+        </div>
+      </div>
+    {{/unless}}
+
+    {{#if preconditionsMet}}
+      <div class="row">
+        <div class="col-lg-12">
+            <div class="alert alert-success">
+              All preconditions for amtc-web installtion are met!
+            </div>
+
+            <form role="form">
+
+                <div class="form-group">
+                  <label>Data directory for amtc-web</label>
+                  {{input type="text" value=datadir class="form-control"}}
+                  <p class="help-block">Defaults to <code>data</code> subdirectory, relative to
+                  index.html. Alternatively, an absolute path may be specified. The directory
+                  will contain locks and logs. It may also contain an SQLite DB, if selected below.</p>
+                </div>
+
+                <div class="form-group">
+                  <label>Path to <code>amtc</code> binary</label>
+                  {{input type="text" value=amtcbin class="form-control"}}
+                  <p class="help-block">
+                    Defaults to <code>/usr/bin/amtc</code>.
+                    For testing amtc-web without amtc installed, cheat by using s.th.
+                    like <code>/usr/bin/who</code>.
+                  </p>
+                </div>
+
+                <div class="form-group">
+                  <label>Timezone</label>
+                  {{input type="text" value=timezone class="form-control"}}
+                  <p class="help-block">Defaults to <code>Europe/Berlin</code>. Select yours.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Select desired PHP <a target="new" href="http://php.net/manual/en/intro.pdo.php">PDO DB Driver</a></label>
+                    {{view Ember.Select
+                                  class="form-control"
+                                  content=dbs
+                                  value=selectedDB
+                                  prompt="Select PDO driver"
+                    }}
+                </div>
+
+                {{#if isMySQL}}
+                  <div class="form-group">
+                      <p>The user provided must exist and either be privileged to create the
+                         named Database -- or it must be created for the user prior to amtc-web installtion.</p>
+                  </div>
+                  <div class="form-group">
+                      <label>MySQL Database Server host</label>
+                      {{input type="text" value=mysqlHost class="form-control"}}
+                  </div>
+                  <div class="form-group">
+                      <label>Database name</label>
+                      {{input type="text" value=mysqlDB class="form-control"}}
+                  </div>
+                  <div class="form-group">
+                      <label>Username</label>
+                      {{input type="text" value=mysqlUser class="form-control"}}
+                  </div>
+                  <div class="form-group">
+                      <label>Password</label>
+                      {{input type="password" value=mysqlPassword class="form-control" placeholder="joe,2014-$ecure!"}}
+                  </div>
+                {{/if}}
+
+                {{#if isSQLite}}
+                  <div class="form-group">
+
+                      <label>SQLite database file</label>
+                      {{input type="text" value=sqlitePath class="form-control" placeholder="data/amtc-web.db"}}
+                      <p class="help-block">Choose a (application-)relative path like <code>data/amtc-web.db</code> or
+                      use an absolute path. Note that the directory containing the file must be writable.</p>
+                  </div>
+                {{/if}}
+
+                <div class="form-group">
+                  <label>HTTP Basic authentication URL</label>
+                  {{input type="text" value=authurl class="form-control"}}
+                  <p class="help-block">Defaults to <code>basic-auth</code> subdirectory, relative to
+                  index.html, but as full URL. The idea here is that you can specify any HTTP Basic Authentication
+                  protected resource as authentication source. By using the localhost URL, you may manage
+                  passwords by means of <code>htpasswd</code> locally -- or you may configure <code>basic-auth</code>
+                  subdirectory to use e.g. LDAP as authentication backend. Inside amtc-web s DB, only usernames and
+                  settings are stored.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Example data</label>
+                    <div class="checkbox">
+                        <label>
+                            {{input type="checkbox" checked=importDemo}} Install example data (some OUs, AMT option sets, and hosts)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                  <div class="alert alert-danger">
+                    <b>Warning!</b><br>
+                    Once written via this setup tool, you have to delete the configuration file
+                    (<code>config/siteconfig.php</code>) manually to re-enable setup.<br>
+                    Default intial admin username is 'admin' with password 'amtc'.
+                    <em>Currently, only SQLite and MySQL are supported by amtc-web!</em>
+                  </div>
+                  {{#if selectedDB}}
+                  <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Write configuration</button>
+                  {{else}}
+                  <i>A PHP DBO driver must be selected before proceeding.</i>
+                  {{/if}}
+                </div>
+            </form>
+        </div>
+      </div>
+    {{else}}
+      <div class="form-group">
+        <div class="alert alert-danger">
+          <em>Error!</em>
+          Not all preconditions met. Needs to be fixed to proceed with initial installation.<br>
+        </div>
+      </div>
+    {{/if}}
+  {{else}}
+    <div class="row">
+      <div class="col-lg-12">
+          <div class="alert alert-danger">
+            <h3>Installation tool locked</h3>
+            <p>As a configuration file already exists at <code>config/siteconfig.php</code>,
+               this setup tool is locked.<br> You have to manually remove the file to re-run setup.</p>
+          </div>
+      </div>
+    </div>
+  {{/if}}
+
+</script>
+
+<script type="text/x-handlebars" id="page">
+{{! Display a single markdown page from DB }}
+  <div class="row">
+    <div class="col-lg-12">
+      {{format-markdown page_content}}
+    </div>
+  </div>
+</script>
+
+<!-- Users -->
+<script type="text/x-handlebars" id="users">
+{{! Display /users page: tabular room list view plus actions:add/remove/edit menu  }}
+  <div class="row">
+    <div class="col-lg-10">
+      {{outlet}} <!-- see users/index : big table view of rooms -->
+    </div>
+    <div class="col-lg-2">
+      <h3>Actions</h3>
+      <ul>
+          <li>{{#link-to 'users'}}List users{{/link-to}}</li>
+          <li>{{#link-to 'users.new'}}Add user{{/link-to}}</li>
+      </ul>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="users/index">
+  {{! Display a table with all users }}
+  <h1 class="page-header">Users</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Fullname</th>
+        <th>Enabled?</th>
+        <th>Admin?</th>
+        <th>May control?</th>
+      </tr>
+    </thead>
+    {{#each model}}
+      <tr>
+        <td>{{#link-to 'user.edit' this}}{{name}}{{/link-to}}</td>
+        <td>{{fullname}}</td>
+        <td>{{check-mark is_enabled}}</td>
+        <td>{{check-mark is_admin}}</td>
+        <td>{{check-mark can_control}}</td>
+      </tr>
+    {{/each}}
+  </table>
+</script>
+
+<script type="text/x-handlebars" id="users/new">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Create User <b>{{name}}</b></h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+
+      {{partial "userEdit"}}
+
+      <div>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}>
+          <span class="glyphicon glyphicon-floppy-disk"></span> Create user
+        </button>
+      </div>
+
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="user/edit">
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Edit User <b>{{model.name}}</b></h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+
+      {{partial "userEdit"}}
+
+      <div>
+        <button {{action "removeUser"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete User</button>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+        {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
+      </div>
+
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" data-template-name='_userEdit'>
+  <form id="userEditForm">
+   <fieldset>
+      <div class="form-group">
+        <label for="name">Username</label>
+        {{input class="form-control" type="text" value=model.name insert-newline="doneEditingReturn" placeholder="username"}}
+      </div>
+      <div class="form-group">
+        <label for="name">Full name</label>
+        {{input class="form-control" type="text" value=model.fullname insert-newline="doneEditingReturn" placeholder="John Doe"}}
+      </div>
+      <div class="form-group">
+        <label for="optionset">Root OU</label>
+        {{#if controllers.ous.ous.content}}
+        {{view Ember.Select content=controllers.ous.ous.content
+                            class="form-control"
+                            value=model.ou_id.id
+                            selection=model.ou_id
+                            prompt="Choose OU"
+                            optionValuePath="content.id"
+                            optionLabelPath="content.name" }}
+        {{/if}}
+        <p class="help-block">Toplevel OU user may access (only one supported atm)</p>
+      </div>
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=model.is_admin}} User has admin privileges
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=model.is_enabled}} Enable account
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=model.can_control}} Has permission to power-control (view only otherwise)
+        </label>
+      </div>
+   </fieldset>
+  </form>
+</script>
+
+<!-- OptionSets -->
+<script type="text/x-handlebars" id="optionsets">
+{{! Display /optionsets page: tabular room list view plus actions:add/remove/edit menu  }}
+  <div class="row">
+    <div class="col-lg-10">
+      {{outlet}} <!-- see optionsets/index : big table view of rooms -->
+    </div>
+    <!-- fixme partial ...: -->
+    <div class="col-lg-2">
+      <h3>Actions</h3>
+      <ul>
+          <li>{{#link-to 'ous'}}List rooms{{/link-to}}</li>
+          <li>{{#link-to 'optionsets'}}List optionsets{{/link-to}}</li>
+          <li>{{#link-to 'optionsets.new'}}Add optionset{{/link-to}}</li>
+      </ul>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="optionsets/index">
+  {{! Display a table with all rooms }}
+  <h1 class="page-header">AMT(c) Option sets</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Edit</th>
+        <th>Name</th>
+        <th>AMT v5</th>
+        <th>DASH</th>
+        <th>Scan SSH</th>
+        <th>Scan RDP</th>
+        <th>Use TLS</th>
+        <th>Skip crt verify</th>
+        <th>TLS CA crt</th>
+        <th>AMT password file</th>
+        <th>Timeout</th>
+      </tr>
+    </thead>
+    {{#each model}}
+      <tr>
+        <td>{{#link-to 'optionset.edit' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
+        <td>{{#link-to 'optionset.edit' this}}{{name}}{{/link-to}}</td>
+        <td>{{check-mark sw_v5}}</td>
+        <td>{{check-mark sw_dash}}</td>
+        <td>{{check-mark sw_scan22}}</td>
+        <td>{{check-mark sw_scan3389}}</td>
+        <td>{{check-mark sw_usetls}}</td>
+        <td>{{check-mark sw_skipcertchk}}</td>
+        <td>{{opt_cacertfile}}</td>
+        <td>{{opt_passfile}}</td>
+        <td>{{opt_timeout}}</td>
+      </tr>
+    {{/each}}
+  </table>
+</script>
+
+<script type="text/x-handlebars" id="optionset">
+  {{! Display a single OU edit form using partial _optionsetEdit }}
+    {{! Display a single OU }}
+  <div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Edit Optionset {{name}}</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      {{partial "optionsetEdit"}}
+      <div id="editbutton">
+        <button {{action "removeOptionset"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete Option set</button>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+        {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
+      </div>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="optionsets/new">
+  <h1 class="page-header">Create a new Optionset</h1>
+  <p>
+    Optionsets are used to apply AMTC command line options (like whether to use TLS, which timeout, which AMT password etc.) to rooms.<br>
+    A newly created option set does not get assigned to any room by default.
+  </p>
+  {{partial "optionsetEdit"}}
+  <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save option set</button>
+</script>
+
+<script type="text/x-handlebars" data-template-name='_optionsetEdit'>
+  <form id="optionsetEditForm">
+   <fieldset>
+      <div class="form-group">
+        <label for="name">Option set name</label>
+        {{input class="form-control" type="text" value=model.name insert-newline="doneEditingReturn" placeholder="shorthand name"}}
+        <p class="help-block">Choose a simple name that reflects settings below.</p>
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+          {{input class="form-control" type="text" value=model.description insert-newline="doneEditingReturn" placeholder="..."}}
+      </div>
+      <div class="form-group">
+        <label for="description">AMT password file</label>
+          {{input class="form-control" type="text" value=model.opt_passfile insert-newline="doneEditingReturn" placeholder="/path/to/file"}}
+      </div>
+      <div class="form-group">
+        <label for="description">Connection timeout [s]</label>
+          {{input class="form-control" type="text" value=model.opt_timeout insert-newline="doneEditingReturn" size=2 placeholder="10"}}
+      </div>
+      {{#unless sw_dash}}
+        <div class="checkbox">
+          <label>
+            {{input type="checkbox" checked=model.sw_v5}} Enforce AMT v5 EOI (see also: <a href="http://en.wikipedia.org/wiki/Intel_AMT_versions">Intel AMT versions</a>)
+          </label>
+        </div>
+      {{/unless}}
+      {{#unless sw_v5}}
+        <div class="checkbox">
+          <label>
+            {{input type="checkbox" checked=model.sw_dash}} Enforce DASH/WsMan; required for AMT 9.0 and greater. Slower.
+          </label>
+        </div>
+      {{/unless}}
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=model.sw_scan22}} Enable SSH portscan
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=model.sw_scan3389}} Enbale RDP portscan
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=model.sw_usetls}} use HTTPS/TLS (TCP port 16993)
+        </label>
+      </div>
+      {{#if sw_usetls}}
+        <div class="checkbox">
+          <label>
+            {{input type="checkbox" checked=model.sw_skipcertchk}} Skip TLS cert verification
+          </label>
+        </div>
+        {{#unless sw_skipcertchk}}
+          <div class="form-group">
+            <label for="description">TLS CA cert file</label>
+              {{input class="form-control" type="text" value=model.opt_cacertfile insert-newline="doneEditingReturn"}}
+          </div>
+        {{/unless}}
+      {{/if}}
+   </fieldset>
+  </form>
+  <div class="clearboth"></div><br>
+</script>
+
+<!-- OUs / Rooms #if controller.ous.content -->
+<!-- bascis from  http://www.manning.com/skeie/ ; thank you :-) -->
+<script type="text/x-handlebars" data-template-name='_ouSelection'>
+  {{#if controllers.ous.ous.content}}
+    {{#each node in controllers.ous.ous.content}}
+      {{#if node.isRootLevel}}
+          {{tree-menu-node node=node action="selectNode" selectedNode=selectedNode}}
+      {{/if}}
+    {{/each}}
+  {{/if}}
+</script>
+
+<script type="text/x-handlebars" data-template-name="components/tree-menu-node">
+  {{#if node.hasChildren}}
+    <li {{action "toggleExpanded"}}>
+      <a href="#">
+        {{#if node.isExpanded}}
+          <i class="fa fa-folder-open-o" {{action "toggleExpanded"}}></i>
+        {{else}}
+          <i class="fa fa-folder-o" {{action "toggleExpanded"}}></i>
+        {{/if}}
+        {{node.name}}
+      </a>
+    </li>
+  {{else}}
+    <li {{action "selectNode" node}} {{bind-attr class=isSelected}}>
+      <a href="#"><!--<i class="fa fa-caret-right"></i>-->{{node.name}}</a>
+    </li>
+  {{/if}}
+
+  {{#if node.isExpanded}}
+    {{#each child in node.children}}
+      <ul class="nav ember-view">
+        {{tree-menu-node node=child action="selectNode" selectedNode=selectedNode}}
+      </ul>
+    {{/each}}
+  {{/if}}
+</script>
+
+<script type="text/x-handlebars" id="ous">
+{{! Display /rooms page: tabular room list view plus actions:add/remove/edit menu  }}
+  <div class="row">
+    <div class="col-lg-10">
+        {{outlet}} <!-- see rooms/index : big table view of rooms -->
+    </div>
+    <div class="col-lg-2">
+      <h3>Actions</h3>
+      <ul>
+          <li>{{#link-to 'ous'}}List rooms{{/link-to}}</li>
+          <li>{{#link-to 'optionsets'}}List optionsets{{/link-to}}</li>
+          <li>{{#link-to 'ous.new'}}Add room{{/link-to}}</li>
+      </ul>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" id="ous/index">
+  {{! Display a table with all rooms }}
+  <h1 class="page-header">List of rooms</h1>
+  {{#if controllers.optionsets.optionsets}}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Edit</th>
+        <th>OU</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Optionset</th>
+        <th>Log</th>
+        <th>idle P [W]</th>
+        <th>Hosts</th>
+      </tr>
+    </thead>
+    {{#each controllers.ous.content}}
+      <tr>
+        <td>{{#link-to 'ou.edit' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
+        <td>{{#link-to 'ou.edit' this}}{{ou_path}}{{/link-to}}</td>
+        <td>{{name}}</td>
+        <td>{{description}}</td>
+        <td>{{optionset_id.name}}</td>
+        <td>{{check-mark logging}}</td>
+        <td>{{idle_power}}</td>
+        <td>{{#link-to 'ou.hosts' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
+      </tr>
+    {{/each}}
+  </table>
+  {{/if}}
+</script>
+
+<script type="text/x-handlebars" data-template-name="navigation">
+  <ul class="nav nav-pills viewmode">
+    {{#link-to "ou.monitor" tagName="li"}}
+      <a {{bind-attr href="view.href"}}>Control</a>
+    {{/link-to}}
+    {{#link-to "ou.statelog" tagName="li"}}
+      <a {{bind-attr href="view.href"}}>State Log</a>
+    {{/link-to}}
+    <li><a href="#messages-pills" data-toggle="tab">Energy</a></li>
+    {{#link-to "ou.edit" tagName="li"}}
+      <a {{bind-attr href="view.href"}}>Edit OU</a>
+    {{/link-to}}
+    {{#link-to "ou.hosts" tagName="li"}}
+      <a {{bind-attr href="view.href"}}>Edit Hosts</a>
+    {{/link-to}}
+  </ul>
+</script>
+
+<script type="text/x-handlebars" id="ou">
+  {{! Display a single OU }}
+  <div class="row">
+    <div class="col-lg-5">
+        <h1 class="page-header">{{name}}</h1>
+    </div>
+    <div class="col-lg-7">
+      {{view "navigation"}}
+    </div>
+  </div>
+  {{outlet}}
+  <!-- see ou/edit, ou/monitor, ou/hosts -->
+</script>
+
+<script type="text/x-handlebars" id="ous/new">
+  <h1 class="page-header">Create a new OU / room</h1>
+  {{partial "ou/edit"}}
+  {{#if parent_id}}
+    <button class="btn btn-default" {{action 'doneEditingReturn'}}>
+      <span class="glyphicon glyphicon-floppy-disk"></span> Save new OU
+    </button>
+  {{/if}}
+</script>
+
+<script type="text/x-handlebars" data-template-name='ou/edit'>
+  <div class="row">
+    <div class="col-lg-12">
+      <form id="ouEditForm">
+       <fieldset>
+          <div class="form-group">
+            <label for="name">OU / room name</label>
+            {{input class="form-control" type="text" value=model.name insert-newline="doneEditingReturn"}}
+            <p class="help-block">e.g. D 23.2</p>
+          </div>
+          <div class="form-group">
+            <label for="description">OU description</label>
+            {{input class="form-control" type="text" value=model.description insert-newline="doneEditingReturn"}}
+            <p class="help-block"></p>
+          </div>
+          <div class="form-group">
+            <label for="optionset">Parent OU</label>
+            {{#if controllers.ous.ous.content}}
+            {{view Ember.Select content=controllers.ous.ous.content
+                                class="form-control"
+                                value=model.parent_id.id
+                                selection=model.parent_id
+                                prompt="Choose OU"
+                                optionValuePath="content.id"
+                                optionLabelPath="content.name" }}
+            {{/if}}
+            <p class="help-block">Choose the parent OU (or "folder") for this room</p>
+          </div>
+          <div class="form-group">
+            <label for="optionset">AMT option set</label>
+            {{#if controllers.optionsets.optionsets.content}}
+            {{view Ember.Select content=controllers.optionsets.optionsets.content
+                                class="form-control"
+                                value=model.optionsetid.id
+                                selection=model.optionset_id
+                                prompt="Choose AMT Option set"
+                                optionValuePath="content.id"
+                                optionLabelPath="content.name" }}
+            {{/if}}
+            <p class="help-block">Optionsets may be created ...here... They will NOT be inherited.</p>
+          </div>
+          <div class="form-group">
+            <label for="description">PC idle power rating</label>
+            {{input class="form-control" type="text" value=model.idle_power insert-newline="doneEditingReturn"}}
+            <p class="help-block">Provide idle power rating to allow generation of approximate energy consumption charts</p>
+          </div>
+          <div class="checkbox">
+            <label>
+              {{input type="checkbox" checked=model.logging}} Allow PC state logging via scheduler
+            </label>
+          </div>
+       </fieldset>
+      </form>
+      <div class="clearboth"></div><br>
+      {{#unless isNew}}
+      <div id="editbutton">
+        <button {{action "removeOu"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete OU</button>
+          <!-- fixme use #if isDirty, currently breaks with drop downs... why? -->
+          <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+          {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
+      </div>
+      {{/unless}}
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" data-template-name='ou/monitor'>
+{{! amtc-web ... live view / monitor + control mode }}
+  <div class="row">
+      <div class="col-lg-12" id="hosts">
+        {{#each host in controller.model.hosts}}
+          <div {{bind-attr class=":pc host.laststate.amtStateCssClass host.laststate.openPortCssClass" hostDbId=host.id}}>
+            <div>
+              <span class="porticon">
+                {{#if host.laststate}}
+                  {{host.laststate.openPortIcon}}
+                {{else}}
+                  <i class="fa fa-fw fa-question"></i>
+                {{/if}}
+              </span>
+              <span class="hostname">{{host.hostname}}</span>
+            </div>
+            <div class="message">
+              {{#if host.laststate}}
+                {{host.laststate.lastScan}}
+              {{else}}
+                No logged data yet
+              {{/if}}
+            </div>
+          </div>
+        {{/each}}
+      </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <span style="display:none">
+        FIXME - this triggers loading all hosts:
+        {{controllers.hosts.hosts}}
+        {{controllers.laststates.laststates}}
+        How to trigger it the right way?
+        <button class="btn btn-default" {{action 'refresh'}}><i class="glyphicon glyphicon-refresh"></i> <i>refresh</i></button>
+      </span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div id="livectrl">
+        <h5>Select hosts above like files in Finder/Explorer or by state below</h5>
+        <p id="hselect"></p>
+        {{#if selectedHostsCount}}
+          <div id="ctrl">
+            <h5>Action for selected <span id="numselected">{{selectedHostsCount}}</span>&nbsp;hosts</h5>
+            <form>
+              {{#each cmd in commandActions}}
+                <label>{{radio-button name='cmd' value=cmd groupValue=selectedCmd}} {{cmd}}</label>
+              {{/each}}
+              ... using a inter-command-delay of {{input type="text" size=3 value=selectedDelay}} seconds
+              {{#if selectedCmd}}
+                <button class="btn btn-default" {{action 'submitJob'}}> <i class="fa fa-thumbs-up"></i> Do it</button>
+              {{/if}}
+            </form>
+          </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" data-template-name='ou/hosts'>
+  <div class="row">
+    <div class="col-lg-12">
+      <p>Add, remove or enable/disable hosts for this OU here.</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <h3>Existing hosts</h3>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12" id="cfghosts">
+      {{#if controllers.hosts.hosts.content}}
+          {{#each controller.model.hosts}}
+              <div class="pc"><i class="fa fa-desktop"></i> {{hostname}}</div>
+          {{/each}}
+      {{else}}
+          No hosts found in this room.
+      {{/if}}
+    </div>
+  </div>
+
+  {{partial "addHostsWizard"}}
+</script>
+
+<script type="text/x-handlebars" data-template-name='ou/statelog'>
+  More to come ...
+  <div class="row">
+    <div class="col-lg-12" id="cfghosts">
+      {{#if controllers.hosts.hosts.content}}
+          {{#each controller.hosts}}
+              <div class="pc"><i class="fa fa-desktop"></i> {{hostname}}</div>
+          {{/each}}
+      {{else}}
+          No hosts found in this room.
+      {{/if}}
+    </div>
+  </div>
+</script>
+
+<script type="text/x-handlebars" data-template-name="addHostsWizard">
+  <div class="row">
+    <div class="col-lg-5">
+      <h3>Add hosts to OU {{name}}</h3>
+      <form id="addHostsWizardForm">
+        <fieldset>
+          <div class="form-group">
+            <label for="name">Hostname</label>
+            {{input class="form-control" type="text" placeholder="my-example" value=hostname insert-newline="saveNewHosts"}}
+            <p class="help-block">For a single host, provide the FQDN</p>
+          </div>
+          <div class="form-group">
+            <label>Add multiple hosts</label>
+            <div class="checkbox">
+              <label>
+                {{input type="checkbox" checked=addMultiple}} Add multiple hosts at once
+              </label>
+            </div>
+          </div>
+          {{#if addMultiple}}
+            <div class="form-group">
+              <label for="description">Number of hosts to add</label>
+              {{input class="form-control" type="number" value=numHosts insert-newline="saveNewHosts"}}
+            </div>
+            <div class="form-group">
+              <label for="description">Start at host number...</label>
+              {{input class="form-control" type="number" value=startNum insert-newline="saveNewHosts"}}
+            </div>
+            <div class="form-group">
+              <label for="description">Pad host number with this amount of zeros</label>
+              {{input class="form-control" type="number" value=padNum insert-newline="saveNewHosts"}}
+              <p class="help-block"></p>
+            </div>
+            <div class="form-group">
+              <label for="description">Domain name</label>
+              {{input class="form-control" type="text" placeholder="example.com" value=domainName insert-newline="saveNewHosts"}}
+              <p class="help-block"></p>
+            </div>
+          {{/if}}
+        </fieldset>
+      </form>
+    </div>
+    <div class="col-lg-7">
+      {{#if hostname}}
+        <h3>Preview</h3>
+        <div id="addHostsPreview">
+          {{#each host in hostsToAdd}}
+            <div class="pc preview"><i class="fa fa-desktop"></i> {{host}}</div>
+          {{/each}}
+          <div class="clearfix"><br><br></div>
+        </div>
+        <div class="clearfix"></div>
+        <br>
+
+        <button class="btn btn-default" {{action 'saveNewHosts'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save new host(s)</button>
+      {{/if}}
+    </div>
+  </div>
+</script>
+
+<script src="js/jslibs.js"></script>
+<script src="js/app/app.js"></script>
+<script src="rest-api.php/rest-config.js"></script>
 
 <noscript>
-  <div id="noscript">... will not work without JavaScript being enabled in your browser</div>
+  <div class="jumbotron">
+    <h1><span class="label label-danger">OMFG!</span> !#@$^~%-/</h1>
+    <p><br>Please enable JavaScript in your browser to use amtc-web.</p>
+  </div>
 </noscript>
-
-<div class="roomSelector" id="rooms">
-</div>
-
-<div id="vm" style="margin:0;float:right;">
-  <div class="viewmodebutton small ui-corner-top" id="admin" title="configure amtc">&#x1F680;</div> 
-  <div class="viewmodebutton small ui-corner-top" id="nd" title="log: next day">&raquo;</div> 
-  <div class="viewmodebutton ui-corner-top" id="log" title="view logged power & OS state">log</div> 
-  <div class="viewmodebutton small ui-corner-top" id="pd" title="log: previous day">&laquo;</div> 
-  <div class="viewmodebutton ui-corner-top selected-viewmode" id="live" title="view live power & OS state">live</div> 
-</div>
-
-
-<div id="canvas" class="ui-corner-bottom">
-  <div id="hosts" class="">
-  </div>
-  <div id="config" class="">
-    <ul>
-      <li><a href="#overview">Overview</a></li>
-      <li><a href="admin/admin.php?action=config&mode=site">Site settings</a></li>
-      <li><a href="admin/admin.php?action=config&mode=db">Database</a></li>
-      <li><a href="#roomcfg">Manage rooms</a></li>
-      <li><a href="#scheduler">Scheduler</a></li>
-    </ul>
-
-    <div id="overview">
-      <h2>Welcome to amtc-web</h2>
-      <h3>What is amtc-web?</h3>
-      <p>amtc-web is a web front-end for remote power management using intel vPro/<a style="color:blue;" href="http://en.wikipedia.org/wiki/Intel_Active_Management_Technology">AMT</a> technology (including the older (and faster)
-         EOI protocol as supported by AMT up to version 8, as well as the newer <a style="color:blue;" href="http://en.wikipedia.org/wiki/WS-Management">WS-Management</a>
-         as supported by AMT version 3 and greater; 
-         <a style="color:blue;" href="http://en.wikipedia.org/wiki/Intel_AMT_versions">see also</a>).
-         It uses <a style="color:blue;" href="https://github.com/schnoddelbotz/amtc">amtc</a> in the background for power
-         state live gathering and control. Once set up, amtc-web not only allows comfortable
-         monitoring and control, but also can create graphs of logged power states.
-         See <a style="color:blue;" href="https://github.com/schnoddelbotz/amtc/wiki">amtc wiki</a> for
-         information on how to enable logging (triggered via cron).
-      </p>
-
-      <h3>How to configure</h3>
-      <p>amtc-web will keep you redirected to this setup
-         page until you have configured your first room containing some vPro capable hosts.
-         Start by choosing your DB that is supported by your PHP's PDO module and specify
-         the corresponding DSN on the 'Site settings' tab. Afterwards, you can switch
-         to the 'Database' tab to import table structures into your new database.
-         Use the 'Manage rooms' tab to create/delete/edit rooms and PCs to control.
-         The 'Scheduler' displays queued power control commands.
-      </p>
-
-      <h3>Important notes</h3>
-      <p>amtc-web is, as amtc, open source software that you can do with what you want.
-        But still, this is just a fun project and no gurantees of any kind are given.
-        Please feel free to improve - and share!
-      </p>
-      <p>
-        Ensure to <span class="warning">lock down admin access</span> by placing an .htaccess
-        file in the /admin subfolder of your amtc-web installation. The password store defined
-        in there will be responsible for authentication popups you will see when clicking
-        one of the tabs above...
-      </p>
-   </div>
-
-   <div id="roomcfg">
-      <h2>Manage rooms and PCs</h2>
-     <div class="roomSelector" id="roomcfg_rooms">
-     </div> 
-     <div class="clearfix"></div>
-     <div id="cfghosts" class="">
-      <p>Please create or select a room.</p>
-     </div>
-     <div class="clearfix"></div>
-     <div id="editRoom">
-        <form id="editRoomForm">
-        <dl>
-          <dt>Room name (only allowed: a-zA-Z0-9_-, no whitespace)</dt>
-          <dd><input id="roomName" type="text" size="50" name="roomname" value=""></dd>
-        
-          <dt>AMT version of PCs in room (5-9 supported, 0 disables)</dt>
-          <dd><input id="amtVersion" type="text" size="50" name="amtVersion" value="8"></dd>
-        
-          <dt>PC idle power rating (Watt)</dt>
-          <dd><input id="idlePower" type="text" size="50" name="idle_power" value="43.21"></dd>
-        </dl>
-        <input type="button" id="addRoom_submit" value="Create new room">
-        <div id="existingRoom">
-          <input type="button" id="editRoom_submit" value="Update room">
-          <input type="button" id="deleteRoom_submit" value="Delete room">
-          <dl>
-            <dt id="newHostDt">Hostname of new PC</dt>
-            <dd><input id="createPc" type="text" size="50" name="createPc" value=""></dd>
-          </dl>
-          <input type="button" id="createPc_submit" value="Create new PC in room">
-          <br/>
-          <br/>
-          <input type="checkbox" id="enableConfirmations" checked="checked">
-          <label for="enableConfirmations">Enable confirmations for delete operations</label>
-          <input type="hidden" id="roomid" value="">
-        </div>
-        </form>
-        <p id="modRoom_msg" class="umsg"></p>
-     </div>
-   </div>
-
-  <div id="scheduler">
-    <h2 id="jobsheader">Job scheduler management</h2>
-    <div id="schedulerstate">
-      <p>Unknown scheduler state (yet).</p>
-    </div>
-    <table class="sortable" id="jobtable">
-      <thead>
-        <tr> 
-          <th>JobId</th> 
-          <th>SubmitUser</th> 
-          <th>Status</th>
-          <th>Submitted</th> 
-          <th>Done</th> 
-          <th>Action</th> 
-          <th>delay</th>
-          <th>Room</th> 
-          <th>Hosts</th> 
-          <th>delete?</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
-  </div>
-
-  </div> <!-- /config -->
-</div> <!-- /canvas -->
-
-    <div class="clearfix"></div>
-<p style="margin:0;float:right;">
-  <a style="color:#aaa" href="https://github.com/schnoddelbotz/amtc">powered by amtc</a>
-</p>
-
-
-<div id="livectrl">
-  <h3>Select hosts above like files in Finder/Explorer or by state below</h3>
-  <p id="hselect"></p>
-    <div id="ctrl">
-    <h3>Action for selected <span id="numselected"></span>&nbsp;hosts</h3>
-      <form>
-       <input type="radio" name="cmd" id="powerdown" value="D"><label for="powerdown">powerdown</label>
-       <input type="radio" name="cmd" id="powerup" value="U"><label for="powerup">powerup</label>
-       <input type="radio" name="cmd" id="powercycle" value="C"><label for="powercycle">powercycle</label>
-       <input type="radio" name="cmd" id="reset" value="R"><label for="reset">reset</label>
-       ... using a inter-command-delay of <input id="delay" type="text"  name="delay" value="5" size=3> seconds
-       <input type="button" id="ctrlSubmit" value="Do it" name="bar">
-      </form>
-</div>
-</div>
 
 </body>
 </html>

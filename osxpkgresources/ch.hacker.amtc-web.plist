@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>ch.hacker.amtc-web</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/share/amtc-web/cli/amtc-web.phpsh</string>
+        <string>runJobs</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>60</integer>
+    <key>UserName</key>
+    <string>_www</string>
+</dict>
+</plist>

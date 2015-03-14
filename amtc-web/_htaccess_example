@@ -15,7 +15,7 @@
 </FilesMatch>
  
 RewriteEngine On
-#RewriteBase /~jan/amtc-web2
+#RewriteBase /~jan/amtc-web
 RewriteCond %{HTTP:accept-encoding} gzip
 RewriteCond %{REQUEST_FILENAME} !\.gz$
 ReWriteCond %{REQUEST_FILENAME}.gz -f
