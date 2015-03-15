@@ -7,7 +7,7 @@
  * for scanning/logging, scheduled jobs - (via a single cronjob)
  */
 
-class amtcwebSpooler {
+class AmtcwebSpooler {
   static $now_wday;       // inited by CLI_main, current week day
   static $now_wday_mask;  // bitmask for current weekday
   static $now_hours;      // current time (hours)
@@ -40,9 +40,10 @@ class amtcwebSpooler {
   );
 
 
-  static function CLI_main()  {
+  static function cliMain($args)  {
     // CLI commands only allowed from CLI context...
-    PHP_SAPI=='cli' || die("CLI only.");
+    if (PHP_SAPI!=='cli')
+      throw new Exception("CLI only.");
 
     $now = getdate();
     self::$now_wday      = $now['wday'];
@@ -56,8 +57,7 @@ class amtcwebSpooler {
     $actionPattern = '/^(' . implode('|', array_keys(self::$actions)) . ')$/';
 
     // php's getopt doesn't tell us which part of $argv were non-options... so:
-    global $argv;
-    if ($match = preg_grep($actionPattern, $argv)) {
+    if ($match = preg_grep($actionPattern, $args)) {
       // run matched action method
       $action = array_shift($match);
       if (isset($options['l']/*[l]oop*/)) {
@@ -152,7 +152,7 @@ class amtcwebSpooler {
     }
 
     foreach ($j as $job) {
-      amtcwebSpooler::execJob($job,$opt);
+      self::execJob($job,$opt);
     }
   }
 
@@ -213,7 +213,7 @@ class amtcwebSpooler {
           foreach ($ou_array as $ou_id) {
             $hosts = array_merge($hosts, self::getOuHosts($ou_id,false,true));
           }
-          $maxThreads = 180; // FIXME: make cfg setting
+          $maxThreads = 180; // This should be a global config option!
           if (count($hosts) < $maxThreads) {
             $job->amtc_hosts = implode(',', $hosts);
             $job->ou_id = $ou_id; // one OU setting fits all here, as it's the same...
@@ -253,10 +253,10 @@ class amtcwebSpooler {
   static function buildAmtcCommandline(Job $job,$opt) {
     $ou        = Ou::find_one($job->ou_id);
     $optionset = Optionset::find_one($ou->optionset_id);
-    // missing:
-    // - throw if $optionset is nil (fresh install...)
+
+    // - throw error if optionset is nil (fresh install...)
     // - maxThreads was a per-optionset setting, but should be global/config
-    // - what was $opt intended for? :-/
+    // - what was opt intended for? :-/
 
     $cmd_opts = Array('-j'); // amtc shall always produce parsable json output
     $optionset->sw_scan22       && $cmd_opts[] = '-s';
@@ -302,7 +302,6 @@ class amtcwebSpooler {
     }
     if ($retval!=0) {
       fwrite(STDERR,"ABORTING at job #$job->id! Fatal error #$retval returned by amtc: $res");
-      //exit($retval); // FIXME -- evil -- e.g. will break monitoring as state remains=running
       return Array();
     }
 

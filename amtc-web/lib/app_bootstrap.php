@@ -41,4 +41,3 @@ $app->notFound(function () {
 $app->error(function (\Exception $e) {
   echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') );
 });
-

@@ -419,7 +419,6 @@ App.OuMonitorView = Ember.View.extend({
     $("#hselect span").css( 'cursor', 'pointer' );
   },
 
-  // fixme: only works when switching routes, but not for rooms
   willClearRender: function() {
     $("#livectrl").hide();
     $("#hosts").hide();
@@ -1186,10 +1185,9 @@ App.Ou = DS.Model.extend({
   children: DS.hasMany('ou', {inverse: 'parent_id'}),
   hosts: DS.hasMany('host'),//, {inverse: null}),
 
-  /// FIXME FIXME ... still feels hackish, but makes the dropdown+save work...
+  /// Improve: feels hackish, but makes the dropdown+save work...
   optionsetid: function(key,value) {
     if (value) {
-       //this.set('optionset_id',value);
       return value;
     }
     else {

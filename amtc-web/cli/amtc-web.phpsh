@@ -14,7 +14,7 @@ DIR=$(cd "$(dirname "$0")"; pwd)
 DATE_FMT="%Y%m%d-%H:%M:%S"
 WHO="[$$/`whoami`]"
 PHP_OPTIONS="-derror_reporting=E_ALL -ddisplay_errors=stdout"
-PHP_CODE="require '$DIR/../lib/app_bootstrap.php'; amtcwebSpooler::CLI_main();"
+PHP_CODE="require '$DIR/../lib/app_bootstrap.php'; AmtcwebSpooler::cliMain(\$argv);"
 LOGFILE=${AMTC_LOGFILE:-$DIR/../data/amtc-web-cli.log}
 [ -z "$AMTC_NOLOG" ] || LOGFILE=/dev/null
 

@@ -24,7 +24,8 @@ if (!empty($_SESSION['authenticated']) && $_SESSION['authenticated'] === true ||
     // Authenticated or request that is allowed without
 } else {
   echo '{"notifications":[], "error":"unauthenticated"}';
-  exit(0);
+  // app->stop() will not work here yet ...
+  return;
 }
 
 
@@ -63,7 +64,7 @@ $app->post('/submit-configuration', function () use ($app) {
 
   if (file_exists(AMTC_CFGFILE)) {
     echo 'INSTALLTOOL_LOCKED';
-    exit(1);
+    return;
   }
 
   $wanted = array(
@@ -125,7 +126,7 @@ $app->post('/submit-configuration', function () use ($app) {
       if ($_POST['importDemo']=='true'/* yes, a string. fixme */)
         $dbh->exec(file_get_contents('lib/install-db/'.$selectedDB.'-exampledata.sql'));
 
-      // fixme: add _htaccess thing ... and some sanitization ... and error checking ... and stuff.
+      // fix-me: add some sanitization ... and error checking ... and stuff!!!
     }
   } else {
     $x = $wanted['AMTCBIN'] ? array("errorMsg"=>"Insufficient parameters!") :
@@ -477,4 +478,3 @@ $app->post('/jobs', function () {
  */
 
 $app->run();
-
