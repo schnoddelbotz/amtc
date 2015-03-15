@@ -43,6 +43,7 @@ PKGTYPE = $(shell (test -f /etc/debian_version && echo deb) || \
 
 APACHECONFD = $(shell test -d /etc/apache2/conf-enabled && \
 		      echo conf-enabled || echo conf.d)
+SPOOLER_USER = $(shell (test -f /etc/redhat-release && echo amtc-web) || echo www-data)
 
 #
 all: amtc amtc-web
@@ -79,6 +80,7 @@ dist: amtc amtc-web
 	   rm -f basic-auth/_htaccess.default config/_htpasswd.default data/amtc-web.db \
 	   config/siteconfig.php build.sh Makefile Makefile.Sources
 	cd dist && mv $(WWWDIR)/crontab-example.txt $(ETCDIR)/cron.d/amtc-web
+	perl -pi -e "s@amtc-web@$(SPOOLER_USER)@" dist/$(ETCDIR)/cron.d/amtc-web
 	cd dist && mv $(WWWDIR)/config $(ETCDIR)/amtc-web && mv $(WWWDIR)/data $(DATADIR)/amtc-web
 	cd dist/$(WWWDIR) && ln -s /$(ETCDIR)/amtc-web config && ln -s /$(DATADIR)/amtc-web data
 	cd dist/$(WWWDIR) && perl -pi -e "s@AuthUserFile .*@AuthUserFile /$(ETCDIR)/amtc-web/.htpasswd@" basic-auth/.htaccess
@@ -91,7 +93,7 @@ package:
 # build q+d debian .deb package (into ../)
 deb: clean
 	echo y | dh_make --createorig -s -p amtc_$(AMTCV) || true
-	echo  -e "#!/bin/sh -e\nchown www-data:www-data /var/lib/amtc-web /etc/amtc-web\na2enmod headers\na2enmod rewrite\nservice apache2 restart" > debian/postinst
+	echo  -e "#!/bin/sh -e\nchown www-data:www-data /var/lib/amtc-web /etc/amtc-web\nchmod 770 /var/lib/amtc-web /etc/amtc-web\na2enmod headers\na2enmod rewrite\nservice apache2 restart" > debian/postinst
 	perl -pi -e 's@Description: .*@Description: Intel AMT/DASH remote power management tool@' debian/control
 	perl -pi -e 's@^Depends: (.*)@Depends: $$1, apache2|lighttpd|nginx, php5-curl, php5-sqlite|php5-mysql|php5-pgsql@' debian/control
 	perl -pi -e 's@^Build-Depends: (.*)@Build-Depends: $$1, curl, vim-common, libcurl3, libcurl4-gnutls-dev, libgnutls-dev@' debian/control
