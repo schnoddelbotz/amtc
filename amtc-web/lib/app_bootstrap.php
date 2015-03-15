@@ -9,7 +9,9 @@
 define('AMTC_WEBROOT', dirname(__FILE__).'/..');
 define('AMTC_CFGFILE', AMTC_WEBROOT.'/config/siteconfig.php');
 
-@include AMTC_CFGFILE; // to let static ember help pages work even if unconfigured
+if (file_exists(AMTC_CFGFILE))
+  include AMTC_CFGFILE; // to let static ember help pages work even if unconfigured
+
 date_default_timezone_set( defined('AMTC_TZ') ? AMTC_TZ : 'Europe/Berlin');
 
 set_include_path(get_include_path().PATH_SEPARATOR.
@@ -33,10 +35,10 @@ if (defined("AMTC_PDOSTRING")) {
 $app = new \Slim\Slim();
 $app->config('debug', false); // ... and enables custom $app->error() handler
 $app->response()->header('Content-Type', 'application/json;charset=utf-8');
-$app->notFound(function () use ($app) {
+$app->notFound(function () {
   echo json_encode(Array('error'=>'Not found'));
 });
-$app->error(function (\Exception $e) use ($app) {
+$app->error(function (\Exception $e) {
   echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') );
 });
 

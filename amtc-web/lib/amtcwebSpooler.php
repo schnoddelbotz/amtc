@@ -104,7 +104,6 @@ class amtcwebSpooler {
     isset($opt['onlyScheduled'])   && $jobs->where('job_type', Job::JOB_SCHEDULED);
     isset($opt['onlyMonitoring'])  && $jobs->where('job_type', Job::JOB_MONITORING);
     foreach ($jobs->find_many() as $record) {
-      $r = $record->as_array();
       printf($jobFormat,  $record->id,
                           $record->repeat_days & 2  ? 'x' : '-', // monday
                           $record->repeat_days & 4  ? 'x' : '-',
@@ -192,6 +191,7 @@ class amtcwebSpooler {
           $job->save();
           if ($notification = Notification::create()) {
             $notification->message = "$job->description completed";
+            // choose powerup-powerdown icons here! use $result?
             $notification->ntype = "envelope";
             $notification->user_id = 2; // hardcoded spooler user
             $notification->save();
@@ -250,11 +250,13 @@ class amtcwebSpooler {
   }
 
   // construct amtc binary command line options based on job
-  static function buildAmtcCommandline($job,$opt) {
+  static function buildAmtcCommandline(Job $job,$opt) {
     $ou        = Ou::find_one($job->ou_id);
     $optionset = Optionset::find_one($ou->optionset_id);
-
-    // FIXME throw if $optionset is nil (fresh install...)
+    // missing:
+    // - throw if $optionset is nil (fresh install...)
+    // - maxThreads was a per-optionset setting, but should be global/config
+    // - what was $opt intended for? :-/
 
     $cmd_opts = Array('-j'); // amtc shall always produce parsable json output
     $optionset->sw_scan22       && $cmd_opts[] = '-s';
@@ -267,10 +269,6 @@ class amtcwebSpooler {
     $optionset->opt_passfile    && $cmd_opts[] = '-p '.$optionset->opt_passfile;
     $optionset->opt_cacertfile  && $cmd_opts[] = '-c '.$optionset->opt_cacertfile;
     $job->amtc_delay            && $cmd_opts[] = '-w '.$job->amtc_delay;
-    #$job->amtc_bootdevice      && $cmd_opts[] = '-b '.$job->amtc_bootdevice;
-    # FIXME
-    # maxThreads was a per-optionset setting, but should be global/config
-    # $optionset->opt_maxthreads  && $cmd_opts[] = '-m '.$optionset->opt_maxthreads;
 
     // decide whether to act on whole OU or a given list of hosts
     if ($job->amtc_hosts) {
@@ -284,7 +282,7 @@ class amtcwebSpooler {
   }
 
   // execute AMTC command, log results
-  static function execAmtCommand($job,$opt) {
+  static function execAmtCommand(Job $job,$opt) {
     $cmd = self::buildAmtcCommandline($job,$opt);
 
     isset($opt['d']) && print("[debug] execAmtCommand for job #$job->id: $cmd\n");

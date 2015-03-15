@@ -7,8 +7,6 @@
  * to provide a REST backend for amtc-web (ember-data, installer, amtc ...)
  */
 
-// sleep(2);
-// error_reporting(E_ALL); ini_set('display_errors','stdout');
 // set up autoloader, include required libs, init ORM & Slim
 require 'lib/app_bootstrap.php';
 
@@ -21,9 +19,9 @@ $allowUnauthenticated = Array('authenticate', 'rest-config.js', 'pages',
                               'phptests', 'submit-configuration');
 $_route = explode('/', $app->request()->getPathInfo());
 $route  = $_route[1];
-if (!empty($_SESSION['authenticated']) && $_SESSION['authenticated'] == true ||
+if (!empty($_SESSION['authenticated']) && $_SESSION['authenticated'] === true ||
     in_array($route, $allowUnauthenticated )) {
-    // echo "Authenticated or request that is allowed without...";
+    // Authenticated or request that is allowed without
 } else {
   echo '{"notifications":[], "error":"unauthenticated"}';
   exit(0);
@@ -137,7 +135,7 @@ $app->post('/submit-configuration', function () use ($app) {
   echo json_encode($x);
 });
 // installation precondition tests
-$app->get('/phptests', function () use ($app) {
+$app->get('/phptests', function () {
   $v=explode(".",PHP_VERSION);
   $tests = array(
     array('id'=>'php53',     'description'=>'PHP version 5.3+',          'result'=>$v[0]>5||($v[0]==5&&$v[1]>2),       'remedy'=>'upgrade PHP to 5.3+'),
@@ -176,7 +174,7 @@ $app->post('/authenticate', function () use ($app) {
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, array());
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-    $return = curl_exec($ch);
+    curl_exec($ch);
     $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     if ($status === 200) {
@@ -187,7 +185,7 @@ $app->post('/authenticate', function () use ($app) {
   }
   echo json_encode($x);
 });
-$app->get('/logout', function () use ($app) {
+$app->get('/logout', function () {
   if ($_SESSION['authenticated']) {
     $x=array('message'=>'success');
   } else {
@@ -203,10 +201,7 @@ $app->get('/logout', function () use ($app) {
 
 $app->get('/notifications', function () {
   $result = array('notifications'=>array());
-  // php-activerecord...
-  //foreach (Notification::all(array("order" => "tstamp desc", 'limit' => 50)) as $record) { $result['notifications'][] = $record->to_array(); }
-  // paris....
-  foreach (Notification::limit(20)->order_by_desc('tstamp')->find_many() as $record) { $result['notifications'][] = $record->as_array(); }
+  foreach (Notification::limit(15)->order_by_desc('tstamp')->find_many() as $record) { $result['notifications'][] = $record->as_array(); }
   echo json_encode( $result );
 });
 
@@ -216,21 +211,18 @@ $app->get('/ous', function () {
   $result = array('ous'=>array());
   foreach (OU::find_many() as $record) {
     $r = $record->as_array();
-    //print_r($r);
-    $children = OU::where('parent_id', $r['id'])->find_many() ;//'all', array('conditions' => array('parent_id = ?', $r['id'])));
-    //$children = OU::find_many() ;
+    $children = OU::where('parent_id', $r['id'])->find_many() ;
     $kids = array();
     foreach ($children as $childOu) {
       $kids[] = $childOu->id;
     }
     $r['children'] = $kids;
-    $r['ou_path'] = 'fixme';// fixme $record->getPathString(); // should/could be done clientside, too
+    $r['ou_path'] = 'fixme'; // record->getPathString -- should/could be done clientside, too
     $result['ous'][] = $r;
   }
-  # relations? Book::all(array('include'=>array('author'));
   echo json_encode( $result );
 });
-$app->get('/ous/:id', function ($ouid) use ($app) {
+$app->get('/ous/:id', function ($ouid) {
   if ($ou = OU::find_one($ouid)) {
     echo json_encode( array('ou'=> $ou->as_array()) );
   }
@@ -249,7 +241,7 @@ $app->put('/ous/:id', function ($id) {
     echo json_encode( array('ou'=> $dev->as_array()) );
   }
 });
-$app->post('/ous', function () use ($app) {
+$app->post('/ous', function () {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $ndev = $post['ou'];
   if ($dev = OU::create()) {
@@ -285,7 +277,7 @@ $app->get('/hosts', function () {
   }
   echo json_encode( $result );
 });
-$app->post('/hosts', function () use ($app) {
+$app->post('/hosts', function () {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $ndev = $post['host'];
   if ($dev = Host::create()) {
@@ -304,11 +296,6 @@ $app->get('/laststates', function () {
   echo json_encode( $result );
 });
 
-// TBD:
-// $app->get('/livestates', $ouid) -> AMTC_BIN + optionset ...
-// or... include it into '/laststates' if flag given: run amtc, update db, fetch db
-
-
 /**************** Users ******************************************************/
 
 $app->get('/users', function () {
@@ -319,7 +306,7 @@ $app->get('/users', function () {
   }
   echo json_encode( $result );
 });
-$app->get('/users/:id', function ($uid) use ($app) {
+$app->get('/users/:id', function ($uid) {
   if ($user = User::find_one($uid)) {
     echo json_encode( array('user'=> $user->as_array()) );
   } elseif ($user = User::where('name',$uid)->find_one()) {
@@ -374,7 +361,7 @@ $app->get('/optionsets', function () {
   }
   echo json_encode( $result );
 });
-$app->get('/optionsets/:id', function ($ouid) use ($app) {
+$app->get('/optionsets/:id', function ($ouid) {
   if ($os = Optionset::find_one($ouid)) {
     echo json_encode( array('optionset'=> $os->as_array()) );
   }
@@ -406,7 +393,7 @@ $app->delete('/optionsets/:id', function ($id) {
     echo '{}';
   }
 });
-$app->post('/optionsets', function () use ($app) {
+$app->post('/optionsets', function () {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $udev = $post['optionset'];
   if ($dev = Optionset::create()) {
@@ -463,7 +450,7 @@ $app->delete('/jobs/:id', function ($id) {
     echo '{}';
   }
 });
-$app->post('/jobs', function () use ($app) {
+$app->post('/jobs', function () {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $user = $post['job'];
   if ($job = Job::create()) {

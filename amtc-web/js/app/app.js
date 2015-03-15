@@ -817,7 +817,7 @@ App.OusIndexController = Ember.Controller.extend({
   //  console.log('Adding a post for ', this.get('currentUser.name'));
   // }
 });
-App.OusNewController = App.OuEditController; // FIXME: evil?
+App.OusNewController = App.OuEditController;
 // Client PCs
 App.HostsController = Ember.ArrayController.extend({
   hosts: function() {
@@ -1033,7 +1033,7 @@ App.OptionsetController = Ember.Controller.extend({
     }
   }
 });
-App.OptionsetsNewController = App.OptionsetController; // FIXME: evil?
+App.OptionsetsNewController = App.OptionsetController;
 App.OptionsetsController = Ember.ArrayController.extend({
   optionsets: function() {
     return this.get('store').find('optionset');
@@ -1092,7 +1092,7 @@ App.ScheduleController = Ember.Controller.extend({
     }
   }
 });
-App.SchedulesNewController = App.ScheduleController; // FIXME: evil? dumb...?
+App.SchedulesNewController = App.ScheduleController;
 // Controller for /#setup (Installer)
 App.SetupController = Ember.Controller.extend({
   // Controller used for initial installation page #setup
