@@ -12,17 +12,22 @@ features
 * lightweight C application, only depends on libcurl, gnutls and pthreads
 * currently builds fine on linux and OSX (and windows via cygwin; unverified since 0.4.0)
 * allows quick and comfortable mass-power control via shell and...
-* comes with a ajaxish PHP-based web interface called `amtc-web`,
+* comes with a EmberJS-based web interface called `amtc-web`,
   that depends on PHP's PDO database layer to provide a GUI for...
-  * realtime power state monitoring via AMT© including OS TCP port probing/detection (#screenshot)
-  * anachronous OOB power control using a database-driven job queue (#screenshot)
-  * power/OS-monitoring logging with graphing (#screenshot)
+  * realtime power state monitoring via AMT© including OS TCP port probing/detection
+  * anachronous OOB power control using a database-driven job queue
+  * power/OS-monitoring logging with graphing
   * management of master file data like rooms and hosts to control
   * setup (of atmc-web itself, i.e. providing database connection details etc.)
 * acts as a tool for flexible and robust scheduled remote power management (which is true for amtc itself and amtc-web; amtc-web just adds another layer of comfort regarding shell interaction with your many hosts).
 
-The [amtc wiki](https://github.com/schnoddelbotz/amtc/wiki) features more details.
-
+<img src="screenshots/setup.png" width="200px" />
+<img src="screenshots/dashboard.png" width="200px" />
+<img src="screenshots/monitor-states.png" width="200px" />
+<img src="screenshots/monitor-selection.png" width="200px" />
+<img src="screenshots/manage-amtoptions.png" width="200px" />
+<img src="screenshots/manage-rooms.png" width="200px" />
+<img src="screenshots/manage-schedule.png" width="200px" />
 
 usage
 =====
