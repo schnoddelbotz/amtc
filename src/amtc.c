@@ -373,7 +373,7 @@ static void *process_single_client(void* num) {
                                  wsman_classes[do_enumerate], chunk.memory);
   }
 
-  // fixme: this needs to be duplicated in the function head to eg. reset only SSH boxes (CLI)
+  // this would need to be duplicated in the function head to eg. reset only SSH boxes (CLI)
   if ( ((scan_ssh||scan_rdp) && (cmd==CMD_INFO && amt_result==0)) || enforceScans ) {
     os_port=SCANRESULT_NONE_OPEN;
     if (scan_rdp)
@@ -501,7 +501,6 @@ int probe_one_hostport(int hostid, int port, int alreadyFound) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/* FIXME error-handling -- not only here :-/ */
 void process_hostlist() {
   int a, b;
   pthread_t tid[MAX_HOSTS];
@@ -623,7 +622,7 @@ struct addrinfo* lookup_host (const char *host) {
         ptr = &((struct sockaddr_in6 *) res->ai_addr)->sin6_addr;
         break;
     }
-    // fixme ... totally untested with v6
+    // totally untested with v6 + needs cleanup
     return res;
     res = res->ai_next;
   }
