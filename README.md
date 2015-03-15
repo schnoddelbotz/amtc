@@ -26,7 +26,6 @@ features
 <img src="screenshots/monitor-states.png" width="200px" />
 <img src="screenshots/monitor-selection.png" width="200px" />
 <img src="screenshots/manage-amtoptions.png" width="200px" />
-<img src="screenshots/manage-rooms.png" width="200px" />
 <img src="screenshots/manage-schedule.png" width="200px" />
 
 usage
