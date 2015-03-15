@@ -23,11 +23,12 @@ amtc: amtc.c
 amtc.c: amt.h
 
 amt.h:
-	perl -pi -e 's/v(\d\.\d\.\d)/v$(AMTCV)/' amtc_usage
+	perl -pi -e 's/#AMTCV#/$(AMTCV)/' amtc_usage
 	for H in $(HEADERS); do xxd -i $$H $$H.h; done
 	cat amtc_usage.h cmd_*.h wsman_*.h wsman.h > amt.h
 	perl -pi -e 's/(0x\S\S)$$/$$1, 0x00/' amt.h
 	perl -pi -e 's/(\d+);$$/$$1 + 1 .";"/e' amt.h
+	git checkout amtc_usage
 
 clean:
 	rm -f cmd_*.h wsman_*.h amtc_usage.h amt.h amtc *.o
