@@ -165,7 +165,7 @@ class AmtcwebSpooler {
           $job->job_status = Job::STATUS_RUNNING;
           $job->last_started = time();
           $job->save();
-          $result = self::execAmtCommand($job,$opt);
+          self::execAmtCommand($job,$opt);
           $job->last_done = time();
           $job->job_status = Job::STATUS_DONE;
           $job->save();
