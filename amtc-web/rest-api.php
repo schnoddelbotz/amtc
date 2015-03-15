@@ -230,28 +230,20 @@ $app->get('/ous/:id', function ($ouid) {
 });
 $app->put('/ous/:id', function ($id) {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $udev = $put['ou'];
   if ($dev = OU::find_one($id)) {
-    $dev->name = $udev->name;
-    $dev->description = $udev->description;
-    $dev->parent_id = $udev->parent_id;
-    $dev->optionset_id = $udev->optionset_id;
-    $dev->idle_power = $udev->idle_power;
-    $dev->logging = $udev->logging;
+    $data = get_object_vars($put['ou']);
+    unset($data['ou_path']); // computed/displayed property ... avoid sending
+    $dev->set($data);
     $dev->save();
     echo json_encode( array('ou'=> $dev->as_array()) );
   }
 });
 $app->post('/ous', function () {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $ndev = $post['ou'];
   if ($dev = OU::create()) {
-    $dev->name = $ndev->name;
-    $dev->description = $ndev->description;
-    $dev->parent_id = $ndev->parent_id;
-    $dev->optionset_id = $ndev->optionset_id;
-    $dev->idle_power = $ndev->idle_power;
-    $dev->logging = $ndev->logging;
+    $data = get_object_vars($post['ou']);
+    unset($data['ou_path']); // computed/displayed property ... avoid sending
+    $dev->set($data);
     $dev->save();
     echo json_encode( array('ou'=> $dev->as_array()) );
   }
@@ -316,30 +308,16 @@ $app->get('/users/:id', function ($uid) {
 });
 $app->put('/users/:id', function ($id) {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $udev = $put['user'];
   if ($dev = User::find_one($id)) {
-    $dev->name = $udev->name;
-    $dev->fullname = $udev->fullname;
-    $dev->ou_id = $udev->ou_id;
-    // this gets boring. improve.
-    $dev->is_enabled = $udev->is_enabled;
-    $dev->is_admin = $udev->is_admin;
-    $dev->can_control = $udev->can_control;
+    $dev->set(get_object_vars($put['user']));
     $dev->save();
     echo json_encode( array('user'=> $dev->as_array()) );
   }
 });
 $app->post('/users', function () {
-  $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $udev = $put['user'];
+  $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   if ($dev = User::create()) {
-    $dev->name = $udev->name;
-    $dev->fullname = $udev->fullname;
-    $dev->ou_id = $udev->ou_id;
-    // this gets boring. improve.
-    $dev->is_enabled = $udev->is_enabled;
-    $dev->is_admin = $udev->is_admin;
-    $dev->can_control = $udev->can_control;
+    $dev->set(get_object_vars($post['user']));
     $dev->save();
     echo json_encode( array('user'=> $dev->as_array()) );
   }
@@ -369,20 +347,8 @@ $app->get('/optionsets/:id', function ($ouid) {
 });
 $app->put('/optionsets/:id', function ($id) {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $udev = $put['optionset'];
   if ($dev = Optionset::find_one($id)) {
-    $dev->name = $udev->name;
-    $dev->description = $udev->description;
-    $dev->sw_v5 = $udev->sw_v5;
-    // this gets boring. improve.
-    $dev->sw_dash = $udev->sw_dash;
-    $dev->sw_scan22 = $udev->sw_scan22;
-    $dev->sw_scan3389 = $udev->sw_scan3389;
-    $dev->sw_skipcertchk = $udev->sw_skipcertchk;
-    $dev->sw_usetls = $udev->sw_usetls;
-    $dev->opt_cacertfile = $udev->opt_cacertfile;
-    $dev->opt_passfile = $udev->opt_passfile;
-    $dev->opt_timeout = $udev->opt_timeout;
+    $dev->set(get_object_vars($put['optionset']));
     $dev->save();
     echo json_encode( array('optionset'=> $dev->as_array()) );
   }
@@ -396,20 +362,8 @@ $app->delete('/optionsets/:id', function ($id) {
 });
 $app->post('/optionsets', function () {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $udev = $post['optionset'];
   if ($dev = Optionset::create()) {
-    $dev->name = $udev->name;
-    $dev->description = $udev->description;
-    $dev->sw_v5 = $udev->sw_v5;
-    // this gets boring. improve.
-    $dev->sw_dash = $udev->sw_dash;
-    $dev->sw_scan22 = $udev->sw_scan22;
-    $dev->sw_scan3389 = $udev->sw_scan3389;
-    $dev->sw_skipcertchk = $udev->sw_skipcertchk;
-    $dev->sw_usetls = $udev->sw_usetls;
-    $dev->opt_cacertfile = $udev->opt_cacertfile;
-    $dev->opt_passfile = $udev->opt_passfile;
-    $dev->opt_timeout = $udev->opt_timeout;
+    $dev->set(get_object_vars($post['optionset']));
     $dev->save();
     echo json_encode( array('optionset'=> $dev->as_array()) );
   }
@@ -432,14 +386,8 @@ $app->get('/jobs/:id', function ($jid) {
 });
 $app->put('/jobs/:id', function ($id) {
   $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $user = $put['job'];
   if ($job = Job::find_one($id)) {
-    $job->repeat_days = $user->repeat_days;
-    $job->description = $user->description;
-    $job->start_time  = $user->start_time;
-    $job->ou_id       = $user->ou_id;
-    $job->amtc_cmd    = $user->amtc_cmd;
-    $job->amtc_delay  = $user->amtc_delay;
+    $job->set(get_object_vars($put['job']));
     $job->save();
     echo json_encode( array('job'=> $job->as_array()) );
   }
@@ -453,17 +401,13 @@ $app->delete('/jobs/:id', function ($id) {
 });
 $app->post('/jobs', function () {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $user = $post['job'];
+  $user = get_object_vars($post['job']);
   if ($job = Job::create()) {
-    $job->repeat_days = $user->repeat_days;
-    $job->description = $user->description;
-    $job->start_time  = $user->start_time;
-    $job->ou_id       = $user->ou_id;
-    $job->job_type    = $user->job_type; //amtcwebSpooler::JOB_INTERACTIVE=1,SCHED=2,MON=3
+    $hosts = $user['hosts'];
+    unset($user['hosts']); // rcvd: array "hosts", need: string "amtc_hosts"
+    $job->set($user);
     $job->user_id     = 1; // FIXME!!
-    $job->amtc_cmd    = $user->amtc_cmd;
-    $job->amtc_delay  = $user->amtc_delay;
-    isset($user->hosts) && $job->amtc_hosts  = implode(',',$user->hosts); // fixme, at least allow int only...
+    count($hosts) && $job->amtc_hosts  = implode(',',$hosts); // fixme, at least allow int only...
     $job->save();
     echo json_encode( array('job'=> $job->as_array()) );
     // if this is a interactive/type-1 job with cmd != info,
