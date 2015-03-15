@@ -185,13 +185,13 @@ class AmtcwebSpooler {
           $job->job_status = Job::STATUS_RUNNING;
           $job->last_started = time();
           $job->save();
-          $result = self::execAmtCommand($job,$opt);
+          self::execAmtCommand($job,$opt);
           $job->last_done = time();
           $job->job_status = Job::STATUS_PENDING;
           $job->save();
           if ($notification = Notification::create()) {
             $notification->message = "$job->description completed";
-            // choose powerup-powerdown icons here! use $result?
+            // choose powerup-powerdown icons here! use execAmtCommand retval?
             $notification->ntype = "envelope";
             $notification->user_id = 2; // hardcoded spooler user
             $notification->save();
@@ -200,63 +200,66 @@ class AmtcwebSpooler {
       break;
       case Job::JOB_MONITORING;
         // find OUs that have monitoring enabled, join by optionset_id
-        $optsetgroup = Array();
-        $job->last_started = time();
-        $job->job_status = Job::STATUS_RUNNING;
-        $job->save();
-        foreach (Ou::where('logging',1)->find_many() as $ou) {
-          $optsetgroup[$ou->optionset_id][] = $ou->id;
-        }
-        // now exec amtc -I ... on each group of hosts with same optionset
-        foreach ($optsetgroup as $optsetid=>$ou_array) {
-          $hosts = Array();
-          foreach ($ou_array as $ou_id) {
-            $hosts = array_merge($hosts, self::getOuHosts($ou_id,false,true));
-          }
-          $maxThreads = 180; // This should be a global config option!
-          if (count($hosts) < $maxThreads) {
-            $job->amtc_hosts = implode(',', $hosts);
-            $job->ou_id = $ou_id; // one OU setting fits all here, as it's the same...
-            if (isset($opt['n'])) {
-              echo "Dry-Run-Skip: execJob MONITORING: ".$job->amtc_hosts."\n";
-            }
-            else {
-              self::updateHostState( self::execAmtCommand($job,$opt), $opt );
-            }
-          } else {
-            // more than maxThreads hosts to scan, slice hosts array
-            $hostsCompleted = 0;
-            while ($hostsCompleted<count($hosts)) {
-              $workpack = array_slice($hosts, $hostsCompleted, $maxThreads);
-              $hostsCompleted += count($workpack);
-              $job->amtc_hosts = implode(',', $workpack);
-              if (isset($opt['n'])) {
-                echo "Dry-Run-Skip: execJob MONITORING: ".$job->amtc_hosts."\n";
-              }
-              else {
-                self::updateHostState( self::execAmtCommand($job,$opt), $opt );
-              }
-            }
-          }
-        }
-        $job->last_done = time();
-        $job->job_status = Job::STATUS_PENDING;
-        $job->ou_id = NULL;
-        $job->amtc_hosts = NULL;
-        $job->save();
+        self::execMonitoringJob($job,$opt);
       break;
     }
     # sendNotification  -> notification 'powered up x in y seconds'
   }
 
+  static function execMonitoringJob(Job $job,$opt) {
+    $optsetgroup = Array();
+    $job->last_started = time();
+    $job->job_status = Job::STATUS_RUNNING;
+    $job->save();
+    foreach (Ou::where('logging',1)->find_many() as $ou) {
+      $optsetgroup[$ou->optionset_id][] = $ou->id;
+    }
+    // now exec amtc -I ... on each group of hosts with same optionset
+    foreach ($optsetgroup as $optsetid=>$ou_array) {
+      $hosts = Array();
+      foreach ($ou_array as $ou_id) {
+        $hosts = array_merge($hosts, self::getOuHosts($ou_id,true));
+      }
+      $maxThreads = 180; // This should be a global config option!
+      if (count($hosts) < $maxThreads) {
+        $job->amtc_hosts = implode(',', $hosts);
+        $job->ou_id = $ou_id; // one OU setting fits all here, as it's the same...
+        if (isset($opt['n'])) {
+          echo "Dry-Run-Skip: execJob MONITORING: ".$job->amtc_hosts."\n";
+        }
+        else {
+          self::updateHostState( self::execAmtCommand($job,$opt), $opt );
+        }
+      } else {
+        // more than maxThreads hosts to scan, slice hosts array
+        $hostsCompleted = 0;
+        while ($hostsCompleted<count($hosts)) {
+          $workpack = array_slice($hosts, $hostsCompleted, $maxThreads);
+          $hostsCompleted += count($workpack);
+          $job->amtc_hosts = implode(',', $workpack);
+          if (isset($opt['n'])) {
+            echo "Dry-Run-Skip: execJob MONITORING: ".$job->amtc_hosts."\n";
+          }
+          else {
+            self::updateHostState( self::execAmtCommand($job,$opt), $opt );
+          }
+        }
+      }
+    }
+    $job->last_done = time();
+    $job->job_status = Job::STATUS_PENDING;
+    $job->ou_id = NULL;
+    $job->amtc_hosts = NULL;
+    $job->save();
+  }
+
   // construct amtc binary command line options based on job
-  static function buildAmtcCommandline(Job $job,$opt) {
+  static function buildAmtcCommandline(Job $job) {
     $ou        = Ou::find_one($job->ou_id);
     $optionset = Optionset::find_one($ou->optionset_id);
 
     // - throw error if optionset is nil (fresh install...)
     // - maxThreads was a per-optionset setting, but should be global/config
-    // - what was opt intended for? :-/
 
     $cmd_opts = Array('-j'); // amtc shall always produce parsable json output
     $optionset->sw_scan22       && $cmd_opts[] = '-s';
@@ -283,7 +286,7 @@ class AmtcwebSpooler {
 
   // execute AMTC command, log results
   static function execAmtCommand(Job $job,$opt) {
-    $cmd = self::buildAmtcCommandline($job,$opt);
+    $cmd = self::buildAmtcCommandline($job);
 
     isset($opt['d']) && print("[debug] execAmtCommand for job #$job->id: $cmd\n");
     if (isset($opt['n'])) {
@@ -365,7 +368,7 @@ class AmtcwebSpooler {
     return implode(' ', $hosts);
   }
 
-  static function getOuHosts($ouid, $recursive=false, $getIdArray=false) {
+  static function getOuHosts($ouid, $getIdArray=false) {
     $hosts = Array();
     $ids = Array();
     foreach (Host::where('ou_id', $ouid)->find_many() as $host) {

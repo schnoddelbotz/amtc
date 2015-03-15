@@ -60,7 +60,7 @@ $app->get('/pages/:id', function ($id) use ($app) {
   )));
 });
 // Installer
-$app->post('/submit-configuration', function () use ($app) {
+$app->post('/submit-configuration', function () {
 
   if (file_exists(AMTC_CFGFILE)) {
     echo 'INSTALLTOOL_LOCKED';
@@ -157,7 +157,7 @@ $app->get('/phptests', function () {
   echo json_encode( $result );
 });
 // simple basic auth verification 'proxy'
-$app->post('/authenticate', function () use ($app) {
+$app->post('/authenticate', function () {
   // done here as browsers do not allow to block basic auth popups... hack? yes.
   $wanted = array(
     'username'   => $_POST['username'],

@@ -47,17 +47,17 @@ class OU extends Model
     if ($s = OU::find($startPid)) {
       $r = $s->to_array();
     }
-    $r['children'] = self::_getTree($startPid);
+    $r['children'] = self::getOuTree($startPid);
     return $r;
   }
 
-  static function _getTree($startPid=1) {
+  static function getOuTree($startPid=1) {
     $z = OU::find($startPid);
     $x = 0;
     $n = array();
     foreach ($z->children as $child) {
       $n[$x] = $child->to_array();
-      $n[$x]['children'] = self::_getTree($child->id);
+      $n[$x]['children'] = self::getOuTree($child->id);
       $x++;
     }
     return $n;
