@@ -12,11 +12,13 @@ features
 * lightweight C application, only depends on libcurl, gnutls and pthreads
 * currently builds fine on linux and OSX (and windows via cygwin; unverified since 0.4.0)
 * allows quick and comfortable mass-power control via shell and...
-* comes with a EmberJS-based web interface called `amtc-web`,
-  that depends on PHP's PDO database layer to provide a GUI for...
+* comes with a [EmberJS](http://www.emberjs.com/)-based web interface called `amtc-web`,
+  that depends on [Slim](http://www.slimframework.com/) and 
+  [Idiorm and Paris](http://j4mie.github.io/idiormandparis/) to provide a JSON backend
+  for these `amtc-web` features:
   * realtime power state monitoring via AMT© including OS TCP port probing/detection
   * anachronous OOB power control using a database-driven job queue
-  * power/OS-monitoring logging with graphing
+  * power/OS-monitoring logging with [notyet:] graphing
   * management of master file data like rooms and hosts to control
   * setup (of atmc-web itself, i.e. providing database connection details etc.)
 * acts as a tool for flexible and robust scheduled remote power management (which is true for amtc itself and amtc-web; amtc-web just adds another layer of comfort regarding shell interaction with your many hosts).
@@ -32,7 +34,7 @@ usage
 =====
 
 ```
- amtc v0.8.4 - Intel AMT & WS-Man OOB mass management tool
+ amtc v0.8.5 - Intel AMT & WS-Man OOB mass management tool
                      https://github.com/schnoddelbotz/amtc
  usage
   amtc [-actions] [-options] host [host ...]
@@ -66,14 +68,6 @@ usage
   -v(erbose)  detailed progress, debug by using -vvv
   -w(ait)     in seconds / float, after each pc. one thread.
 
- examples
-  query powerstate of <AMT-9.0-hosts named host-a and host-b
-   $ amtc host-a host-b
-  power up some AMT 9.0 hosts using wsman and 5-second-delay
-   $ amtc -dUw 5 host-c host-d host-e
-  enable SOL (Serial over LAN on TCP port 16994)
-   $ amtc -M sol=on host-f
-
 ```
 
 status
@@ -94,60 +88,17 @@ a real SOAP library like [gSOAP](http://www.cs.fsu.edu/~engelen/soap.html).
 If you're hit by this hack, please file a bug of an amtc-run
 using -vvvv option -- thanks!
 
-Give `amtc-web` a testdrive here:
-<a href="http://jan.hacker.ch/projects/amtc/demo">amtc - vPro/AMT GUI demo site</a>,
-The account required for admin-access (e.g. room management) is:
-```
-username: joe
-password: foo
-AMT password: C@mp1eXsuxx
-```
-Note that the demosite's config file is read-only, which means you can
-happily create/edit rooms and pcs but NOT change basic config settings
-like which DB or password file to use. This also means if you want to
-test amtc-web not only by clicking around but by turning your own home
-PC on or off using that demo website, you have to set your AMT password 
-to the one stated above. Also note that every full hour, a sane default 
-test database will be restored.
-
-I'll try to put some more time into amtc-web2 to get the new GUI ready soon...
-
-
-building
-========
-```
-# OSX: Install XCode including CommandLineTools,
-#      Install gnutls, [homebrew](http://brew.sh) recommended.
-make
-
-# debianoid: 
-sudo apt-get install libcurl3 libcurl4-gnutls-dev libgnutls-dev build-essential
-make
-sudo make install
-
-# ... or, create a .deb package (has additional build requirements)
-sudo apt-get install dh-make devscripts
-make deb
-sudo dpkg -i ../amtc_xxx.deb
-
-# RHELoid: 
-sudo yum install libcurl-devel gnutls-devel libcurl gnutls
-make
-
-# ... or, create a .rpm package - requires ....
-make rpm
-
-# Windows: install cygwin's curl,gnutls and pthreads (-dev) packages, make and gcc
-make
-```
+building, installation
+======================
+See [INSTALL.md](INSTALL.md).
 
 license
 =======
-This project is published under the [MIT license](../master/LICENSE.txt).
+This project is published under the [MIT license](LICENSE.txt).
 It heavily relies on bundled 3rd party OSS components that are listed in the
-in-app ['about' page](../master/amtc-web2/pages/about.md) of amtc-web;
+in-app ['about' page](amtc-web/pages/about.md) of amtc-web;
 their individual license texts have been bundled into 
-[LICENSES-3rd-party.txt](../master/amtc-web2/LICENSES-3rd-party.txt). That file is also
+[LICENSES-3rd-party.txt](amtc-web/LICENSES-3rd-party.txt). That file is also
 distributed with any [release of amtc](https://github.com/schnoddelbotz/amtc/releases).
 
 alternatives
@@ -162,3 +113,4 @@ alternatives
   A windows powershell based GUI. Again, completely different story.
 - for DASH-only use, the best choice for windows CLI scenarios is most likely AMD's [dashcli](http://developer.amd.com/tools-and-sdks/cpu-development/client-management-tools-for-dmtf-dash/). Find MS SCCM plugins there, too.
 - bootstrap your own using the [intel AMT SDK](http://software.intel.com/sites/manageability/AMT_Implementation_and_Reference_Guide)
+- [OpenWSMAN](http://openwsman.github.io/): Correct SOAP implementation, rich feature set.
