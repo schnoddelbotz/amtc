@@ -403,11 +403,14 @@ $app->post('/jobs', function () {
   $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
   $user = get_object_vars($post['job']);
   if ($job = Job::create()) {
-    $hosts = $user['hosts'];
-    unset($user['hosts']); // rcvd: array "hosts", need: string "amtc_hosts"
+    if (isset($user['hosts'])) {
+      $hosts = $user['hosts'];
+      unset($user['hosts']); // rcvd: array "hosts", need: string "amtc_hosts"
+    }
     $job->set($user);
     $job->user_id     = 1; // FIXME!!
-    count($hosts) && $job->amtc_hosts  = implode(',',$hosts); // fixme, at least allow int only...
+    if (is_array($hosts))
+      $job->amtc_hosts = preg_replace('/[^\d,]/','',implode(',',$hosts));
     $job->save();
     echo json_encode( array('job'=> $job->as_array()) );
     // if this is a interactive/type-1 job with cmd != info,
