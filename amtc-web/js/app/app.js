@@ -1295,7 +1295,7 @@ App.Laststate = DS.Model.extend({
     this.get('state_http')== 200  && this.get('state_amt')==5 && (cc='fa fa-power-off fa-fw'); // AMT ok, powered down
     this.get('open_port') == 22   && (cc = "fa fa-linux fa-fw");
     this.get('open_port') == 3389 && (cc = "fa fa-windows fa-fw");
-    return new Handlebars.SafeString('<i class="'+cc+'"></i> ');
+    return new Ember.Handlebars.SafeString('<i class="'+cc+'"></i> ');
   }.property('open_port','state_http','state_amt'),
   openPortCssClass: function() {
     var result = ''; // unreachable
@@ -1436,7 +1436,7 @@ Ember.Handlebars.helper('format-markdown', function(input) {
   if (input) {
     var md = showdown.makeHtml(input);
     md = md.replace("<h1 id=",'<h1 class="page-header" id=');
-    var html = new Handlebars.SafeString(md);
+    var html = new Ember.Handlebars.SafeString(md);
     return html;
   } else {
     console.log("Warning: empty input on showdown call.");
@@ -1447,8 +1447,8 @@ Ember.Handlebars.helper('format-markdown', function(input) {
 // print fontAwesome checkmarks for input true/false
 Ember.Handlebars.helper('check-mark', function(input) {
   return input ?
-    new Handlebars.SafeString('<i class="fa grey fa-fw fa-check-square-o"></i> ') :
-    new Handlebars.SafeString('<i class="fa grey fa-fw fa-square-o"></i> ');
+    new Ember.Handlebars.SafeString('<i class="fa grey fa-fw fa-check-square-o"></i> ') :
+    new Ember.Handlebars.SafeString('<i class="fa grey fa-fw fa-square-o"></i> ');
 });
 
 // moment.js PRETTY timestamps

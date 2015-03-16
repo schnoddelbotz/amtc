@@ -12,7 +12,6 @@ export BOOTSTRAP   = 3.3.2
 export EMBERJS     = 1.11.0-beta.5
 export EMBERDATA   = 1.0.0-beta.15
 export FONTAWESOME = 4.3.0
-export HANDLEBARS  = 1.3.0
 
 SHELL = bash
 
@@ -24,7 +23,7 @@ JSFILES  = js/jquery.min.js js/bootstrap.min.js js/ember-template-compiler.js \
 	js/emberjs.min.js js/ember-data.min.js js/showdown.js \
 	js/moment.js js/humane.min.js js/plugins/metisMenu/metisMenu.min.js \
 	js/plugins/morris/raphael.min.js js/plugins/morris/morris.min.js \
-	js/jquery-ui.min.js js/handlebars.js
+	js/jquery-ui.min.js
 
 PHPLIBS  = lib/Slim/Slim.php lib/idiorm.php lib/paris.php
 ZIPSRC   = js/jquery-ui.min.js js/bootstrap.min.js css/sb-admin-2.css fonts/fontawesome-webfont.woff
