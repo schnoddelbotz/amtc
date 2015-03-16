@@ -139,10 +139,8 @@ $app->get('/ous/:id', function ($ouid) {
     echo json_encode( array('ou'=> $ou->as_array()) );
   }
 });
-$app->put('/ous/:id', function ($id) {
-  $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  if ($dev = OU::find_one($id)) {
-    $data = get_object_vars($put['ou']);
+$app->put('/ous/:id', function ($id) use ($app) {
+  if (($dev = OU::find_one($id)) && ($data = getSubmit($app,'ou'))) {
     unset($data['ou_path']); // computed/displayed property ... avoid sending
     $dev->set($data);
     $dev->save();
@@ -182,8 +180,6 @@ $app->get('/hosts', function () {
   echo json_encode( $result );
 });
 $app->post('/hosts', function () {
-  $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $ndev = $post['host'];
   if ($dev = Host::create()) {
     $dev->hostname = $ndev->hostname;
     $dev->ou_id = $ndev->ou_id;
@@ -225,10 +221,9 @@ $app->put('/users/:id', function ($id) {
     echo json_encode( array('user'=> $dev->as_array()) );
   }
 });
-$app->post('/users', function () {
-  $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  if ($dev = User::create()) {
-    $dev->set(get_object_vars($post['user']));
+$app->post('/users', function () use ($app) {
+  if (($dev = User::create()) && ($data = getSubmit($app,'user'))) {
+    $dev->set($data);
     $dev->save();
     echo json_encode( array('user'=> $dev->as_array()) );
   }
@@ -256,10 +251,9 @@ $app->get('/optionsets/:id', function ($ouid) {
     echo json_encode( array('optionset'=> $os->as_array()) );
   }
 });
-$app->put('/optionsets/:id', function ($id) {
-  $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  if ($dev = Optionset::find_one($id)) {
-    $dev->set(get_object_vars($put['optionset']));
+$app->put('/optionsets/:id', function ($id) use ($app) {
+  if (($dev = Optionset::find_one($id)) && ($data = getSubmit($app,'optionset'))) {
+    $dev->set($data);
     $dev->save();
     echo json_encode( array('optionset'=> $dev->as_array()) );
   }
@@ -310,10 +304,8 @@ $app->delete('/jobs/:id', function ($id) {
     echo '{}';
   }
 });
-$app->post('/jobs', function () {
-  $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  $user = get_object_vars($post['job']);
-  if ($job = Job::create()) {
+$app->post('/jobs', function () use ($app) {
+  if (($job = Job::create()) && ($user = getSubmit($app,'job'))) {
     if (isset($user['hosts'])) {
       $hosts = $user['hosts'];
       unset($user['hosts']); // rcvd: array "hosts", need: string "amtc_hosts"
