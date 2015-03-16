@@ -41,3 +41,11 @@ $app->notFound(function () {
 $app->error(function (\Exception $e) {
   echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') );
 });
+
+function getSubmit($_app,$key) {
+  $ret = null;
+  $data = get_object_vars(json_decode($_app->request()->getBody()));
+  if (isset($data[$key]))
+    $ret = get_object_vars($data[$key]);
+  return $ret;
+}
