@@ -157,45 +157,45 @@ class AmtcwebSpooler {
   }
 
   static function execJob($job,$opt) {
+    if (isset($opt['n'])) {
+      echo "Dry-Run-Skip execJob: ".$job->id.": ".$job->description."\n";
+      return;
+    }
     switch ($job->job_type) {
       case Job::JOB_INTERACTIVE:
-        if (isset($opt['n']))
-          echo "Dry-Run-Skip: execJob INTERACTIVE: ".$job->id."  ".$job->description."\n";
-        else {
-          $job->job_status = Job::STATUS_RUNNING;
-          $job->last_started = time();
-          $job->save();
-          self::execAmtCommand($job,$opt);
-          $job->last_done = time();
-          $job->job_status = Job::STATUS_DONE;
-          $job->save();
-          // how to trigger increased monitoring until job completed?
-          if ($notification = Notification::create()) {
-            $notification->message = "Job $job->id completed";
-            $notification->ntype = "envelope";
-            $notification->user_id = 2; // hardcoded spooler user
-            $notification->save();
-          }
+        $job->job_status = Job::STATUS_RUNNING;
+        $job->last_started = time();
+        $job->save();
+        self::execAmtCommand($job,$opt);
+        $job->last_done = time();
+        $job->job_status = Job::STATUS_DONE;
+        $job->save();
+        // how to trigger increased monitoring until job completed?
+        if ($notification = Notification::create()) {
+          $notification->message = "Job $job->id completed";
+          $notification->ntype = "envelope";
+          $notification->user_id = 2; // hardcoded spooler user
+          $notification->save();
         }
       break;
       case Job::JOB_SCHEDULED:
-        if (isset($opt['n']))
-          echo "Dry-Run-Skip: execJob SCHEDULED: ".$job->id."  ".$job->description."\n";
-        else {
-          $job->job_status = Job::STATUS_RUNNING;
-          $job->last_started = time();
-          $job->save();
-          self::execAmtCommand($job,$opt);
-          $job->last_done = time();
-          $job->job_status = Job::STATUS_PENDING;
-          $job->save();
-          if ($notification = Notification::create()) {
-            $notification->message = "$job->description completed";
-            // choose powerup-powerdown icons here! use execAmtCommand retval?
-            $notification->ntype = "envelope";
-            $notification->user_id = 2; // hardcoded spooler user
-            $notification->save();
+        $job->job_status = Job::STATUS_RUNNING;
+        $job->last_started = time();
+        $job->save();
+        self::execAmtCommand($job,$opt);
+        $job->last_done = time();
+        $job->job_status = Job::STATUS_PENDING;
+        $job->save();
+        if ($notification = Notification::create()) {
+          $notification->message = "$job->description completed";
+          // choose powerup-powerdown icons here! use execAmtCommand retval?
+          switch ($job->amtc_cmd) {
+            case 'U': $notification->ntype = 'toggle-on';  break;
+            case 'D': $notification->ntype = 'toggle-off'; break;
+            default:  $notification->ntype = 'envelope';
           }
+          $notification->user_id = 2; // hardcoded spooler user
+          $notification->save();
         }
       break;
       case Job::JOB_MONITORING;
@@ -224,12 +224,7 @@ class AmtcwebSpooler {
       if (count($hosts) < $maxThreads) {
         $job->amtc_hosts = implode(',', $hosts);
         $job->ou_id = $ou_id; // one OU setting fits all here, as it's the same...
-        if (isset($opt['n'])) {
-          echo "Dry-Run-Skip: execJob MONITORING: ".$job->amtc_hosts."\n";
-        }
-        else {
-          self::updateHostState( self::execAmtCommand($job,$opt), $opt );
-        }
+        self::updateHostState( self::execAmtCommand($job,$opt), $opt );
       } else {
         // more than maxThreads hosts to scan, slice hosts array
         $hostsCompleted = 0;
@@ -237,12 +232,7 @@ class AmtcwebSpooler {
           $workpack = array_slice($hosts, $hostsCompleted, $maxThreads);
           $hostsCompleted += count($workpack);
           $job->amtc_hosts = implode(',', $workpack);
-          if (isset($opt['n'])) {
-            echo "Dry-Run-Skip: execJob MONITORING: ".$job->amtc_hosts."\n";
-          }
-          else {
-            self::updateHostState( self::execAmtCommand($job,$opt), $opt );
-          }
+          self::updateHostState( self::execAmtCommand($job,$opt), $opt );
         }
       }
     }

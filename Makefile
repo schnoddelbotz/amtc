@@ -58,7 +58,7 @@ amtc-web:
 
 clean:
 	rm -rf dist amtc amtc*.{deb,pkg} *.build debian/amtc \
-        	osxpkgscripts osxpkgroot Distribution.xml
+		osxpkgscripts osxpkgroot Distribution.xml amtc_build.spec
 	cd src && make clean
 	cd $(AMTCWEBDIR) && make clean
 
@@ -107,7 +107,8 @@ debclean: clean
 rpm: clean
 	mkdir -p $(RPMBUILD)/SOURCES
 	cd ..; mv amtc $(APP); tar --exclude-vcs -czf $(RPMSRC) $(APP); mv $(APP) amtc
-	rpmbuild -ba amtc.spec
+	perl -pe "s/#AMTCV#/$(AMTCV)/" amtc.spec > amtc_build.spec
+	rpmbuild -ba amtc_build.spec
 
 # apply RHELoid + apache 2.4 changes (if installed _on buildhost_)
 # called by amtc.spec%install
