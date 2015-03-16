@@ -23,7 +23,7 @@ if (!empty($_SESSION['authenticated']) && $_SESSION['authenticated'] === true ||
     in_array($route, $allowUnauthenticated )) {
     // Authenticated or request that is allowed without
 } else {
-  echo '{"notifications":[], "error":"unauthenticated"}';
+  echo '{"notifications":[], "laststates":[], "error":"unauthenticated"}';
   // app->stop() will not work here yet ...
   return;
 }
@@ -140,7 +140,7 @@ $app->get('/ous/:id', function ($ouid) {
   }
 });
 $app->put('/ous/:id', function ($id) use ($app) {
-  if (($dev = OU::find_one($id)) && ($data = getSubmit($app,'ou'))) {
+  if (($dev = OU::find_one($id)) && ($data = SlimUtil::getSubmit($app,'ou'))) {
     unset($data['ou_path']); // computed/displayed property ... avoid sending
     $dev->set($data);
     $dev->save();
@@ -148,9 +148,7 @@ $app->put('/ous/:id', function ($id) use ($app) {
   }
 });
 $app->post('/ous', function () {
-  $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  if ($dev = OU::create()) {
-    $data = get_object_vars($post['ou']);
+  if (($dev = OU::create()) && ($data = SlimUtil::getSubmit($app,'ou'))) {
     unset($data['ou_path']); // computed/displayed property ... avoid sending
     $dev->set($data);
     $dev->save();
@@ -179,10 +177,10 @@ $app->get('/hosts', function () {
   }
   echo json_encode( $result );
 });
-$app->post('/hosts', function () {
-  if ($dev = Host::create()) {
-    $dev->hostname = $ndev->hostname;
-    $dev->ou_id = $ndev->ou_id;
+$app->post('/hosts', function () use ($app) {
+  if (($dev = Host::create()) && ($data = SlimUtil::getSubmit($app,'host'))) {
+    $dev->ou_id = $data['ou_id'];
+    $dev->hostname = $data['hostname'];
     $dev->save();
     echo json_encode( array('host'=> $dev->as_array()) );
   }
@@ -213,16 +211,15 @@ $app->get('/users/:id', function ($uid) {
     echo json_encode( array('user'=> $user->as_array()) );
   }
 });
-$app->put('/users/:id', function ($id) {
-  $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  if ($dev = User::find_one($id)) {
-    $dev->set(get_object_vars($put['user']));
+$app->put('/users/:id', function ($id) use ($app) {
+  if (($dev = User::find_one($id)) && ($data = SlimUtil::getSubmit($app,'user'))) {
+    $dev->set($data);
     $dev->save();
     echo json_encode( array('user'=> $dev->as_array()) );
   }
 });
 $app->post('/users', function () use ($app) {
-  if (($dev = User::create()) && ($data = getSubmit($app,'user'))) {
+  if (($dev = User::create()) && ($data = SlimUtil::getSubmit($app,'user'))) {
     $dev->set($data);
     $dev->save();
     echo json_encode( array('user'=> $dev->as_array()) );
@@ -252,7 +249,7 @@ $app->get('/optionsets/:id', function ($ouid) {
   }
 });
 $app->put('/optionsets/:id', function ($id) use ($app) {
-  if (($dev = Optionset::find_one($id)) && ($data = getSubmit($app,'optionset'))) {
+  if (($dev = Optionset::find_one($id)) && ($data = SlimUtil::getSubmit($app,'optionset'))) {
     $dev->set($data);
     $dev->save();
     echo json_encode( array('optionset'=> $dev->as_array()) );
@@ -265,10 +262,9 @@ $app->delete('/optionsets/:id', function ($id) {
     echo '{}';
   }
 });
-$app->post('/optionsets', function () {
-  $post = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  if ($dev = Optionset::create()) {
-    $dev->set(get_object_vars($post['optionset']));
+$app->post('/optionsets', function () use ($app) {
+  if (($dev = Optionset::create()) && ($data = SlimUtil::getSubmit($app,'optionset'))) {
+    $dev->set($data);
     $dev->save();
     echo json_encode( array('optionset'=> $dev->as_array()) );
   }
@@ -289,10 +285,9 @@ $app->get('/jobs/:id', function ($jid) {
     echo json_encode( array('job'=> $job->as_array()) );
   }
 });
-$app->put('/jobs/:id', function ($id) {
-  $put = get_object_vars(json_decode(\Slim\Slim::getInstance()->request()->getBody()));
-  if ($job = Job::find_one($id)) {
-    $job->set(get_object_vars($put['job']));
+$app->put('/jobs/:id', function ($id) use ($app) {
+  if (($job = Job::find_one($id)) && ($data = SlimUtil::getSubmit($app,'job'))) {
+    $job->set($data);
     $job->save();
     echo json_encode( array('job'=> $job->as_array()) );
   }
@@ -305,7 +300,7 @@ $app->delete('/jobs/:id', function ($id) {
   }
 });
 $app->post('/jobs', function () use ($app) {
-  if (($job = Job::create()) && ($user = getSubmit($app,'job'))) {
+  if (($job = Job::create()) && ($user = SlimUtil::getSubmit($app,'job'))) {
     if (isset($user['hosts'])) {
       $hosts = $user['hosts'];
       unset($user['hosts']); // rcvd: array "hosts", need: string "amtc_hosts"

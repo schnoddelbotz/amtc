@@ -8,13 +8,14 @@
 
 class AmtcwebInstaller {
 
+  static $cfgTpl = "<?php\n\ndefine('AMTC_PDOSTRING', '%s');\ndefine('AMTC_DBUSER', '%s');\ndefine('AMTC_DBPASS', '%s');\ndefine('AMTC_BIN', '%s');\ndefine('AMTC_AUTH_URL', '%s');\ndefine('AMTC_TZ', '%s');\ndefine('AMTC_DATADIR', '%s');\n";
+
   // write user-posted config (fresh install only)
   static function writeAmtcwebConfig($userData) {
     if (file_exists(AMTC_CFGFILE)) {
       echo 'INSTALLTOOL_LOCKED';
       return;
     }
-
     $wanted = array(
       'TIMEZONE'   => preg_replace('/[^A-Za-z\/]/', '',  $userData['timezone']),
       'AMTCBIN'    => realpath($userData['amtcbin']),
@@ -22,17 +23,8 @@ class AmtcwebInstaller {
       'DBTYPE'     => preg_replace('/[^A-Za-z]/', '',    $userData['selectedDB']),
       'DATADIR'    => realpath($userData['datadir'])
     );
-
     if ($wanted['TIMEZONE'] && $wanted['DATADIR'] && $wanted['DBTYPE'] && $wanted['AMTCBIN']) {
       $x = array("message"=>"Configuration written successfully");
-      $cfgTpl = "<?php\n\n".
-                "define('AMTC_PDOSTRING', '%s');\n".
-                "define('AMTC_DBUSER', '%s');\n".
-                "define('AMTC_DBPASS', '%s');\n".
-                "define('AMTC_BIN', '%s');\n".
-                "define('AMTC_AUTH_URL', '%s');\n".
-                "define('AMTC_TZ', '%s');\n".
-                "define('AMTC_DATADIR', '%s');\n";
 
       if ($wanted['DBTYPE'] == 'SQLite') {
         // create db if non-existant
@@ -57,8 +49,7 @@ class AmtcwebInstaller {
         $dbh = new PDO($wanted['PDOSTRING'], $wanted['DBUSER'], $wanted['DBPASS']);
       }
       // stuff below will only happen if PDO connect was ok...
-
-      $cfg = sprintf($cfgTpl, $wanted['PDOSTRING'], $wanted['DBUSER'],
+      $cfg = sprintf(self::$cfgTpl, $wanted['PDOSTRING'], $wanted['DBUSER'],
                     $wanted['DBPASS'], $wanted['AMTCBIN'], $wanted['AUTHURL'],
                     $wanted['TIMEZONE'], $wanted['DATADIR']);
 
@@ -80,7 +71,6 @@ class AmtcwebInstaller {
       $x = $wanted['AMTCBIN'] ? array("errorMsg"=>"Insufficient parameters!") :
                                 array("errorMsg"=>"amtc binary not found at path provided");
     }
-
     return json_encode($x);
   }
 
