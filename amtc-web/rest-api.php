@@ -147,7 +147,7 @@ $app->put('/ous/:id', function ($id) use ($app) {
     echo json_encode( array('ou'=> $dev->as_array()) );
   }
 });
-$app->post('/ous', function () {
+$app->post('/ous', function () use ($app) {
   if (($dev = OU::create()) && ($data = SlimUtil::getSubmit($app,'ou'))) {
     unset($data['ou_path']); // computed/displayed property ... avoid sending
     $dev->set($data);

@@ -223,7 +223,7 @@ class AmtcwebSpooler {
       $maxThreads = 180; // This should be a global config option!
       if (count($hosts) < $maxThreads) {
         $job->amtc_hosts = implode(',', $hosts);
-        $job->ou_id = $ou_id; // one OU setting fits all here, as it's the same...
+        $job->ou_id = $ou_array[0]; // one OU setting fits all here, as it's the same...
         self::updateHostState( self::execAmtCommand($job,$opt), $opt );
       } else {
         // more than maxThreads hosts to scan, slice hosts array
@@ -232,6 +232,7 @@ class AmtcwebSpooler {
           $workpack = array_slice($hosts, $hostsCompleted, $maxThreads);
           $hostsCompleted += count($workpack);
           $job->amtc_hosts = implode(',', $workpack);
+          $job->ou_id = $ou_array[0]; // one OU setting fits all here, as it's the same...
           self::updateHostState( self::execAmtCommand($job,$opt), $opt );
         }
       }

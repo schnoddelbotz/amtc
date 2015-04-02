@@ -1058,13 +1058,13 @@
           {{input type="checkbox" checked=model.sw_usetls}} use HTTPS/TLS (TCP port 16993)
         </label>
       </div>
-      {{#if sw_usetls}}
+      {{#if model.sw_usetls}}
         <div class="checkbox">
           <label>
             {{input type="checkbox" checked=model.sw_skipcertchk}} Skip TLS cert verification
           </label>
         </div>
-        {{#unless sw_skipcertchk}}
+        {{#unless model.sw_skipcertchk}}
           <div class="form-group">
             <label for="description">TLS CA cert file</label>
               {{input class="form-control" type="text" value=model.opt_cacertfile insert-newline="doneEditingReturn"}}

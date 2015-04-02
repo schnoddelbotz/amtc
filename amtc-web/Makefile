@@ -8,9 +8,9 @@
 # define versions to fetch
 export JQUERY      = 2.1.3
 export JQUERYUI    = 1.11.4
-export BOOTSTRAP   = 3.3.2
-export EMBERJS     = 1.11.0-beta.5
-export EMBERDATA   = 1.0.0-beta.15
+export BOOTSTRAP   = 3.3.4
+export EMBERJS     = 1.11.0
+export EMBERDATA   = 1.0.0-beta.16
 export FONTAWESOME = 4.3.0
 
 SHELL = bash
