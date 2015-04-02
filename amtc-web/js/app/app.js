@@ -651,7 +651,7 @@ App.LoginController = Ember.Controller.extend({
             self.set('isAuthenticated', true);
             // self.transitionToRoute('index');
             // lazy way, retrigger ember-data loads...
-            window.location.href = 'index.html';
+            window.location.href = ''; // -> index.html
           }
         },
         error: function(xhr, status, err) {
@@ -674,7 +674,7 @@ App.LoginController = Ember.Controller.extend({
           humane.log('<i class="glyphicon glyphicon-fire"></i> Signed out successfully',
             { timeout: 1000, clickToClose: false });
           window.setTimeout( function(){
-            window.location.href='index.html'; // not nice ... but ok 4 now
+            window.location.href=''; // not nice ... but ok 4 now
           }, 1100);
         },
         error: function(xhr, status, err) {
