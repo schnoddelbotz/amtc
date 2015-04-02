@@ -57,9 +57,6 @@ here to name any 3rd party component that makes up amtc-web (in random order).
    * Copyright (C) 2011-2014 Tilde, Inc. and contributors.
    * Portions Copyright (C) 2011 LivingSocial Inc.
    * [MIT? license](https://github.com/emberjs/data/blob/master/LICENSE)
- * [handlebarsJS](http://handlebarsjs.com)
-   * Copyright © 2011-2014 by Yehuda Katz
-   * [MIT license](https://github.com/wycats/handlebars.js/blob/master/LICENSE)
  * [showdownJS](https://github.com/showdownjs)
    * Copyright © 2007, John Fraser, [http://www.attacklab.net/](http://www.attacklab.net/)
    * Original Markdown copyright (c) 2004, John Gruber, [http://daringfireball.net/](http://daringfireball.net/)
