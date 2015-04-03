@@ -37,7 +37,7 @@ var App = Ember.Application.create({
     // AMTCWEB_IS_CONFIGURED gets defined via included script rest-api.php/rest-config.js
     if (typeof AMTCWEB_IS_CONFIGURED != 'undefined' && AMTCWEB_IS_CONFIGURED===false && !window.location.hash.match('#/page')) {
       // unconfigured system detected. inform user and relocate to setup.php
-      humane.log('<i class="glyphicon glyphicon-fire"></i> '+
+      humane.log('<i class="fa fa-meh-o"></i> '+
                  'No configuration file found!<br>warping into setup ...', { timeout: 3000 });
       window.setTimeout( function(){
         window.location.href = '#/setup'; // how to use transitionToRoute here?
@@ -338,7 +338,7 @@ App.SetupRoute = Ember.Route.extend({
                config_writable && data_writable && curl_supported) ? true : false);
         },
         function(response){
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Fatal error:'+
+          humane.log('<i class="fa fa-meh-o"></i> Fatal error:'+
                      '<p>webserver seems to lack PHP support!</p>', { timeout: 0, clickToClose: true });
         }
       );
@@ -671,7 +671,7 @@ App.LoginController = Ember.Controller.extend({
           App.eraseCookie("amtcweb");
           App.eraseCookie("username");
           App.eraseCookie("isLoggedIn");
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Signed out successfully',
+          humane.log('<i class="fa fa-meh-o"></i> Signed out successfully',
             { timeout: 1000, clickToClose: false });
           window.setTimeout( function(){
             window.location.href=''; // not nice ... but ok 4 now
@@ -718,7 +718,7 @@ App.UserEditController = Ember.Controller.extend({
         var device = this.get('model');
         device.deleteRecord();
         device.save().then(function() {
-          humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
+          humane.log('<i class="fa fa-trash"></i> Deleted successfully',
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
           window.location.href = '#/users';
@@ -726,7 +726,7 @@ App.UserEditController = Ember.Controller.extend({
           var res = jQuery.parseJSON(response.responseText);
           var msg = (typeof res.exceptionMessage=='undefined') ?
                     'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+          humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
         }
       )};
@@ -735,14 +735,14 @@ App.UserEditController = Ember.Controller.extend({
     doneEditingReturn: function() {
       console.log(this.get('model'));
       this.get('model').save().then(function() {
-        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
+        humane.log('<i class="fa fa-save"></i> Saved successfully',
           { timeout: 800 });
         window.location.href = '#/users';
       }, function(response){
         var res = jQuery.parseJSON(response.responseText);
         var msg = (typeof res.exceptionMessage=='undefined') ?
                    'Check console, please.' : res.exceptionMessage;
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+        humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
                    '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
         device.rollback();
         }
@@ -772,7 +772,7 @@ App.OuEditController = Ember.Controller.extend({
 
         device.save().then(function(x) {
           console.log('DELETE SUCCESS');
-          humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
+          humane.log('<i class="fa fa-trash"></i> Deleted successfully',
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
           window.location.href = '#/ous';
@@ -780,7 +780,7 @@ App.OuEditController = Ember.Controller.extend({
           var res = jQuery.parseJSON(response.responseText);
           var msg = (typeof res.exceptionMessage=='undefined') ?
                     'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+          humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
           device.rollback();
         });
@@ -789,14 +789,14 @@ App.OuEditController = Ember.Controller.extend({
 
     doneEditingReturn: function() {
       this.get('model').save().then(function() {
-        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
+        humane.log('<i class="fa fa-save"></i> Saved successfully',
             { timeout: 800 });
         window.location.href = '#/ous';
       }, function(response){
           var res = jQuery.parseJSON(response.responseText);
           var msg = (typeof res.exceptionMessage=='undefined') ?
                     'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+          humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
       } );
     }
@@ -901,7 +901,7 @@ App.OuMonitorController = Ember.Controller.extend({
       record.set('description', "Interactive");
       record.set('job_type', 1 /*interactive*/);
       record.save().then(function() {
-        humane.log('<i class="glyphicon glyphicon-saved"></i> Submitted',
+        humane.log('<i class="fa fa-save"></i> Submitted',
           { timeout: 1000 });
         // de-uglify:
          $("#hosts .pc").removeClass("ui-selected");
@@ -911,7 +911,7 @@ App.OuMonitorController = Ember.Controller.extend({
         var res = jQuery.parseJSON(response.responseText);
         var msg = (typeof res.exceptionMessage=='undefined') ?
                    'Check console, please.' : res.exceptionMessage;
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+        humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
                    '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
         }
       );
@@ -1001,7 +1001,7 @@ App.OptionsetController = Ember.Controller.extend({
         var device = this.get('model');
         device.deleteRecord();
         device.save().then(function() {
-          humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
+          humane.log('<i class="fa fa-trash"></i> Deleted successfully',
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
           window.location.href = '#/optionsets';
@@ -1009,7 +1009,7 @@ App.OptionsetController = Ember.Controller.extend({
           var res = jQuery.parseJSON(response.responseText);
           var msg = (typeof res.exceptionMessage=='undefined') ?
                     'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+          humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
         }
       )};
@@ -1018,14 +1018,14 @@ App.OptionsetController = Ember.Controller.extend({
     doneEditingReturn: function() {
       console.log(this.get('model'));
       this.get('model').save().then(function() {
-        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
+        humane.log('<i class="fa fa-save"></i> Saved successfully',
           { timeout: 800 });
         window.location.href = '#/optionsets';
       }, function(response){
         var res = jQuery.parseJSON(response.responseText);
         var msg = (typeof res.exceptionMessage=='undefined') ?
                    'Check console, please.' : res.exceptionMessage;
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+        humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
                    '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
         }
       );
@@ -1060,7 +1060,7 @@ App.ScheduleController = Ember.Controller.extend({
         var device = this.get('model');
         device.deleteRecord();
         device.save().then(function() {
-          humane.log('<i class="glyphicon glyphicon-saved"></i> Deleted successfully',
+          humane.log('<i class="fa fa-trash"></i> Deleted successfully',
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
           window.location.href = '#/schedules';
@@ -1068,7 +1068,7 @@ App.ScheduleController = Ember.Controller.extend({
           var res = jQuery.parseJSON(response.responseText);
           var msg = (typeof res.exceptionMessage=='undefined') ?
                     'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+          humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
                      '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
         }
       )};
@@ -1077,14 +1077,14 @@ App.ScheduleController = Ember.Controller.extend({
     doneEditingReturn: function() {
       this.set('model.job_type', 2 /* scheduled task */ );
       this.get('model').save().then(function() {
-        humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully',
+        humane.log('<i class="fa fa-save"></i> Saved successfully',
           { timeout: 1000 });
         window.location.href = '#/schedules';
       }, function(response){
         var res = jQuery.parseJSON(response.responseText);
         var msg = (typeof res.exceptionMessage=='undefined') ?
                    'Check console, please.' : res.exceptionMessage;
-        humane.log('<i class="glyphicon glyphicon-fire"></i> Ooops! Fatal error:'+
+        humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
                    '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
         }
       );
@@ -1147,9 +1147,9 @@ App.SetupController = Ember.Controller.extend({
               data:jQuery.param(d), dataType:"json"}).then(function(response) {
         console.log(response);
         if (typeof response.errorMsg != "undefined")
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Save failed: <br>'+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
+          humane.log('<i class="fa fa-meh-o"></i> Save failed: <br>'+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
         else {
-          humane.log('<i class="glyphicon glyphicon-saved"></i> Saved successfully! Warping into amtc-web!', { timeout: 1500 });
+          humane.log('<i class="fa fa-save"></i> Saved successfully! Warping into amtc-web!', { timeout: 1500 });
           window.setTimeout( function(){
             window.location.href = 'index.html';
           }, 2000);
@@ -1158,12 +1158,12 @@ App.SetupController = Ember.Controller.extend({
         console.log("what happened?");
         console.log(response);
         if (response.responseText=='INSTALLTOOL_LOCKED') {
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Setup is LOCKED!<br>'+
+          humane.log('<i class="fa fa-meh-o"></i> Setup is LOCKED!<br>'+
             'Setup is intended for initial installation only.<br>'+
             'Remove <code>config/siteconfig.php</code> to re-enable setup.',
             { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
         } else {
-          humane.log('<i class="glyphicon glyphicon-fire"></i> Failed to save! Please check console.'+response.responseText,
+          humane.log('<i class="fa fa-meh-o"></i> Failed to save! Please check console.'+response.responseText,
             { timeout: 0, clickToClose: true, addnCls: 'humane-error' });
         }
       });

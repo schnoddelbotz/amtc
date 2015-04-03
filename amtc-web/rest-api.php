@@ -156,7 +156,6 @@ $app->post('/ous', function () use ($app) {
 });
 $app->delete('/ous/:id', function ($id) {
   if ($dev = OU::find_one($id)) {
-    OU::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
     // "Note: Although after destroyRecord or deleteRecord/save the adapter
     // expects an empty object e.g. {} to be returned from the server after
@@ -226,7 +225,6 @@ $app->post('/users', function () use ($app) {
 });
 $app->delete('/users/:id', function ($id) {
   if ($dev = User::find_one($id)) {
-    Optionset::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
     echo '{}';
   }
@@ -256,7 +254,6 @@ $app->put('/optionsets/:id', function ($id) use ($app) {
 });
 $app->delete('/optionsets/:id', function ($id) {
   if ($dev = Optionset::find_one($id)) {
-    Optionset::query('PRAGMA foreign_keys = ON;');
     $dev->delete();
     echo '{}';
   }
@@ -293,7 +290,6 @@ $app->put('/jobs/:id', function ($id) use ($app) {
 });
 $app->delete('/jobs/:id', function ($id) {
   if ($job = Job::find_one($id)) {
-    //Job::query('PRAGMA foreign_keys = ON;'); // YIKES! FIXME!-no-idiorm...ORM::configure?
     $job->delete();
     echo '{}';
   }
