@@ -527,7 +527,7 @@
     {{#each model}}
     {{#if isScheduledTask}}
       <tr>
-        <td>{{#link-to 'schedule.edit' this}}<i class="glyphicon glyphicon-edit"></i> {{/link-to}}&nbsp;
+        <td>{{#link-to 'schedule.edit' this}}<i class="fa fa-edit"></i> {{/link-to}}&nbsp;
         {{#link-to 'schedule.edit' this}}{{description}}{{/link-to}}</td>
         <td>{{check-mark on_monday}}</td>
         <td>{{check-mark on_tuesday}}</td>
@@ -559,8 +559,8 @@
     <div class="col-lg-12">
       {{partial "scheduleEdit"}}
       <div id="editbutton">
-        <button {{action "removeSchedule"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete Job</button>
-        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+        <button {{action "removeSchedule"}} class="btn btn-default"><span class="fa fa-trash"></span> Delete Job</button>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="fa fa-save"></span> Save and return</button>
         {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
       </div>
     </div>
@@ -574,7 +574,7 @@
     in the interval you specify here. Provide a description, select days the job should apply on.
   </p>
   {{partial "scheduleEdit"}}
-  <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save task</button>
+  <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="fa fa-save"></span> Save task</button>
 </script>
 
 <script type="text/x-handlebars" data-template-name='_scheduleEdit'>
@@ -759,7 +759,7 @@
                     <em>Currently, only SQLite and MySQL are supported by amtc-web!</em>
                   </div>
                   {{#if selectedDB}}
-                  <button class="btn btn-default" {{action 'doneEditing'}}><span class="glyphicon glyphicon-floppy-disk"></span> Write configuration</button>
+                  <button class="btn btn-default" {{action 'doneEditing'}}><span class="fa fa-save"></span> Write configuration</button>
                   {{else}}
                   <i>A PHP DBO driver must be selected before proceeding.</i>
                   {{/if}}
@@ -855,7 +855,7 @@
 
       <div>
         <button class="btn btn-default" {{action 'doneEditingReturn'}}>
-          <span class="glyphicon glyphicon-floppy-disk"></span> Create user
+          <span class="fa fa-save"></span> Create user
         </button>
       </div>
 
@@ -875,8 +875,8 @@
       {{partial "userEdit"}}
 
       <div>
-        <button {{action "removeUser"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete User</button>
-        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+        <button {{action "removeUser"}} class="btn btn-default"><span class="fa fa-trash"></span> Delete User</button>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="fa fa-save"></span> Save and return</button>
         {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
       </div>
 
@@ -968,7 +968,7 @@
     <tbody>
     {{#each model}}
       <tr>
-        <td>{{#link-to 'optionset.edit' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
+        <td>{{#link-to 'optionset.edit' this}}<i class="fa fa-edit"></i>{{/link-to}}</td>
         <td>{{#link-to 'optionset.edit' this}}{{name}}{{/link-to}}</td>
         <td>{{check-mark sw_v5}}</td>
         <td>{{check-mark sw_dash}}</td>
@@ -997,8 +997,8 @@
     <div class="col-lg-12">
       {{partial "optionsetEdit"}}
       <div id="editbutton">
-        <button {{action "removeOptionset"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete Option set</button>
-        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+        <button {{action "removeOptionset"}} class="btn btn-default"><span class="fa fa-trash"></span> Delete Option set</button>
+        <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="fa fa-save"></span> Save and return</button>
         {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
       </div>
     </div>
@@ -1012,7 +1012,7 @@
     A newly created option set does not get assigned to any room by default.
   </p>
   {{partial "optionsetEdit"}}
-  <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save option set</button>
+  <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="fa fa-save"></span> Save option set</button>
 </script>
 
 <script type="text/x-handlebars" data-template-name='_optionsetEdit'>
@@ -1158,14 +1158,14 @@
     <tbody>
     {{#each controllers.ous.content}}
       <tr>
-        <td>{{#link-to 'ou.edit' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
+        <td>{{#link-to 'ou.edit' this}}<i class="fa fa-edit"></i>{{/link-to}}</td>
         <td>{{ou_path}}</td>
         <td>{{name}}</td>
         <td>{{description}}</td>
         <td>{{optionset_id.name}}</td>
         <td>{{check-mark logging}}</td>
         <td>{{idle_power}}</td>
-        <td>{{#link-to 'ou.hosts' this}}<i class="glyphicon glyphicon-edit"></i>{{/link-to}}</td>
+        <td>{{#link-to 'ou.hosts' this}}<i class="fa fa-edit"></i>{{/link-to}}</td>
       </tr>
     {{/each}}
     </tbody>
@@ -1210,7 +1210,7 @@
   {{partial "ou/edit"}}
   {{#if parent_id}}
     <button class="btn btn-default" {{action 'doneEditingReturn'}}>
-      <span class="glyphicon glyphicon-floppy-disk"></span> Save new OU
+      <span class="fa fa-save"></span> Save new OU
     </button>
   {{/if}}
 </script>
@@ -1271,9 +1271,9 @@
       <div class="clearboth"></div><br>
       {{#unless isNew}}
       <div id="editbutton">
-        <button {{action "removeOu"}} class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete OU</button>
+        <button {{action "removeOu"}} class="btn btn-default"><span class="fa fa-trash"></span> Delete OU</button>
           <!-- fixme use #if isDirty, currently breaks with drop downs... why? -->
-          <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save and return</button>
+          <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="fa fa-save"></span> Save and return</button>
           {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
       </div>
       {{/unless}}
@@ -1316,7 +1316,7 @@
         {{controllers.hosts.hosts}}
         {{controllers.laststates.laststates}}
         How to trigger it the right way?
-        <button class="btn btn-default" {{action 'refresh'}}><i class="glyphicon glyphicon-refresh"></i> <i>refresh</i></button>
+        <button class="btn btn-default" {{action 'refresh'}}><i class="fa fa-refresh"></i> <i>refresh</i></button>
       </span>
     </div>
   </div>
@@ -1440,7 +1440,7 @@
         <div class="clearfix"></div>
         <br>
 
-        <button class="btn btn-default" {{action 'saveNewHosts'}}><span class="glyphicon glyphicon-floppy-disk"></span> Save new host(s)</button>
+        <button class="btn btn-default" {{action 'saveNewHosts'}}><span class="fa fa-save"></span> Save new host(s)</button>
       {{/if}}
     </div>
   </div>
