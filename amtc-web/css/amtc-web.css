@@ -145,7 +145,10 @@ ul.viewmode li.active a:hover {
   -ms-animation: flash 1s ease-out;
   -ms-animation-iteration-count: 60;
 }
-@-webkit-keyframes flash {
+@media screen and (min-device-width: 1280px) {
+  /* the animation breaks the app on iOS 8 :-(
+     as hack, only enable for 1280px+ screens. */
+  @-webkit-keyframes flash {
     0% { color:black;}
     1% { color:yellow;}
     5% { color:black;}
@@ -163,6 +166,7 @@ ul.viewmode li.active a:hover {
     96% { color:black;}
     97% { color:yellow;}
     100% {color:black;}
+  }
 }
 @-moz-keyframes flash {
     0% { color:black;}
