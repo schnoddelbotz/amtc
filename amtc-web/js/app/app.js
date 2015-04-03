@@ -1195,14 +1195,14 @@ App.Ou = DS.Model.extend({
     }
   }.property('optionset_id'),
 
+  // return ou/room path-style string of 'parent directories'
   ou_path: function() {
-    var depth = 0;
+    var height = 0;
     var pathParts = [];
     var p = this.get('parent_id');
-    while (p && p.id!=1 /* UGH,again */ && depth<10) {
-      pathParts.push(p.get('name'));
+    while (p && height++<10) {
+      pathParts.unshift(p.get('name'));
       p = p.get('parent_id');
-      depth++;
     }
     return pathParts.join(' / ');
   }.property('parent_id').cacheable(),
