@@ -1179,7 +1179,6 @@ App.Ou = DS.Model.extend({
   description: attr('string'),
   parent_id: DS.belongsTo('ou', {inverse: 'children'}),
   optionset_id: DS.belongsTo('optionset'),
-  ou_path: attr('string'),
   idle_power: attr('number'),
   logging: attr('boolean'),
   children: DS.hasMany('ou', {inverse: 'parent_id'}),
@@ -1195,6 +1194,18 @@ App.Ou = DS.Model.extend({
       return this.get('optionset_id');
     }
   }.property('optionset_id'),
+
+  ou_path: function() {
+    var depth = 0;
+    var pathParts = [];
+    var p = this.get('parent_id');
+    while (p && p.id!=1 /* UGH,again */ && depth<10) {
+      pathParts.push(p.get('name'));
+      p = p.get('parent_id');
+      depth++;
+    }
+    return pathParts.join(' / ');
+  }.property('parent_id').cacheable(),
 
   // new ou-tree; 1:1 from https://github.com/joachimhs/Montric/blob/master/Montric.View/src/main/webapp/js/app/models/MainMenuModel.js
   isSelected: false,

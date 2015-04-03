@@ -129,7 +129,6 @@ $app->get('/ous', function () {
       $kids[] = $childOu->id;
     }
     $r['children'] = $kids;
-    $r['ou_path'] = 'fixme'; // record->getPathString -- should/could be done clientside, too
     $result['ous'][] = $r;
   }
   echo json_encode( $result );
