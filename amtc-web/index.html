@@ -34,7 +34,7 @@
   </div>
 </div>
 
-<script type="text/x-handlebars">
+<script type="text/x-handlebars" id="application">
   <div id="wrapper">
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
         <div class="navbar-header">
@@ -577,7 +577,7 @@
   <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="fa fa-save"></span> Save task</button>
 </script>
 
-<script type="text/x-handlebars" data-template-name='_scheduleEdit'>
+<script type="text/x-handlebars" id="_scheduleEdit">
   <form id="optionsetEditForm">
    <fieldset>
       <div class="form-group">
@@ -884,7 +884,7 @@
   </div>
 </script>
 
-<script type="text/x-handlebars" data-template-name='_userEdit'>
+<script type="text/x-handlebars" id="_userEdit">
   <form id="userEditForm">
    <fieldset>
       <div class="form-group">
@@ -1015,7 +1015,7 @@
   <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="fa fa-save"></span> Save option set</button>
 </script>
 
-<script type="text/x-handlebars" data-template-name='_optionsetEdit'>
+<script type="text/x-handlebars" id="_optionsetEdit">
   <form id="optionsetEditForm">
    <fieldset>
       <div class="form-group">
@@ -1084,7 +1084,7 @@
 
 <!-- OUs / Rooms #if controller.ous.content -->
 <!-- bascis from  http://www.manning.com/skeie/ ; thank you :-) -->
-<script type="text/x-handlebars" data-template-name='_ouSelection'>
+<script type="text/x-handlebars" id="_ouSelection">
   {{#if controllers.ous.ous.content}}
     {{#each node in controllers.ous.ous.content}}
       {{#if node.isRootLevel}}
@@ -1094,7 +1094,7 @@
   {{/if}}
 </script>
 
-<script type="text/x-handlebars" data-template-name="components/tree-menu-node">
+<script type="text/x-handlebars" id="components/tree-menu-node">
   {{#if node.hasChildren}}
     <li {{action "toggleExpanded"}}>
       <a href="#">
@@ -1173,7 +1173,7 @@
   {{/if}}
 </script>
 
-<script type="text/x-handlebars" data-template-name="navigation">
+<script type="text/x-handlebars" id="navigation">
   <ul class="nav nav-pills viewmode">
     {{#link-to "ou.monitor" tagName="li"}}
       <a href={{"view.href"}}>Control</a>
@@ -1215,7 +1215,7 @@
   {{/if}}
 </script>
 
-<script type="text/x-handlebars" data-template-name='ou/edit'>
+<script type="text/x-handlebars" id="ou/edit">
   <div class="row">
     <div class="col-lg-12">
       <form id="ouEditForm">
@@ -1281,7 +1281,7 @@
   </div>
 </script>
 
-<script type="text/x-handlebars" data-template-name='ou/monitor'>
+<script type="text/x-handlebars" id="ou/monitor">
 {{! amtc-web ... live view / monitor + control mode }}
   <div class="row">
       <div class="col-lg-12" id="hosts">
@@ -1345,7 +1345,7 @@
   </div>
 </script>
 
-<script type="text/x-handlebars" data-template-name='ou/hosts'>
+<script type="text/x-handlebars" id="ou/hosts">
   <div class="row">
     <div class="col-lg-12">
       <p>Add, remove or enable/disable hosts for this OU here.</p>
@@ -1371,7 +1371,7 @@
   {{partial "addHostsWizard"}}
 </script>
 
-<script type="text/x-handlebars" data-template-name='ou/statelog'>
+<script type="text/x-handlebars" id="ou/statelog">
   More to come ...
   <div class="row">
     <div class="col-lg-12" id="cfghosts">
@@ -1386,7 +1386,7 @@
   </div>
 </script>
 
-<script type="text/x-handlebars" data-template-name="addHostsWizard">
+<script type="text/x-handlebars" id="addHostsWizard">
   <div class="row">
     <div class="col-lg-5">
       <h3>Add hosts to OU {{name}}</h3>
