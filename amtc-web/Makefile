@@ -41,35 +41,35 @@ compress: concat css/styles.css.gz js/jslibs.js.gz index.html.gz
 
 index.html: js/ember-template-compiler.js
 ifeq ($(HAVE_NODEJS),YES)
-    # Having NodeJS allows HTMLbars template precompilation
-    cat templates/page_header.html > index.html
-    cat templates/page_footer.html >> index.html
-    cat /dev/null > js/compiled-templates.js
-    for t in templates/*.hbs.html templates/*/*.hbs.html; do \
-      tpl=`basename $$t | cut -d. -f1`; \
-      dir=`dirname $$t`; \
-      if [ $$dir != "templates" ]; then \
-        tpl="`basename $$dir`/$$tpl"; \
-      fi; \
-      echo "// $$t ($$tpl) " >> js/compiled-templates.js; \
-      ./js/compile-template.js "$$t" "$$tpl"; \
-    done
+	# Having NodeJS allows HTMLbars template precompilation
+	cat templates/page_header.html > index.html
+	cat templates/page_footer.html >> index.html
+	cat /dev/null > js/compiled-templates.js
+	for t in templates/*.hbs.html templates/*/*.hbs.html; do \
+	  tpl=`basename $$t | cut -d. -f1`; \
+	  dir=`dirname $$t`; \
+	  if [ $$dir != "templates" ]; then \
+	    tpl="`basename $$dir`/$$tpl"; \
+	  fi; \
+	  echo "// $$t ($$tpl) " >> js/compiled-templates.js; \
+	  ./js/compile-template.js "$$t" "$$tpl"; \
+	done
 else
-    # No NodeJS on buildhost, build index.html that will result in
-    # client-side template compilation.
-    cat templates/page_header.html > index.html
-    for t in templates/*.hbs.html templates/*/*.hbs.html; do \
-      tpl=`basename $$t | cut -d. -f1`; \
-      dir=`dirname $$t`; \
-      if [ $$dir != "templates" ]; then \
-        tpl="`basename $$dir`/$$tpl"; \
-      fi; \
-      echo "<!-- $$t ($$tpl) -->" >> index.html; \
-      echo '<script type="text/x-handlebars" id="'$$tpl'">' >> index.html; \
-      cat $$t >> index.html; \
-      echo -e '</script>\n' >> index.html; \
-      done
-    cat templates/page_footer.html >> index.html
+	# No NodeJS on buildhost, build index.html that will result in
+	# client-side template compilation.
+	cat templates/page_header.html > index.html
+	for t in templates/*.hbs.html templates/*/*.hbs.html; do \
+	  tpl=`basename $$t | cut -d. -f1`; \
+	  dir=`dirname $$t`; \
+	  if [ $$dir != "templates" ]; then \
+	    tpl="`basename $$dir`/$$tpl"; \
+	  fi; \
+	  echo "<!-- $$t ($$tpl) -->" >> index.html; \
+	  echo '<script type="text/x-handlebars" id="'$$tpl'">' >> index.html; \
+	  cat $$t >> index.html; \
+	  echo -e '</script>\n' >> index.html; \
+	  done
+	cat templates/page_footer.html >> index.html
 endif
 
 # concat targets
