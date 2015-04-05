@@ -1,0 +1,15 @@
+{{! Display /optionsets page: tabular room list view plus actions:add/remove/edit menu  }}
+<div class="row">
+  <div class="col-lg-10">
+    {{outlet}} <!-- see optionsets/index : big table view of rooms -->
+  </div>
+  <!-- fixme partial ...: -->
+  <div class="col-lg-2">
+    <h3>Actions</h3>
+    <ul>
+        <li>{{#link-to 'ous'}}List rooms{{/link-to}}</li>
+        <li>{{#link-to 'optionsets'}}List optionsets{{/link-to}}</li>
+        <li>{{#link-to 'optionsets.new'}}Add optionset{{/link-to}}</li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+{{! Display a table with all rooms }}
+<h1 class="page-header">AMT(c) Option sets</h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Edit</th>
+      <th>Name</th>
+      <th>AMT v5</th>
+      <th>DASH</th>
+      <th>Scan SSH</th>
+      <th>Scan RDP</th>
+      <th>Use TLS</th>
+      <th>Skip crt verify</th>
+      <th>TLS CA crt</th>
+      <th>AMT password file</th>
+      <th>Timeout</th>
+    </tr>
+  </thead>
+  <tbody>
+  {{#each model}}
+    <tr>
+      <td>{{#link-to 'optionset.edit' this}}<i class="fa fa-edit"></i>{{/link-to}}</td>
+      <td>{{#link-to 'optionset.edit' this}}{{name}}{{/link-to}}</td>
+      <td>{{check-mark sw_v5}}</td>
+      <td>{{check-mark sw_dash}}</td>
+      <td>{{check-mark sw_scan22}}</td>
+      <td>{{check-mark sw_scan3389}}</td>
+      <td>{{check-mark sw_usetls}}</td>
+      <td>{{check-mark sw_skipcertchk}}</td>
+      <td>{{opt_cacertfile}}</td>
+      <td>{{opt_passfile}}</td>
+      <td>{{opt_timeout}}</td>
+    </tr>
+  {{/each}}
+  </tbody>
+</table>

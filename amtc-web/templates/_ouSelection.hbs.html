@@ -1,0 +1,7 @@
+{{#if controllers.ous.ous.content}}
+  {{#each node in controllers.ous.ous.content}}
+    {{#if node.isRootLevel}}
+        {{tree-menu-node node=node action="selectNode" selectedNode=selectedNode}}
+    {{/if}}
+  {{/each}}
+{{/if}}

@@ -1,0 +1,156 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Dashboard</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+
+<!-- Colorful big numbers OS header-->
+<div class="row">
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-linux fa-5x" {{bindAttr title="controllers.laststates.stateSSHList"}}></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{controllers.laststates.stateSSH}}</div>
+                        <div>running Linux</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-windows fa-5x" {{bindAttr title="controllers.laststates.stateRDPList"}}></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{controllers.laststates.stateRDP}}</div>
+                        <div>running Windows</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="panel" style="background-color:#aaa">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-power-off fa-5x" {{bindAttr title="controllers.laststates.stateOffList"}}></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{controllers.laststates.stateOff}}</div>
+                        <div>powered down</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-frown-o fa-5x" {{bindAttr title="controllers.laststates.stateUnreachableList"}}></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{controllers.laststates.stateUnreachable}}</div>
+                        <div>unreachable</div>
+                    </div>
+                </div>
+            </div>
+            <!-- where to link to? ... knock out atm.
+            <a href="#">
+                <div class="panel-footer">
+                    <span class="pull-left">View Details</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+            -->
+        </div>
+    </div>
+</div>
+<!-- 1st col: Stats Graph and "Recent OS / power..." (tbd) and, 2nd col: Notifications -->
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Operational Hosts Log: -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-bar-chart-o fa-fw"></i> Operational Hosts Log
+                <div class="pull-right">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                            Show ...
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu pull-right" role="menu">
+                            <li><a href="#">Four hours</a>
+                            </li>
+                            <li><a href="#">One day</a>
+                            </li>
+                            <li><a href="#">A week</a>
+                            </li>
+                            <li><a href="#">A month</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <div id="morris-area-chart"></div>
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+        <!-- Energy stats: -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-clock-o fa-fw"></i> Current energy statistics
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <i>None yet</i>
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+    </div>
+    <!-- /.col-lg-8 -->
+    <!-- Notifications: -->
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-bell fa-fw"></i> Notifications Panel
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <div class="list-group">
+                    {{#if controllers.notifications.notifications}}
+                      {{#each msg in controllers.notifications.notifications.content}}
+                        <a href="#" class="list-group-item">
+                         <i class={{msg.cssClass}}></i> {{msg.message}}
+                         <span class="pull-right text-muted small"><em>{{format-from-now msg.tstamp}}</em></span>
+                        </a>
+                      {{/each}}
+                    {{else}}
+                      <i class="fa fa-spinner fa-spin"></i> Loading latest notifications ...
+                    {{/if}}
+                </div>
+                <!-- /.list-group -->
+                <a href="#" class="btn btn-default btn-block">View All Alerts</a>
+            </div>
+            <!-- /.panel-body -->
+        </div>
+    </div>
+    <!-- /.col-lg-4 -->
+</div>
+<!-- /.row -->

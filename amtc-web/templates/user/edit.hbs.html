@@ -1,0 +1,18 @@
+<div class="row">
+  <div class="col-lg-12">
+      <h1 class="page-header">Edit User <b>{{model.name}}</b></h1>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-12">
+
+    {{partial "userEdit"}}
+
+    <div>
+      <button {{action "removeUser"}} class="btn btn-default"><span class="fa fa-trash"></span> Delete User</button>
+      <button class="btn btn-default" {{action 'doneEditingReturn'}}><span class="fa fa-save"></span> Save and return</button>
+      {{#if isDirty}}<span class="label label-danger">unsaved changes</span>{{/if}}
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,14 @@
+<div class="row">
+  <div class="col-lg-12">
+      <h1 class="page-header">Sign out</h1>
+  </div>
+  <div class="col-lg-12">
+      <p>
+        {{#if controllers.login.isLoggedIn}}
+            Thanks for logging out... See you soon!
+          {{else}}
+            You have not signed in yet. Why log out, eh?
+        {{/if}}
+      </p>
+  </div>
+</div>

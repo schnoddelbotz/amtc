@@ -1,0 +1,24 @@
+{{! Display a table with all users }}
+<h1 class="page-header">Users</h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Fullname</th>
+      <th>Enabled?</th>
+      <th>Admin?</th>
+      <th>May control?</th>
+    </tr>
+  </thead>
+  <tbody>
+  {{#each model}}
+    <tr>
+      <td>{{#link-to 'user.edit' this}}{{name}}{{/link-to}}</td>
+      <td>{{fullname}}</td>
+      <td>{{check-mark is_enabled}}</td>
+      <td>{{check-mark is_admin}}</td>
+      <td>{{check-mark can_control}}</td>
+    </tr>
+  {{/each}}
+  </tbody>
+</table>

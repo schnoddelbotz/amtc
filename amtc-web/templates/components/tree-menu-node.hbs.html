@@ -1,0 +1,24 @@
+{{#if node.hasChildren}}
+  <li {{action "toggleExpanded"}}>
+    <a href="#">
+      {{#if node.isExpanded}}
+        <i class="fa fa-folder-open-o" {{action "toggleExpanded"}}></i>
+      {{else}}
+        <i class="fa fa-folder-o" {{action "toggleExpanded"}}></i>
+      {{/if}}
+      {{node.name}}
+    </a>
+  </li>
+{{else}}
+  <li {{action "selectNode" node}} class={{isSelected}}>
+    <a href="#"><!--<i class="fa fa-caret-right"></i>-->{{node.name}}</a>
+  </li>
+{{/if}}
+
+{{#if node.isExpanded}}
+  {{#each child in node.children}}
+    <ul class="nav ember-view">
+      {{tree-menu-node node=child action="selectNode" selectedNode=selectedNode}}
+    </ul>
+  {{/each}}
+{{/if}}

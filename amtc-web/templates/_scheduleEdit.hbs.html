@@ -1,0 +1,45 @@
+<form id="optionsetEditForm">
+ <fieldset>
+    <div class="form-group">
+      <label for="description">Description</label>
+        {{input class="form-control" type="text" value=model.description insert-newline="doneEditingReturn" placeholder="Power-Up|Down Room when ..."}}
+    </div>
+
+    <div class="checkbox"><label>{{input type="checkbox" checked=model.on_monday}} Monday</label></div>
+    <div class="checkbox"><label>{{input type="checkbox" checked=model.on_tuesday}} Tuesday</label></div>
+    <div class="checkbox"><label>{{input type="checkbox" checked=model.on_wednesday}} Wednesday</label></div>
+    <div class="checkbox"><label>{{input type="checkbox" checked=model.on_thursday}} Thursday</label></div>
+    <div class="checkbox"><label>{{input type="checkbox" checked=model.on_friday}} Friday</label></div>
+    <div class="checkbox"><label>{{input type="checkbox" checked=model.on_saturday}} Saturday</label></div>
+    <div class="checkbox"><label>{{input type="checkbox" checked=model.on_sunday}} Sunday</label></div>
+
+    <div class="form-group">
+      <label for="start_time">Start time</label>
+      {{input class="form-control" type="time" value=model.human_start_time insert-newline="doneEditingReturn"}}
+    </div>
+
+    <div class="form-group">
+      {{#if controllers.ous.ous.content}}
+      {{view Ember.Select content=controllers.ous.ous.content
+                          class="form-control"
+                          value=model.ou_id.id
+                          selection=model.ou_id
+                          prompt="Choose OU"
+                          optionValuePath="content.id"
+                          optionLabelPath="content.name" }}
+      {{/if}}
+    </div>
+
+    <div class="form-group">
+      <label for="action">Action</label>
+      {{view Ember.Select value=model.amtc_cmd content=validCommands optionValuePath="content.cchar" optionLabelPath="content.cmd"}}
+    </div>
+
+    <div class="form-group">
+      <label>Delay</label>
+        {{input class="form-control" type="number" step="any" min="0" value=model.amtc_delay insert-newline="doneEditingReturn" placeholder="Delay in seconds between each PC"}}
+    </div>
+
+ </fieldset>
+</form>
+<div class="clearboth"></div><br>

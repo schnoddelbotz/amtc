@@ -3,6 +3,7 @@ Distribution.xml
 *.pkg
 
 amtc-web/js/*.js
+!amtc-web/js/compile-template.js
 amtc-web/css/*.css
 
 amtc-web/basic-auth/.htaccess
@@ -20,7 +21,7 @@ amtc-web/lib/idiorm.php
 amtc-web/lib/paris.php
 
 amtc-web/css/styles.css.gz
-amtc-web/index.html.gz
+amtc-web/index.html*
 amtc-web/js/jslibs.js.gz
 
 src/amt.h

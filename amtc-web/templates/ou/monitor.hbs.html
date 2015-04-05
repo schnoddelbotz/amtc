@@ -1,0 +1,61 @@
+{{! amtc-web ... live view / monitor + control mode }}
+<div class="row">
+    <div class="col-lg-12" id="hosts">
+      {{#each host in controller.model.hosts}}
+        <div class="pc {{host.laststate.amtStateCssClass}} {{host.laststate.openPortCssClass}}" hostDbId={{host.id}}>
+          <div>
+            <span class="porticon">
+              {{#if host.laststate}}
+                {{host.laststate.openPortIcon}}
+              {{else}}
+                <i class="fa fa-fw fa-question"></i>
+              {{/if}}
+            </span>
+            <span class="hostname">{{host.hostname}}</span>
+          </div>
+          <div class="message">
+            {{#if host.laststate}}
+              {{host.laststate.lastScan}}
+            {{else}}
+              No logged data yet
+            {{/if}}
+          </div>
+        </div>
+      {{/each}}
+    </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <span style="display:none">
+      FIXME - this triggers loading all hosts:
+      {{controllers.hosts.hosts}}
+      {{controllers.laststates.laststates}}
+      How to trigger it the right way?
+      <button class="btn btn-default" {{action 'refresh'}}><i class="fa fa-refresh"></i> <i>refresh</i></button>
+    </span>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <div id="livectrl">
+      <h5>Select hosts above like files in Finder/Explorer or by state below</h5>
+      <p id="hselect"></p>
+      {{#if selectedHostsCount}}
+        <div id="ctrl">
+          <h5>Action for selected <span id="numselected">{{selectedHostsCount}}</span>&nbsp;hosts</h5>
+          <form>
+            {{#each cmd in commandActions}}
+              <label>{{radio-button name='cmd' value=cmd groupValue=selectedCmd}} {{cmd}}</label>
+            {{/each}}
+            ... using a inter-command-delay of {{input type="text" size=3 value=selectedDelay}} seconds
+            {{#if selectedCmd}}
+              <button class="btn btn-default" {{action 'submitJob'}}> <i class="fa fa-thumbs-up"></i> Do it</button>
+            {{/if}}
+          </form>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+</div>

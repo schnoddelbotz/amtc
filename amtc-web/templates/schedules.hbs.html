@@ -1,0 +1,13 @@
+{{! Manage scheduled power-ups/downs }}
+<div class="row">
+  <div class="col-lg-10">
+    {{outlet}} <!-- see schedule/index -->
+  </div>
+  <div class="col-lg-2">
+    <h3>Actions</h3>
+    <ul>
+        <li>{{#link-to 'schedules'}}Show schedule{{/link-to}}</li>
+        <li>{{#link-to 'schedules.new'}}Add item{{/link-to}}</li>
+    </ul>
+  </div>
+</div>

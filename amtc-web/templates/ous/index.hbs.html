@@ -1,0 +1,32 @@
+{{! Display a table with all rooms }}
+<h1 class="page-header">List of rooms</h1>
+{{#if controllers.optionsets.optionsets}}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Edit</th>
+      <th>OU</th>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Optionset</th>
+      <th>Log</th>
+      <th>idle P [W]</th>
+      <th>Hosts</th>
+    </tr>
+  </thead>
+  <tbody>
+  {{#each controllers.ous.content}}
+    <tr>
+      <td>{{#link-to 'ou.edit' this}}<i class="fa fa-edit"></i>{{/link-to}}</td>
+      <td>{{ou_path}}</td>
+      <td>{{name}}</td>
+      <td>{{description}}</td>
+      <td>{{optionset_id.name}}</td>
+      <td>{{check-mark logging}}</td>
+      <td>{{idle_power}}</td>
+      <td>{{#link-to 'ou.hosts' this}}<i class="fa fa-edit"></i>{{/link-to}}</td>
+    </tr>
+  {{/each}}
+  </tbody>
+</table>
+{{/if}}

@@ -1,0 +1,160 @@
+<div class="row">
+  <div class="col-lg-12">
+      <h1 class="page-header">amtc-web Installation</h1>
+  </div>
+</div>
+{{#if freshsetup}}
+  {{#unless preconditionsMet}}
+    <div class="row">
+      <div class="col-lg-12">
+          <h3>Installation precondition tests</h3>
+          At least one PHP PDO driver is required.
+          <ul id="phptests">
+            {{#if phptests}}
+            {{#each phptests}}
+              <li>
+                {{check-mark result}} {{description}}
+                {{#unless result}}(potential fix: {{remedy}}){{/unless}}
+              </li>
+            {{/each}}
+            {{else}}
+              <i class="fa fa-spinner fa-spin"></i> <i>running tests...</i>
+            {{/if}}
+          </ul>
+      </div>
+    </div>
+  {{/unless}}
+
+  {{#if preconditionsMet}}
+    <div class="row">
+      <div class="col-lg-12">
+          <div class="alert alert-success">
+            All preconditions for amtc-web installtion are met!
+          </div>
+
+          <form role="form">
+
+              <div class="form-group">
+                <label>Data directory for amtc-web</label>
+                {{input type="text" value=datadir class="form-control"}}
+                <p class="help-block">Defaults to <code>data</code> subdirectory, relative to
+                index.html. Alternatively, an absolute path may be specified. The directory
+                will contain locks and logs. It may also contain an SQLite DB, if selected below.</p>
+              </div>
+
+              <div class="form-group">
+                <label>Path to <code>amtc</code> binary</label>
+                {{input type="text" value=amtcbin class="form-control"}}
+                <p class="help-block">
+                  Defaults to <code>/usr/bin/amtc</code>.
+                  For testing amtc-web without amtc installed, cheat by using s.th.
+                  like <code>/usr/bin/who</code>.
+                </p>
+              </div>
+
+              <div class="form-group">
+                <label>Timezone</label>
+                {{input type="text" value=timezone class="form-control"}}
+                <p class="help-block">Defaults to <code>Europe/Berlin</code>. Select yours.</p>
+              </div>
+
+              <div class="form-group">
+                  <label>Select desired PHP <a target="new" href="http://php.net/manual/en/intro.pdo.php">PDO DB Driver</a></label>
+                  {{view Ember.Select
+                                class="form-control"
+                                content=dbs
+                                value=selectedDB
+                                prompt="Select PDO driver"
+                  }}
+              </div>
+
+              {{#if isMySQL}}
+                <div class="form-group">
+                    <p>The user provided must exist and either be privileged to create the
+                       named Database -- or it must be created for the user prior to amtc-web installtion.</p>
+                </div>
+                <div class="form-group">
+                    <label>MySQL Database Server host</label>
+                    {{input type="text" value=mysqlHost class="form-control"}}
+                </div>
+                <div class="form-group">
+                    <label>Database name</label>
+                    {{input type="text" value=mysqlDB class="form-control"}}
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    {{input type="text" value=mysqlUser class="form-control"}}
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    {{input type="password" value=mysqlPassword class="form-control" placeholder="joe,2014-$ecure!"}}
+                </div>
+              {{/if}}
+
+              {{#if isSQLite}}
+                <div class="form-group">
+
+                    <label>SQLite database file</label>
+                    {{input type="text" value=sqlitePath class="form-control" placeholder="data/amtc-web.db"}}
+                    <p class="help-block">Choose a (application-)relative path like <code>data/amtc-web.db</code> or
+                    use an absolute path. Note that the directory containing the file must be writable.</p>
+                </div>
+              {{/if}}
+
+              <div class="form-group">
+                <label>HTTP Basic authentication URL</label>
+                {{input type="text" value=authurl class="form-control"}}
+                <p class="help-block">Defaults to <code>basic-auth</code> subdirectory, relative to
+                index.html, but as full URL. The idea here is that you can specify any HTTP Basic Authentication
+                protected resource as authentication source. By using the localhost URL, you may manage
+                passwords by means of <code>htpasswd</code> locally -- or you may configure <code>basic-auth</code>
+                subdirectory to use e.g. LDAP as authentication backend. Inside amtc-web s DB, only usernames and
+                settings are stored.</p>
+              </div>
+
+              <div class="form-group">
+                  <label>Example data</label>
+                  <div class="checkbox">
+                      <label>
+                          {{input type="checkbox" checked=importDemo}} Install example data (some OUs, AMT option sets, and hosts)
+                      </label>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                <div class="alert alert-danger">
+                  <b>Warning!</b><br>
+                  Once written via this setup tool, you have to delete the configuration file
+                  (<code>config/siteconfig.php</code>) manually to re-enable setup.<br>
+                  Default intial admin username is 'admin' with password 'amtc'.
+                  <em>Currently, only SQLite and MySQL are supported by amtc-web!</em>
+                </div>
+                {{#if selectedDB}}
+                <button class="btn btn-default" {{action 'doneEditing'}}><span class="fa fa-save"></span> Write configuration</button>
+                {{else}}
+                <i>A PHP DBO driver must be selected before proceeding.</i>
+                {{/if}}
+              </div>
+          </form>
+      </div>
+    </div>
+  {{else}}
+    <div class="form-group">
+      <div class="alert alert-danger">
+        <em>Error!</em>
+        Not all preconditions met. Needs to be fixed to proceed with initial installation.<br>
+      </div>
+    </div>
+  {{/if}}
+{{else}}
+  <div class="row">
+    <div class="col-lg-12">
+        <div class="alert alert-danger">
+          <h3>Installation tool locked</h3>
+          <p>As a configuration file already exists at <code>config/siteconfig.php</code>,
+             this setup tool is locked.<br> You have to manually remove the file to re-run setup.</p>
+        </div>
+    </div>
+  </div>
+{{/if}}
+

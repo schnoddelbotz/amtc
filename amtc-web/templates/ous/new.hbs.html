@@ -1,0 +1,7 @@
+<h1 class="page-header">Create a new OU / room</h1>
+{{partial "ou/edit"}}
+{{#if parent_id}}
+  <button class="btn btn-default" {{action 'doneEditingReturn'}}>
+    <span class="fa fa-save"></span> Save new OU
+  </button>
+{{/if}}

@@ -1,0 +1,64 @@
+<form id="optionsetEditForm">
+ <fieldset>
+    <div class="form-group">
+      <label for="name">Option set name</label>
+      {{input class="form-control" type="text" value=model.name insert-newline="doneEditingReturn" placeholder="shorthand name"}}
+      <p class="help-block">Choose a simple name that reflects settings below.</p>
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+        {{input class="form-control" type="text" value=model.description insert-newline="doneEditingReturn" placeholder="..."}}
+    </div>
+    <div class="form-group">
+      <label for="description">AMT password file</label>
+        {{input class="form-control" type="text" value=model.opt_passfile insert-newline="doneEditingReturn" placeholder="/path/to/file"}}
+    </div>
+    <div class="form-group">
+      <label for="description">Connection timeout [s]</label>
+        {{input class="form-control" type="text" value=model.opt_timeout insert-newline="doneEditingReturn" size=2 placeholder="10"}}
+    </div>
+    {{#unless sw_dash}}
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=model.sw_v5}} Enforce AMT v5 EOI (see also: <a href="http://en.wikipedia.org/wiki/Intel_AMT_versions">Intel AMT versions</a>)
+        </label>
+      </div>
+    {{/unless}}
+    {{#unless sw_v5}}
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=model.sw_dash}} Enforce DASH/WsMan; required for AMT 9.0 and greater. Slower.
+        </label>
+      </div>
+    {{/unless}}
+    <div class="checkbox">
+      <label>
+        {{input type="checkbox" checked=model.sw_scan22}} Enable SSH portscan
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        {{input type="checkbox" checked=model.sw_scan3389}} Enbale RDP portscan
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        {{input type="checkbox" checked=model.sw_usetls}} use HTTPS/TLS (TCP port 16993)
+      </label>
+    </div>
+    {{#if model.sw_usetls}}
+      <div class="checkbox">
+        <label>
+          {{input type="checkbox" checked=model.sw_skipcertchk}} Skip TLS cert verification
+        </label>
+      </div>
+      {{#unless model.sw_skipcertchk}}
+        <div class="form-group">
+          <label for="description">TLS CA cert file</label>
+            {{input class="form-control" type="text" value=model.opt_cacertfile insert-newline="doneEditingReturn"}}
+        </div>
+      {{/unless}}
+    {{/if}}
+ </fieldset>
+</form>
+<div class="clearboth"></div><br>

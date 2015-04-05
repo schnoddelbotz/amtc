@@ -9,7 +9,7 @@
 export JQUERY      = 2.1.3
 export JQUERYUI    = 1.11.4
 export BOOTSTRAP   = 3.3.4
-export EMBERJS     = 1.11.0
+export EMBERJS     = 1.11.1
 export EMBERDATA   = 1.0.0-beta.16
 export FONTAWESOME = 4.3.0
 
@@ -29,7 +29,9 @@ PHPLIBS  = lib/Slim/Slim.php lib/idiorm.php lib/paris.php
 ZIPSRC   = js/jquery-ui.min.js js/bootstrap.min.js css/sb-admin-2.css fonts/fontawesome-webfont.woff
 FONTS    = fonts/fontawesome-webfont.woff
 
-build: download compress basic-auth/.htaccess
+HAVE_NODEJS ?= $(shell /usr/bin/env node -v &>/dev/null && echo YES)
+
+build: index.html download compress basic-auth/.htaccess
 
 download: $(CSSFILES) $(JSFILES) $(PHPLIBS) $(FONTS)
 
@@ -37,12 +39,48 @@ concat: download css/styles.css js/jslibs.js
 
 compress: concat css/styles.css.gz js/jslibs.js.gz index.html.gz
 
+index.html: js/ember-template-compiler.js
+ifeq ($(HAVE_NODEJS),YES)
+    # Having NodeJS allows HTMLbars template precompilation
+    cat templates/page_header.html > index.html
+    cat templates/page_footer.html >> index.html
+    cat /dev/null > js/compiled-templates.js
+    for t in templates/*.hbs.html templates/*/*.hbs.html; do \
+      tpl=`basename $$t | cut -d. -f1`; \
+      dir=`dirname $$t`; \
+      if [ $$dir != "templates" ]; then \
+        tpl="`basename $$dir`/$$tpl"; \
+      fi; \
+      echo "// $$t ($$tpl) " >> js/compiled-templates.js; \
+      ./js/compile-template.js "$$t" "$$tpl"; \
+    done
+else
+    # No NodeJS on buildhost, build index.html that will result in
+    # client-side template compilation.
+    cat templates/page_header.html > index.html
+    for t in templates/*.hbs.html templates/*/*.hbs.html; do \
+      tpl=`basename $$t | cut -d. -f1`; \
+      dir=`dirname $$t`; \
+      if [ $$dir != "templates" ]; then \
+        tpl="`basename $$dir`/$$tpl"; \
+      fi; \
+      echo "<!-- $$t ($$tpl) -->" >> index.html; \
+      echo '<script type="text/x-handlebars" id="'$$tpl'">' >> index.html; \
+      cat $$t >> index.html; \
+      echo -e '</script>\n' >> index.html; \
+      done
+    cat templates/page_footer.html >> index.html
+endif
+
 # concat targets
 css/styles.css: $(CSSFILES) $(ZIPSRC)
 	cat $(CSSFILES) > css/styles.css
 
-js/jslibs.js: $(JSFILES) $(ZIPSRC)
+js/jslibs.js: index.html $(JSFILES) $(ZIPSRC)
 	cat $(JSFILES) > js/jslibs.js
+ifeq ($(HAVE_NODEJS),YES)
+	cat js/compiled-templates.js >> js/jslibs.js
+endif
 
 # compress targets
 %.gz: js/jslibs.js css/styles.css
@@ -50,12 +88,13 @@ js/jslibs.js: $(JSFILES) $(ZIPSRC)
 
 # remove any non-repo / downloaded / built files
 clean:
-	rm -rf fonts css/plugins js/plugins {.,css,js}/*.gz lib/Slim
-	rm -f css/{b,f,h,sb,st}*.css js/{b,e,h,j,m,s}*.js js/jq*.map lib/{paris,idiorm}.php
+	rm -rf index.html fonts css/plugins js/plugins {.,css,js}/*.gz lib/Slim
+	rm -f css/{b,f,h,sb,st}*.css js/{b,e,h,j,m,s}*.js js/jq*.map \
+	 lib/{paris,idiorm}.php js/compiled-templates.js
 
 # remove single js/css files (to keep concat+compress version only)
 distclean:
-	rm -f css/{b,f,h,sb}*.css js/{b,e,h,jq,m,s}*.js
+	rm -f css/{b,f,h,sb}*.css js/{compile,b,e,h,jq,m,s}*.js
 	rm -rf {css,js}/plugins
 
 # download any CSS/JSFILES from URLs specified in Makefile.Sources

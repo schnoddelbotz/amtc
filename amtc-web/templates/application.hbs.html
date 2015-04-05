@@ -1,0 +1,223 @@
+<div id="wrapper">
+<nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="">
+          <span class="brand">{{appName}}</span>
+          <span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x lightgrey"></i>
+            <i id="bolt" class="fa fa-bolt fa-fw fa-stack-1x grey flash"></i>
+          </span>
+          <i class="hidden-xs">remote. power. management.</i>
+        </a>
+    </div>
+    <!-- /.navbar-header -->
+
+    <ul class="nav navbar-top-links navbar-right">
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <i class="fa fa-bell fa-fw"></i>  <i class="fa fa-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-messages">
+              {{#if controllers.notifications.notifications}}
+                {{#each msg in controllers.notifications.notifications.content}}
+                  <li>
+                    <a href="#">
+                      <div>
+                        <strong>FIXME {{msg.user_id.fullname}}</strong>
+                        <span class="pull-right text-muted">
+                            <em>{{format-from-now msg.tstamp}}</em>
+                        </span>
+                      </div>
+                      <div><i class={{msg.cssClass}}></i> {{msg.message}}</div>
+                    </a>
+                  </li>
+                  <li class="divider"></li>
+                {{/each}}
+              {{else}}
+                <i class="fa fa-spinner fa-spin"></i> Loading latest notifications ...
+              {{/if}}
+              <li>
+                  <a class="text-center" href="#">
+                      <strong>read all notifications</strong>
+                      <i class="fa fa-angle-right"></i>
+                  </a>
+              </li>
+            </ul>
+            <!-- /.dropdown-messages -->
+        </li>
+        <!-- /.dropdown -->
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <i class="fa fa-tasks fa-fw"></i>  <i class="fa fa-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-tasks">
+                <li>
+                    <a href="#">
+                        <div>
+                            <p>
+                                <strong>Task 1</strong>
+                                <span class="pull-right text-muted">40% Complete</span>
+                            </p>
+                            <div class="progress progress-striped active">
+                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                                    <span class="sr-only">40% Complete (success)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="#">
+                        <div>
+                            <p>
+                                <strong>Task 2</strong>
+                                <span class="pull-right text-muted">20% Complete</span>
+                            </p>
+                            <div class="progress progress-striped active">
+                                <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
+                                    <span class="sr-only">20% Complete</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="#">
+                        <div>
+                            <p>
+                                <strong>Task 3</strong>
+                                <span class="pull-right text-muted">60% Complete</span>
+                            </p>
+                            <div class="progress progress-striped active">
+                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%">
+                                    <span class="sr-only">60% Complete (warning)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="#">
+                        <div>
+                            <p>
+                                <strong>Task 4</strong>
+                                <span class="pull-right text-muted">80% Complete</span>
+                            </p>
+                            <div class="progress progress-striped active">
+                                <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
+                                    <span class="sr-only">80% Complete (danger)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a class="text-center" href="#">
+                        <strong>See All Tasks</strong>
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                </li>
+            </ul>
+            <!-- /.dropdown-tasks -->
+        </li>
+        <!-- /.dropdown -->
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-user">
+                <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                </li>
+                <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                </li>
+                <li class="divider"></li>
+                <li><a href="#/logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                <!-- {{controllers.login}} -->
+                </li>
+            </ul>
+            <!-- /.dropdown-user -->
+        </li>
+        <!-- /.dropdown -->
+    </ul>
+    <!-- /.navbar-top-links -->
+
+    <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
+            <ul class="nav" id="side-menu">
+            <!--
+                <li class="sidebar-search">
+                    <div class="input-group custom-search-form">
+                        <input type="text" class="form-control" placeholder="Search host or room">
+                        <span class="input-group-btn">
+                        <button class="btn btn-default" type="button">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </span>
+                    </div>
+                </li>
+            -->
+            {{#if controllers.login.isLoggedIn}} <!-- hide menu items that require login -->
+                <li>
+                    <a href="#"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                </li>
+                <li>
+                    <a {{bindAttr href="view.href"}}>
+                        <i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts
+                    </a>
+                    <ul class="nav nav-second-level in">
+                        {{partial "ouSelection"}}
+                    </ul>
+                </li>
+                {{#linkTo 'logs' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>{{/linkTo}}
+                {{#linkTo 'energy' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-area-chart fa-fw"></i> Energy Consumption</a>{{/linkTo}}
+                <li>
+                    <a href="#"><i class="fa fa-wrench fa-fw"></i> Administration<span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+
+                        {{#linkTo 'ous' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>{{/linkTo}}
+
+                        {{#linkTo 'schedules' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Power Schedule</a>{{/linkTo}}
+
+                        {{#linkTo 'users' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-users fa-fw"></i> Users</a>{{/linkTo}}
+
+                        <li>
+                            <a href="#/systemhealth"><i class="fa fa-heartbeat fa-fw"></i> Scheduler Log and Status</a>
+                        </li>
+                        {{#linkTo 'optionsets' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>{{/linkTo}}
+                    </ul>
+                    <!-- /.nav-second-level -->
+                </li>
+            {{else}}
+             <li><a href="#/login"><i class="fa fa-user fa-fw"></i> Login</a></li>
+            {{/if}} <!-- / hide menu items that require login -->
+                <li>
+                    <a href="#"><i class="fa fa-ambulance fa-fw"></i> Help<span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li> <a href="#/page/configure-amt"><i class="fa fa-wrench fa-fw"></i> Configuring AMT</a> </li>
+                        <li> <a href="#/page/first-steps"><i class="fa fa-child fa-fw"></i> {{appName}} First Steps</a> </li>
+                        <li> <a href="#/page/about"><i class="fa fa-github fa-fw"></i> About, Feedback, ...</a> </li>
+                    </ul>
+                    <!-- /.nav-second-level -->
+                </li>
+            </ul>
+        </div>
+        <!-- /.sidebar-collapse -->
+    </div>
+    <!-- /.navbar-static-side -->
+</nav>
+
+<div id="page-wrapper">
+    {{outlet}}
+</div>
+
+</div>

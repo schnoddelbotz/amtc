@@ -1,0 +1,41 @@
+{{! Display a table with (only) all scheduled job items }}
+<h1 class="page-header">Scheduled power management</h1>
+<table class="table table-striped">
+<thead>
+  <tr>
+    <th>Job Description</th>
+    <th>Mon</th>
+    <th>Tue</th>
+    <th>Wed</th>
+    <th>Thu</th>
+    <th>Fri</th>
+    <th>Sat</th>
+    <th>Sun</th>
+    <th>Time</th>
+    <th>Action</th>
+    <th>OU</th>
+    <th>Delay</th>
+  </tr>
+</thead>
+<tbody>
+{{#each model}}
+{{#if isScheduledTask}}
+  <tr>
+    <td>{{#link-to 'schedule.edit' this}}<i class="fa fa-edit"></i> {{/link-to}}&nbsp;
+    {{#link-to 'schedule.edit' this}}{{description}}{{/link-to}}</td>
+    <td>{{check-mark on_monday}}</td>
+    <td>{{check-mark on_tuesday}}</td>
+    <td>{{check-mark on_wednesday}}</td>
+    <td>{{check-mark on_thursday}}</td>
+    <td>{{check-mark on_friday}}</td>
+    <td>{{check-mark on_saturday}}</td>
+    <td>{{check-mark on_sunday}}</td>
+    <td>{{human_start_time}}</td>
+    <td>{{amtc_cmd}}</td>
+    <td>{{ou_id.name}}</td>
+    <td>{{amtc_delay}}</td>
+  </tr>
+{{/if}}
+{{/each}}
+</tbody>
+</table>

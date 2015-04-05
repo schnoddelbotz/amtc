@@ -1,0 +1,23 @@
+<div class="row">
+  <div class="col-lg-12">
+    <p>Add, remove or enable/disable hosts for this OU here.</p>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-12">
+    <h3>Existing hosts</h3>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-12" id="cfghosts">
+    {{#if controllers.hosts.hosts.content}}
+        {{#each controller.model.hosts}}
+            <div class="pc"><i class="fa fa-desktop"></i> {{hostname}}</div>
+        {{/each}}
+    {{else}}
+        No hosts found in this room.
+    {{/if}}
+  </div>
+</div>
+
+{{partial "addHostsWizard"}}
