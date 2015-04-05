@@ -109,8 +109,8 @@ clean:
 # remove single js/css files (to keep concat+compress version only)
 distclean:
 	rm -f css/{b,f,h,sb}*.css js/{compile,b,e,h,jq,m,s}*.js
-	rm -rf {css,js}/plugins
-	[ $(MERGE_JS) = YES ] && rm -f js/app/app.js || true
+	rm -rf {css,js}/plugins templates
+	[ $(MERGE_JS) = YES ] && rm -rf js/app || true
 	[ $(MERGE_CSS) = YES ] && rm -f css/amtc-web.css || true
 
 # download any CSS/JSFILES from URLs specified in Makefile.Sources
