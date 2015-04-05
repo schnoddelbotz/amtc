@@ -92,7 +92,7 @@ ifeq ($(HAVE_NODEJS),YES)
 	cat js/compiled-templates.js >> js/jslibs.js
 	[ $(MERGE_JS) = YES ] && node -e 'var u=require("uglify-js"); console.log(u.minify("js/app/app.js").code);' >> js/jslibs.js || true
 else
-  [ $(MERGE_JS) = YES ] && cat js/app/app.js >> js/jslibs.js || true
+	[ $(MERGE_JS) = YES ] && cat js/app/app.js >> js/jslibs.js || true
 endif
 
 
