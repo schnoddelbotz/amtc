@@ -14,12 +14,16 @@ export EMBERDATA   = 1.0.0-beta.16
 export FONTAWESOME = 4.3.0
 
 SHELL = bash
+MERGE_JS    ?= YES
+MERGE_CSS   ?= YES
+HAVE_NODEJS ?= $(shell /usr/bin/env node -v &>/dev/null && echo YES)
+TPL_COMPILER = $(shell test "$(HAVE_NODEJS)" = "YES" && echo "" || echo "js/ember-template-compiler.js")
 
 CSSFILES = css/bootstrap.min.css css/plugins/metisMenu/metisMenu.min.css \
  	css/plugins/timeline.css css/sb-admin-2.css css/plugins/morris.css \
  	css/font-awesome.min.css css/humane-original.css
 
-JSFILES  = js/jquery.min.js js/bootstrap.min.js js/ember-template-compiler.js \
+JSFILES  = js/jquery.min.js js/bootstrap.min.js $(TPL_COMPILER) \
 	js/emberjs.min.js js/ember-data.min.js js/showdown.js \
 	js/moment.js js/humane.min.js js/plugins/metisMenu/metisMenu.min.js \
 	js/plugins/morris/raphael.min.js js/plugins/morris/morris.min.js \
@@ -28,10 +32,6 @@ JSFILES  = js/jquery.min.js js/bootstrap.min.js js/ember-template-compiler.js \
 PHPLIBS  = lib/Slim/Slim.php lib/idiorm.php lib/paris.php
 ZIPSRC   = js/jquery-ui.min.js js/bootstrap.min.js css/sb-admin-2.css fonts/fontawesome-webfont.woff
 FONTS    = fonts/fontawesome-webfont.woff
-
-HAVE_NODEJS ?= $(shell /usr/bin/env node -v &>/dev/null && echo YES)
-MERGE_JS  ?= YES
-MERGE_CSS ?= YES
 
 build: index.html download compress basic-auth/.htaccess
 
@@ -72,12 +72,12 @@ else
 	  echo '<script type="text/x-handlebars" id="'$$tpl'">' >> index.html; \
 	  cat $$t >> index.html; \
 	  echo -e '</script>\n' >> index.html; \
-	  done
+	done
 endif
 	if [ $(MERGE_JS) = YES ]; then \
 	  grep -v app/app.js templates/application_footer.html >> index.html; \
 	else \
-		cat templates/application_footer.html >> index.html; \
+	  cat templates/application_footer.html >> index.html; \
 	fi
 
 
