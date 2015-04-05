@@ -24,8 +24,8 @@ CSSFILES = css/bootstrap.min.css css/plugins/metisMenu/metisMenu.min.css \
  	css/font-awesome.min.css css/humane-original.css
 
 JSFILES  = js/jquery.min.js js/bootstrap.min.js $(TPL_COMPILER) \
-	js/emberjs.min.js js/ember-data.min.js js/showdown.js \
-	js/moment.js js/humane.min.js js/plugins/metisMenu/metisMenu.min.js \
+	js/emberjs.min.js js/ember-data.min.js js/showdown.min.js \
+	js/moment.min.js js/humane.min.js js/plugins/metisMenu/metisMenu.min.js \
 	js/plugins/morris/raphael.min.js js/plugins/morris/morris.min.js \
 	js/jquery-ui.min.js
 
