@@ -30,6 +30,8 @@ ZIPSRC   = js/jquery-ui.min.js js/bootstrap.min.js css/sb-admin-2.css fonts/font
 FONTS    = fonts/fontawesome-webfont.woff
 
 HAVE_NODEJS ?= $(shell /usr/bin/env node -v &>/dev/null && echo YES)
+MERGE_JS  ?= YES
+MERGE_CSS ?= YES
 
 build: index.html download compress basic-auth/.htaccess
 
@@ -40,10 +42,12 @@ concat: download css/styles.css js/jslibs.js
 compress: concat css/styles.css.gz js/jslibs.js.gz index.html.gz
 
 index.html: js/ember-template-compiler.js
+	if [ $(MERGE_CSS) = YES ]; then \
+	  grep -v css/amtc-web.css templates/application_header.html > index.html; \
+	else \
+	  cat templates/application_header.html > index.html; \
+	fi
 ifeq ($(HAVE_NODEJS),YES)
-	# Having NodeJS allows HTMLbars template precompilation
-	cat templates/page_header.html > index.html
-	cat templates/page_footer.html >> index.html
 	cat /dev/null > js/compiled-templates.js
 	for t in templates/*.hbs.html templates/*/*.hbs.html; do \
 	  tpl=`basename $$t | cut -d. -f1`; \
@@ -57,7 +61,7 @@ ifeq ($(HAVE_NODEJS),YES)
 else
 	# No NodeJS on buildhost, build index.html that will result in
 	# client-side template compilation.
-	cat templates/page_header.html > index.html
+	cat templates/application_header.html > index.html
 	for t in templates/*.hbs.html templates/*/*.hbs.html; do \
 	  tpl=`basename $$t | cut -d. -f1`; \
 	  dir=`dirname $$t`; \
@@ -69,21 +73,31 @@ else
 	  cat $$t >> index.html; \
 	  echo -e '</script>\n' >> index.html; \
 	  done
-	cat templates/page_footer.html >> index.html
 endif
+	if [ $(MERGE_JS) = YES ]; then \
+	  grep -v app/app.js templates/application_footer.html >> index.html; \
+	else \
+		cat templates/application_footer.html >> index.html; \
+	fi
+
 
 # concat targets
 css/styles.css: $(CSSFILES) $(ZIPSRC)
 	cat $(CSSFILES) > css/styles.css
+	[ $(MERGE_CSS) = YES ] && cat css/amtc-web.css >> css/styles.css || true
 
 js/jslibs.js: index.html $(JSFILES) $(ZIPSRC)
 	cat $(JSFILES) > js/jslibs.js
 ifeq ($(HAVE_NODEJS),YES)
 	cat js/compiled-templates.js >> js/jslibs.js
+	[ $(MERGE_JS) = YES ] && node -e 'var u=require("uglify-js"); console.log(u.minify("js/app/app.js").code);' >> js/jslibs.js || true
+else
+  [ $(MERGE_JS) = YES ] && cat js/app/app.js >> js/jslibs.js || true
 endif
 
+
 # compress targets
-%.gz: js/jslibs.js css/styles.css
+%.gz: js/jslibs.js css/styles.css index.html
 	gzip -c --best $* > $*.gz
 
 # remove any non-repo / downloaded / built files
@@ -96,6 +110,8 @@ clean:
 distclean:
 	rm -f css/{b,f,h,sb}*.css js/{compile,b,e,h,jq,m,s}*.js
 	rm -rf {css,js}/plugins
+	[ $(MERGE_JS) = YES ] && rm -f js/app/app.js || true
+	[ $(MERGE_CSS) = YES ] && rm -f css/amtc-web.css || true
 
 # download any CSS/JSFILES from URLs specified in Makefile.Sources
 %:
