@@ -158,6 +158,7 @@ Ember.Route.reopen({
     var L = App.readCookie("isLoggedIn");
     if (U == null && L == null && !window.location.href.match('/login') && !window.location.href.match('/setup') && !window.location.href.match('/page')) {
       console.log('NULL USER detected on Ember.Route.init(); redir to #/login!');
+      window.targetURL = window.location.href;
       window.location.href = '#/login';
     }
     this._super();
@@ -632,6 +633,31 @@ App.LoginController = Ember.Controller.extend({
             self.set('isAuthenticated', true);
             self.set('isLoggedIn', true); // will load/unhide real menu
             self.set('authFailed', false);
+            /*
+
+            INTENSION: redir to initially requested URL upon successful auth
+
+            if (window.targetURL) {
+              var t = window.targetURL.split('#')[1];
+              if (t) {
+                var e = t.substring(1).split('/');
+                if (e.length==3) {
+                  self.transitionToRoute(e[0]+'.'+e[2], {id:e[1]});
+                } else if (e.length==1) {
+                  self.transitionToRoute(e[0]);
+                } else {
+                  self.transitionToRoute('index');
+                }
+              } else {
+                self.transitionToRoute('index');
+              }
+            } else {
+              self.transitionToRoute('index');
+            }
+
+            FIXME: this would work ok, but models don't get loaded as needed.
+
+            */
             self.transitionToRoute('index');
           } else {
             self.set('authFailed', true);
