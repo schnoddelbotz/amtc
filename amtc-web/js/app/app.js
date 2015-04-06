@@ -106,11 +106,9 @@ var App = Ember.Application.create({
 // Routes
 App.Router.map(function() {
   this.route('login');
-  this.route('logout');
   this.route('setup');
   this.resource('logs');
   this.resource('energy');
-  //this.resource('schedule');
   this.resource('page', { path: '/page/:id' });
 
   this.resource('ous', function() {
@@ -143,7 +141,6 @@ App.Router.map(function() {
   this.resource('schedule', { path: '/schedule/:id' }, function() {
     this.route('edit');
   });
-
 });
 
 Ember.Route.reopen({
@@ -164,19 +161,6 @@ Ember.Route.reopen({
     }
     this._super();
   }
-});
-App.Router.reopen({
-  routeDidChange: function() {
-    // this will redirect any user that clicks on a link w/o having a cookie
-    // console.log('AppRouter didTransition to: ' + url);
-    var url = this.get('url')
-    var U = App.readCookie("username");
-    var L = App.readCookie("isLoggedIn");
-    if (U == null && !url.match('/page') && !window.location.href.match('/setup')) {
-      console.log('NULL USER detected on App.Router.routeDidChange(); redir to #/login!' + window.location.href);
-      window.location.href = '#/login';
-    }
-  }.on('didTransition')
 });
 
 App.PageRoute = Ember.Route.extend({
@@ -588,13 +572,15 @@ App.ApplicationController = Ember.Controller.extend({
       //console.log('TreeMenuComponent node: ' + node);
       this.set('selectedNode', node.get('id'));
       this.transitionToRoute('ou.monitor', node.get('id') )
+    },
+    goLogout: function() {
+      this.get('controllers.login').send('doLogout');
     }
-
   },
 });
 
 App.LoginController = Ember.Controller.extend({
-  needs: ["user"],
+  //needs: ["user"],
 
   isLoggingIn: false,
   isAuthenticated: false,
@@ -612,19 +598,6 @@ App.LoginController = Ember.Controller.extend({
     this.set('isLoggedIn', isL);
     console.log('INIT UserCtrl with user ... ' + cuser);
   },
-
-  isLoggedInObserver: function() {
-    // third place to redirect users w/o login sess cookie
-    console.log('Fetching user: ' + this.get('username'));
-    if (this.get('username')) {
-      this.set('content', this.store.find('user', this.get('username')));
-    } else if (!window.location.href.match('/page')) {
-      // redir to /login if non-/page (.md doc) request
-      this.set('content', null);
-      this.transitionToRoute('login');
-    }
-  }.observes('isLoggedIn').on('init'),
-
   actions: {
     doLogin: function(assertion) {
       this.set('isLoggingIn', true);
@@ -638,20 +611,18 @@ App.LoginController = Ember.Controller.extend({
         data: {username: u, password: p},
 
         success: function(res, status, xhr) {
-          console.log(res);
-          if (res.exceptionMessage) {
-            self.set('authFailed', true);
-            $("#password").effect( "shake" );
-          } else if (res.result=='success') {
-            console.log('AUTH SUCCESS!');
+          if (res.result=="success") {
             App.createCookie("username", u);
             App.createCookie("isLoggedIn", 1);
             self.set('isLoggingIn', false);
-            self.set('password','no-longer-required');
+            self.set('password',''); // no-longer-required
             self.set('isAuthenticated', true);
-            // self.transitionToRoute('index');
-            // lazy way, retrigger ember-data loads...
-            window.location.href = ''; // -> index.html
+            self.set('isLoggedIn', true); // will load/unhide real menu
+            self.set('authFailed', false);
+            self.transitionToRoute('index');
+          } else {
+            self.set('authFailed', true);
+            $("#password").effect( "shake" );
           }
         },
         error: function(xhr, status, err) {
@@ -660,40 +631,39 @@ App.LoginController = Ember.Controller.extend({
       });
     },
     doLogout: function() {
-      //controller.set('content', null);
+      var self = this;
       this.set('isAuthenticated', false);
       $.ajax({
+        dataType: "json",
         type: 'GET',
         url: 'rest-api.php/logout',
         success: function(xhr, status, err) {
-          console.log('onlogout: ');
-          console.log(xhr);
-          App.eraseCookie("amtcweb");
-          App.eraseCookie("username");
-          App.eraseCookie("isLoggedIn");
-          humane.log('<i class="fa fa-meh-o"></i> Signed out successfully',
-            { timeout: 1000, clickToClose: false });
-          window.setTimeout( function(){
-            window.location.href=''; // not nice ... but ok 4 now
-          }, 1100);
+          if (xhr.error) {
+            humane.log('<i class="fa fa-meh-o"></i> Not logged in!',
+               { timeout: 500, clickToClose: false });
+          } else if (xhr.message && xhr.message=="success") {
+            App.eraseCookie("amtcweb");
+            App.eraseCookie("username");
+            App.eraseCookie("isLoggedIn");
+            humane.log('<i class="fa fa-smile-o"></i> Signed out successfully',
+               { timeout: 1000, clickToClose: false });
+            self.set('isLoggedIn', false);
+            self.set('isAuthenticated', false);
+            self.transitionToRoute('login');
+          } else {
+            humane.log('<i class="fa fa-meh-o"></i> Weird error!',
+               { timeout: 0, clickToClose: true });
+          }
         },
         error: function(xhr, status, err) {
-          console.log(xhr);
-          console.log('Error while logging out: ' + err + " status: " + status);
+          humane.log('<i class="fa fa-meh-o"></i> <b>Fatal error:</b><br>'+err,
+               { timeout: 0, clickToClose: true });
         }
         });
     }
   },
 });
-App.LogoutController = Ember.Controller.extend({
-  needs: ["user", "login"],
-  init: function() {
-    var cuser = App.readCookie("username");
-    var isL = App.readCookie("isLoggedIn");
-    console.log('LOGOUT UserCtrl with user ... ' + cuser);
-    this.get('controllers.login').send('doLogout');
-  },
-});
+
 // Index/Dashboard
 App.IndexController = Ember.Controller.extend({
   needs: ["notifications","laststates"],
@@ -701,7 +671,6 @@ App.IndexController = Ember.Controller.extend({
 // Index page notification messages ('job completed') et al
 App.NotificationsController = Ember.ArrayController.extend({
   notifications: function() {
-    console.log("NotificationsController notifications() - fetching.");
     return this.get('store').find('notification');
   }.property()
 });
@@ -804,7 +773,6 @@ App.OuEditController = Ember.Controller.extend({
 });
 App.OusController = Ember.ArrayController.extend({
   ous: function() {
-    console.log("OusController ous() - fetching.");
     return this.get('store').find('ou');
   }.property()
 });
@@ -820,7 +788,6 @@ App.OusNewController = App.OuEditController;
 // Client PCs
 App.HostsController = Ember.ArrayController.extend({
   hosts: function() {
-    console.log("HostsController hosts() - fetching.");
     return this.get('store').find('host');
   }.property()
 });
@@ -924,7 +891,6 @@ App.OuStatelogController = Ember.Controller.extend({
 });
 App.LaststatesController = Ember.ArrayController.extend({
   laststates: function() {
-    console.log("laststatesController laststates() - fetching.");
     return this.get('store').find('laststate');
   }.property(),
 
