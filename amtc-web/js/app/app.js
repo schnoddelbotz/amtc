@@ -1481,6 +1481,9 @@ Ember.Handlebars.helper('check-mark', function(input) {
 
 // moment.js PRETTY timestamps
 Ember.Handlebars.helper('format-from-now', function(date) {
+  if (!date) {
+    return 'n/a';
+  }
   return moment.unix(date).fromNow();
 });
 

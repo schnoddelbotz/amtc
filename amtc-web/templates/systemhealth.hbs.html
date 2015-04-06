@@ -19,13 +19,7 @@
       <dd>{{model.systemhealth.logsize}}</dd>
 
       <dt>amtc-web log last entry</dt>
-      <dd>
-        {{#if model.systemhealth.logmodtime}}
-          {{format-from-now model.systemhealth.logmodtime}}
-        {{else}}
-          <i>n/a</i>
-        {{/if}}
-      </dd>
+      <dd>{{format-from-now model.systemhealth.logmodtime}}</dd>
 
       <dt>Server date and time</dt>
       <dd>{{model.systemhealth.datetime}}</dd>
