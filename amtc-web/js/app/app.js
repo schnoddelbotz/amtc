@@ -1078,9 +1078,6 @@ App.SystemhealthController = Ember.Controller.extend({
     resetJobs: function () {
       alert("Not yet ... coming soon.");
     },
-    killProcesses: function () {
-      alert("Not yet ... coming soon.");
-    },
     refresh: function () {
       this.send("refreshData"); // ... on the router
     }

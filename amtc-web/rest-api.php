@@ -112,12 +112,13 @@ $app->get('/systemhealth', function () {
   $data['uptime'] = trim(`uptime`);
   $data['datetime'] = strftime('%c');
   $data['diskfree'] = sprintf('%0.3f GB', disk_free_space(AMTC_DATADIR)/1024/1024/1024);
+  $monitorJob = Job::find_one(1);
+  $data['lastmonitoringstarted'] = $monitorJob->last_started;
+  $data['lastmonitoringdone'] = $monitorJob->last_done;
+  $data['activejobs'] = ORM::for_table('job')->where('job_status',Job::STATUS_RUNNING)->count();
   // fixme:
-  $data['memfree'] = '?? gb';
-  $data['lastmonitoring'] = rand(1,32000);
-  $data['activejobs'] = rand(1,32000);
   $data['activeprocesses'] = rand(1,32000);
-  $data['monitorcount'] = rand(1,32000);
+  $data['monitorcount'] = ORM::for_table('statelog')->count();
   // add -V to amtc... or improve otherwise
   $av = shell_exec(AMTC_BIN);
   $av = preg_replace("/.*amtc v([^\s]+).*/ms","$1",$av);
@@ -125,7 +126,7 @@ $app->get('/systemhealth', function () {
   //
   $logfile = AMTC_DATADIR.'/amtc-web-cli.log';
   $data['logsize'] = 'file does not exist';
-  $data['logmodtime'] = 'n/a';
+  $data['logmodtime'] = false;
   if (file_exists($logfile)) {
     $fstat = stat($logfile);
     $data['logsize'] = sprintf('%0.3f MB', $fstat[7]/1024/1024);

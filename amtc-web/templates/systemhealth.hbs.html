@@ -15,14 +15,17 @@
       <dt>Disk free</dt>
       <dd>{{model.systemhealth.diskfree}}</dd>
 
-      <dt>Memory free</dt>
-      <dd>{{model.systemhealth.memfree}}</dd>
-
       <dt>amtc-web log size</dt>
       <dd>{{model.systemhealth.logsize}}</dd>
 
       <dt>amtc-web log last entry</dt>
-      <dd>{{format-from-now model.systemhealth.logmodtime}}</dd>
+      <dd>
+        {{#if model.systemhealth.logmodtime}}
+          {{format-from-now model.systemhealth.logmodtime}}
+        {{else}}
+          <i>n/a</i>
+        {{/if}}
+      </dd>
 
       <dt>Server date and time</dt>
       <dd>{{model.systemhealth.datetime}}</dd>
@@ -32,26 +35,28 @@
   <div class="col-lg-6">
     <h3>database and process status</h3>
     <dl>
-      <dt>Last monitoring start</dt>
-      <dd>{{model.systemhealth.lastmonitoring}}</dd>
+      <dt>Monitoring task last started</dt>
+      <dd>{{format-from-now model.systemhealth.lastmonitoringstarted}}</dd>
 
-      <dt>Active jobs</dt>
+      <dt>Monitoring task last completed</dt>
+      <dd>{{format-from-now model.systemhealth.lastmonitoringdone}}</dd>
+
+      <dt>Active jobs according to DB</dt>
       <dd>{{model.systemhealth.activejobs}}</dd>
 
-      <dt>Active processes</dt>
-      <dd>{{model.systemhealth.activeprocesses}}</dd>
+      <dt>Active amtc processes</dt>
+      <dd>{{model.systemhealth.activeprocesses}} (notyet)</dd>
 
       <dt>Monitoring log entries</dt>
       <dd>{{model.systemhealth.monitorcount}}</dd>
     </dl>
     <button {{action 'resetJobs'}}>Reset job status</button>
-    <button {{action 'killProcesses'}}>Kill processes</button>
   </div>
 </div>
 
 <div class="row">
   <div class="col-lg-6">
-    <h3>amtc-web JS library versions</h3>
+    <h3>amtc-web javascript library versions</h3>
     <dl>
      <dt>EmberJS</dt>     <dd>{{Ember.VERSION}}</dd>
      <dt>Ember Data</dt>  <dd>{{DS.VERSION}}</dd>
