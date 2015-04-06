@@ -109,6 +109,7 @@ App.Router.map(function() {
   this.route('setup');
   this.resource('logs');
   this.resource('energy');
+  this.resource('systemhealth');
   this.resource('page', { path: '/page/:id' });
 
   this.resource('ous', function() {
@@ -344,6 +345,18 @@ App.ScheduleRoute = Ember.Route.extend({
   model: function(params) {
     console.log("SchedulesRoute model() fetching job with id=" + params.id);
     return this.store.find('job', params.id);
+  }
+});
+App.SystemhealthRoute = Ember.Route.extend({
+  model: function() {
+    return Ember.$.getJSON('rest-api.php/systemhealth').then(function(data) {
+      return data;
+    });
+  },
+  actions: {
+    refreshData: function() {
+      this.refresh();
+    }
   }
 });
 
@@ -1058,6 +1071,21 @@ App.ScheduleController = Ember.Controller.extend({
   }
 });
 App.SchedulesNewController = App.ScheduleController;
+// System Status
+App.SystemhealthController = Ember.Controller.extend({
+  // action killJobs, killProcesses
+  actions: {
+    resetJobs: function () {
+      alert("Not yet ... coming soon.");
+    },
+    killProcesses: function () {
+      alert("Not yet ... coming soon.");
+    },
+    refresh: function () {
+      this.send("refreshData"); // ... on the router
+    }
+  }
+});
 // Controller for /#setup (Installer)
 App.SetupController = Ember.Controller.extend({
   // Controller used for initial installation page #setup

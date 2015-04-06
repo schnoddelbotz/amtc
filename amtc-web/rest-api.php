@@ -106,6 +106,35 @@ $app->get('/logout', function () {
   session_destroy();
   echo json_encode($x);
 });
+// #/systemhealth status page
+$app->get('/systemhealth', function () {
+  $data['phpversion'] = PHP_VERSION;
+  $data['uptime'] = trim(`uptime`);
+  $data['datetime'] = strftime('%c');
+  $data['diskfree'] = sprintf('%0.3f GB', disk_free_space(AMTC_DATADIR)/1024/1024/1024);
+  // fixme:
+  $data['memfree'] = '?? gb';
+  $data['lastmonitoring'] = rand(1,32000);
+  $data['activejobs'] = rand(1,32000);
+  $data['activeprocesses'] = rand(1,32000);
+  $data['monitorcount'] = rand(1,32000);
+  // add -V to amtc... or improve otherwise
+  $av = shell_exec(AMTC_BIN);
+  $av = preg_replace("/.*amtc v([^\s]+).*/ms","$1",$av);
+  $data['amtcversion'] = $av;
+  //
+  $logfile = AMTC_DATADIR.'/amtc-web-cli.log';
+  $data['logsize'] = 'file does not exist';
+  $data['logmodtime'] = 'n/a';
+  if (file_exists($logfile)) {
+    $fstat = stat($logfile);
+    $data['logsize'] = sprintf('%0.3f MB', $fstat[7]/1024/1024);
+    $data['logmodtime'] = $fstat[9];
+  }
+
+  $result = array('systemhealth'=>$data);
+  echo json_encode($result);
+});
 
 // DB-Model requests
 
