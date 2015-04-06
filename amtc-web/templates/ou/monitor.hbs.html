@@ -1,6 +1,8 @@
 {{! amtc-web ... live view / monitor + control mode }}
 <div class="row">
-    <div class="col-lg-12" id="hosts">
+  <div class="col-lg-12" id="hosts">
+    {{#if controllers.hosts.hosts}}
+    {{#if controllers.laststates.laststates}}
       {{#each host in controller.model.hosts}}
         <div class="pc {{host.laststate.amtStateCssClass}} {{host.laststate.openPortCssClass}}" hostDbId={{host.id}}>
           <div>
@@ -22,23 +24,14 @@
           </div>
         </div>
       {{/each}}
-    </div>
-</div>
-
-<div class="row">
-  <div class="col-lg-12">
-    <span style="display:none">
-      FIXME - this triggers loading all hosts:
-      {{controllers.hosts.hosts}}
-      {{controllers.laststates.laststates}}
-      How to trigger it the right way?
-      <button class="btn btn-default" {{action 'refresh'}}><i class="fa fa-refresh"></i> <i>refresh</i></button>
-    </span>
+    {{/if}}
+    {{/if}}
   </div>
 </div>
 
 <div class="row">
   <div class="col-lg-12">
+    {{#if controller.model.hosts.length}}
     <div id="livectrl">
       <h5>Select hosts above like files in Finder/Explorer or by state below</h5>
       <p id="hselect"></p>
@@ -57,5 +50,10 @@
         </div>
       {{/if}}
     </div>
+    {{else}}
+    This room looks empty.
+    Use {{#link-to "ou.hosts"}}Edit Hosts{{/link-to}} to add some hosts to this room.
+    {{/if}}
+    <!-- FIXME: {{controller.model}} is [object] instead of Ember.Ou if redir/login -->
   </div>
 </div>

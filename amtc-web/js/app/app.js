@@ -633,32 +633,20 @@ App.LoginController = Ember.Controller.extend({
             self.set('isAuthenticated', true);
             self.set('isLoggedIn', true); // will load/unhide real menu
             self.set('authFailed', false);
-            /*
-
-            INTENSION: redir to initially requested URL upon successful auth
-
+            //INTENSION: redir to initially requested URL upon successful auth
             if (window.targetURL) {
               var t = window.targetURL.split('#')[1];
               if (t) {
                 var e = t.substring(1).split('/');
                 if (e.length==3) {
-                  self.transitionToRoute(e[0]+'.'+e[2], {id:e[1]});
+                  return self.transitionToRoute(e[0]+'.'+e[2], {id:e[1]});
                 } else if (e.length==1) {
-                  self.transitionToRoute(e[0]);
-                } else {
-                  self.transitionToRoute('index');
+                  return self.transitionToRoute(e[0]);
                 }
-              } else {
-                self.transitionToRoute('index');
               }
-            } else {
-              self.transitionToRoute('index');
             }
-
-            FIXME: this would work ok, but models don't get loaded as needed.
-
-            */
-            self.transitionToRoute('index');
+            ///FIXME: this works ok, but models don't get loaded as needed
+            return self.transitionToRoute('index');
           } else {
             self.set('authFailed', true);
             $("#password").effect( "shake" );
