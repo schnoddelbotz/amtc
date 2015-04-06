@@ -90,8 +90,14 @@ $app->post('/authenticate', function () {
     $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     if ($status === 200) {
-        $x = array("result"=>"success");
+      if ($user = User::where('name',$wanted['username'])->find_one()) {
+        $x = array("result"=>"success", "fullname"=>$user->fullname);
         $_SESSION['authenticated'] = true;
+        $_SESSION['username'] = $user->name;
+        $_SESSION['userid']   = $user->id;
+      } else {
+        $x = array("exceptionMessage"=>"no-local-account");
+      }
     } else
       sleep(2);
   }
