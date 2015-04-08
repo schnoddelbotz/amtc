@@ -367,7 +367,7 @@ App.SystemhealthRoute = Ember.Route.extend({
       this.refresh();
     }
   },
-  beforeModel: function(t) {ensureLoginForTarget(this,t);}
+  beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
 });
 
 // Views
