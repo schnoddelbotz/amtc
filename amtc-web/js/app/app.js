@@ -21,14 +21,9 @@ var App = Ember.Application.create({
   ready: function() {
     // turn off splash screen
     window.setTimeout( function(){
-      if (App.readCookie("isLoggedIn")) {
-        $('#splash').hide();
-        $('#backdrop').hide();
-      } else {
-        $('#splash').fadeOut(1200);
-        $('#backdrop').fadeOut(1000);
-      }
-    }, App.readCookie("isLoggedIn") ? 0 : 750);
+      $('#splash').fadeOut(1200);
+      $('#backdrop').fadeOut(1000);
+    }, 750);
 
     $(window).bind("load resize", function(){
       App.windowResizeHandler();
@@ -39,9 +34,7 @@ var App = Ember.Application.create({
       // unconfigured system detected. inform user and relocate to setup.php
       humane.log('<i class="fa fa-meh-o"></i> '+
                  'No configuration file found!<br>warping into setup ...', { timeout: 3000 });
-      window.setTimeout( function(){
-        window.location.href = '#/setup'; // how to use transitionToRoute here?
-      }, 3100);
+      window.location.href = '#/setup'; // how to use transitionToRoute here?
     }
 
     // just for demo... we have a flashing bolt as progress indicator :-)
@@ -77,29 +70,6 @@ var App = Ember.Application.create({
     if (height > topOffset) {
       $("#page-wrapper").css("min-height", (height) + "px");
     }
-  },
-  // 1:1 copy, THANKS! https://github.com/joachimhs/Montric/blob/master/Montric.View/src/main/webapp/js/app.js
-  createCookie: function(name, value, days) {
-    if (days) {
-      var date = new Date();
-      date.setTime(date.getTime()+(days*24*60*60*1000));
-      var expires = "; expires="+date.toGMTString();
-    }
-    else var expires = "";
-    document.cookie = name+"="+value+expires+"; path=/";
-  },
-  readCookie:function (name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-  },
-  eraseCookie:function (name) {
-    this.createCookie(name, "", -1);
   }
 });
 
@@ -149,19 +119,6 @@ Ember.Route.reopen({
   render: function(controller, model) {
     this._super();
     window.scrollTo(0, 0);
-  },
-
-  init: function() {
-    // this will redirect any user arriving e.g. via bookmark -- without cookie.
-    // done here, as ember-data routes would trigger errors without valid sess.
-    var U = App.readCookie("username");
-    var L = App.readCookie("isLoggedIn");
-    if (U == null && L == null && !window.location.href.match('/login') && !window.location.href.match('/setup') && !window.location.href.match('/page')) {
-      console.log('NULL USER detected on Ember.Route.init(); redir to #/login!');
-      window.targetURL = window.location.href;
-      window.location.href = '#/login';
-    }
-    this._super();
   }
 });
 
@@ -177,6 +134,12 @@ App.OuRoute = Ember.Route.extend({
     this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('ou', params.id);
   },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
+  }
 });
 App.IndexRoute = Ember.Route.extend({
   setupController: function(controller, model) {
@@ -201,6 +164,12 @@ App.IndexRoute = Ember.Route.extend({
         // would be model.refresh(), but we need it for the laststates model...
         this.store.find('laststate');
         this.store.find('notification'); // me too!
+    }
+  },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
     }
   }
 });
@@ -228,12 +197,24 @@ App.OuMonitorRoute = Ember.Route.extend({
         this.store.find('laststate');
         // this.store.find('notification'); // me too!
     }
+  },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
   }
 });
 App.OusRoute = Ember.Route.extend({
   model: function(params) {
     console.log("App.OusRoute model(), FETCH OUS");
     return this.store.find('ou');
+  },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
   }
 });
 App.OusNewRoute = Ember.Route.extend({
@@ -247,17 +228,35 @@ App.LaststatesRoute = Ember.Route.extend({
   model: function(params) {
     console.log("App.LaststatesRoute model(), fetch last state of pcs");
     return this.store.find('laststate');
+  },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
   }
 });
 App.UserRoute = Ember.Route.extend({
   model: function(params) {
     return this.store.find('user', params.id);
   },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
+  }
 });
 App.UsersRoute = Ember.Route.extend({
   model: function() {
     console.log("UsersRoute model() fetching users");
     return this.store.find('user');
+  },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
   }
 });
 App.UsersNewRoute = Ember.Route.extend({
@@ -272,11 +271,23 @@ App.OptionsetRoute = Ember.Route.extend({
     //this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('optionset', params.id);
   },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
+  }
 });
 App.OptionsetsRoute = Ember.Route.extend({
   model: function() {
     console.log("OptionsetsRoute model() fetching optionsets");
     return this.store.find('optionset');
+  },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
   }
 });
 App.OptionsetsNewRoute = Ember.Route.extend({
@@ -289,6 +300,12 @@ App.NotificationsRoute = Ember.Route.extend({
   model: function() {
     console.log("NotificationsRoute model() fetching notifications");
     return this.store.find('notification');
+  },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
   }
 });
 App.SetupRoute = Ember.Route.extend({
@@ -334,6 +351,12 @@ App.SchedulesRoute = Ember.Route.extend({
   model: function() {
     console.log("SchedulesRoute model() fetching jobs with type=sched");
     return this.store.find('job');
+  },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
   }
 });
 App.SchedulesNewRoute = Ember.Route.extend({
@@ -346,6 +369,12 @@ App.ScheduleRoute = Ember.Route.extend({
   model: function(params) {
     console.log("SchedulesRoute model() fetching job with id=" + params.id);
     return this.store.find('job', params.id);
+  },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
+    }
   }
 });
 App.SystemhealthRoute = Ember.Route.extend({
@@ -357,6 +386,12 @@ App.SystemhealthRoute = Ember.Route.extend({
   actions: {
     refreshData: function() {
       this.refresh();
+    }
+  },
+  beforeModel: function(transition) {
+    if (!this.controllerFor('login').get('isLoggedIn')) {
+      this.controllerFor('login').set('previousTransition', transition);
+      this.transitionTo('login');
     }
   }
 });
@@ -594,24 +629,12 @@ App.ApplicationController = Ember.Controller.extend({
 });
 
 App.LoginController = Ember.Controller.extend({
-  //needs: ["user"],
-
   isLoggingIn: false,
   isAuthenticated: false,
-  uuidToken: null,
   authFailed: null,
-
-  sessionid: null,
   username: null,
   password: null,
 
-  init: function() {
-    var cuser = App.readCookie("username");
-    var isL = App.readCookie("isLoggedIn");
-    this.set('username', cuser);
-    this.set('isLoggedIn', isL);
-    console.log('INIT UserCtrl with user ... ' + cuser);
-  },
   actions: {
     doLogin: function(assertion) {
       this.set('isLoggingIn', true);
@@ -626,27 +649,20 @@ App.LoginController = Ember.Controller.extend({
 
         success: function(res, status, xhr) {
           if (res.result=="success") {
-            App.createCookie("username", u);
-            App.createCookie("isLoggedIn", 1);
             self.set('isLoggingIn', false);
             self.set('password',''); // no-longer-required
             self.set('isAuthenticated', true);
             self.set('isLoggedIn', true); // will load/unhide real menu
             self.set('authFailed', false);
             //INTENSION: redir to initially requested URL upon successful auth
-            if (window.targetURL) {
-              var t = window.targetURL.split('#')[1];
-              if (t) {
-                var e = t.substring(1).split('/');
-                if (e.length==3) {
-                  return self.transitionToRoute(e[0]+'.'+e[2], {id:e[1]});
-                } else if (e.length==1) {
-                  return self.transitionToRoute(e[0]);
-                }
-              }
+            var previousTransition = self.get('previousTransition');
+            if (previousTransition) {
+              self.set('previousTransition', null);
+              previousTransition.retry();
+            } else {
+              // Default back to homepage
+              self.transitionToRoute('index');
             }
-            ///FIXME: this works ok, but models don't get loaded as needed
-            return self.transitionToRoute('index');
           } else {
             self.set('authFailed', true);
             $("#password").effect( "shake" );
@@ -669,9 +685,6 @@ App.LoginController = Ember.Controller.extend({
             humane.log('<i class="fa fa-meh-o"></i> Not logged in!',
                { timeout: 500, clickToClose: false });
           } else if (xhr.message && xhr.message=="success") {
-            App.eraseCookie("amtcweb");
-            App.eraseCookie("username");
-            App.eraseCookie("isLoggedIn");
             humane.log('<i class="fa fa-smile-o"></i> Signed out successfully',
                { timeout: 1000, clickToClose: false });
             self.set('isLoggedIn', false);
