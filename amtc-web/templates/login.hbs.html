@@ -6,16 +6,15 @@
   </div>
   <div class="col-lg-4">
     <h1 class="page-header">Login</h1>
-    {{#if isAuthenticated}}
-      Hi, {{username}} !
+    {{#if isLoggedIn}}
       <button class="btn btn-default" {{action 'doLogout'}}><span class="fa fa-fw fa-sign-out"></span> Logout</button>
     {{else}}
-     <p>
-      {{input id="username" type="text" value=username autofocus=true insert-newline="doLogin" class="form-control" placeholder="username"}}
-     </p>
-     <p>
-      {{input id="password" type="password" value=password insert-newline="doLogin" class="form-control" placeholder="password"}}
-     </p>
+      <p>
+        {{input id="username" type="text" value=username autofocus=true insert-newline="doLogin" class="form-control" placeholder="username"}}
+      </p>
+      <p>
+        {{input id="password" type="password" value=password insert-newline="doLogin" class="form-control" placeholder="password"}}
+      </p>
       <button class="btn btn-default pull-right" {{action 'doLogin'}}><span class="fa fa-fw fa-sign-in"></span> sign in</button>
 
       {{#if authFailed}}Bad username or password!{{/if}}
