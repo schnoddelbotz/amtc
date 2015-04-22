@@ -13,7 +13,7 @@ js/jquery.min.map http://code.jquery.com/jquery-${JQUERY}.min.map
 js/emberjs.min.js http://builds.emberjs.com/tags/v${EMBERJS}/ember.min.js
 js/ember-template-compiler.js http://builds.emberjs.com/tags/v${EMBERJS}/ember-template-compiler.js
 js/ember-data.min.js http://builds.emberjs.com/tags/v${EMBERDATA}/ember-data.min.js
-js/showdown.min.js https://raw.githubusercontent.com/showdownjs/showdown/master/compressed/Showdown.min.js
+js/showdown.min.js https://raw.githubusercontent.com/showdownjs/showdown/master/compressed/showdown.min.js
 js/moment.min.js http://momentjs.com/downloads/moment.min.js
 js/humane.min.js https://raw.githubusercontent.com/wavded/humane-js/master/humane.min.js
 
