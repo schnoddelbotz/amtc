@@ -1056,8 +1056,21 @@ App.SchedulesNewController = App.ScheduleController;
 App.SystemhealthController = Ember.Controller.extend({
   // action killJobs, killProcesses
   actions: {
-    resetJobs: function () {
-      alert("Not yet ... coming soon.");
+    flushStatelog: function () {
+      if (confirm('Really drop all host state log / history information?')) {
+        Ember.$.getJSON('rest-api.php/flushStatelog').then(function(data) {
+          humane.log('<i class="fa fa-trash"></i> Flush successful',
+            { timeout: 1500, clickToClose: false });
+        });
+      }
+    },
+    resetMonitoringJob: function () {
+      if (confirm('Really reset monitoring job status?')) {
+        Ember.$.getJSON('rest-api.php/resetMonitoringJob').then(function(data) {
+          humane.log('<i class="fa fa-trash"></i> Reset successful',
+            { timeout: 1500, clickToClose: false });
+        });
+      }
     },
     refresh: function () {
       this.send("refreshData"); // ... on the router

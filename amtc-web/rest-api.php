@@ -142,6 +142,21 @@ $app->get('/systemhealth', function () {
   $result = array('systemhealth'=>$data);
   echo json_encode($result);
 });
+// #/systemhealth actions
+$app->get('/flushStatelog', function () {
+  // tbd admin only...
+  if (ORM::for_table('statelog')->delete_many()) {
+    echo json_encode(Array('success'=>'success'));
+  }
+});
+$app->get('/resetMonitoringJob', function () {
+  // tbd admin only and id 1 :/
+  if ($monitoringJob = ORM::for_table('job')->find_one(1)) {
+    $monitoringJob->job_status = Job::STATUS_PENDING;
+    $monitoringJob->save();
+    echo json_encode(Array('success'=>'success'));
+  }
+});
 
 // DB-Model requests
 

@@ -44,7 +44,8 @@
       <dt>Monitoring log entries</dt>
       <dd>{{model.systemhealth.monitorcount}}</dd>
     </dl>
-    <button {{action 'resetJobs'}}>Reset job status</button>
+    <button {{action 'resetMonitoringJob'}}>Reset monitoring job status</button>
+    <button {{action 'flushStatelog'}}>Flush host state log</button>
   </div>
 </div>
 

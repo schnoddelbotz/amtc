@@ -1,8 +1,10 @@
 {{! amtc-web ... live view / monitor + control mode }}
 <div class="row">
   <div class="col-lg-12" id="hosts">
-    {{#if controllers.hosts.hosts}}
     {{#if controllers.laststates.laststates}}
+      {{!-- triggers loading laststates - but host display should not depend on it --}}
+    {{/if}}
+    {{#if controllers.hosts.hosts}}
       {{#each host in controller.model.hosts}}
         <div class="pc {{host.laststate.amtStateCssClass}} {{host.laststate.openPortCssClass}}" hostDbId={{host.id}}>
           <div>
@@ -24,7 +26,6 @@
           </div>
         </div>
       {{/each}}
-    {{/if}}
     {{/if}}
   </div>
 </div>
