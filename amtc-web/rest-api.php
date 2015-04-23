@@ -122,8 +122,7 @@ $app->get('/systemhealth', function () {
   $data['lastmonitoringstarted'] = $monitorJob->last_started;
   $data['lastmonitoringdone'] = $monitorJob->last_done;
   $data['activejobs'] = ORM::for_table('job')->where('job_status',Job::STATUS_RUNNING)->count();
-  // fixme:
-  $data['activeprocesses'] = rand(1,32000);
+  $data['activeprocesses'] = rand(1,32000); // tbd ...
   $data['monitorcount'] = ORM::for_table('statelog')->count();
   // add -V to amtc... or improve otherwise
   $av = shell_exec(AMTC_BIN);
