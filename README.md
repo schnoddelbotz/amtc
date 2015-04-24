@@ -72,9 +72,13 @@ usage
 
 status
 ======
-ever-pre-1.0. just for fun. against all odds. works for me.
+ever-pre-1.0. just for fun. against all odds. works for me... check the [changelog](CHANGELOG.md).
 
-amtc 0.8.0 introduced the -E option, which serves for retreiving system
+You may want to [give amtc-web a try](http://jan.hacker.ch/projects/amtc/demo) --
+just login with setup default credentials (admin/amtc). The demo page runs off a read-only
+sqlite database so you shouldn't be able to make any changes.
+
+`amtc` 0.8.0 introduced the -E option, which serves for retreiving system
 configuration and asset management data. Currently, amtc will not parse
 those replies and just dump the raw SOAP reply. amtc-web currently
 offers no way yet to retreive/display those values. This will improve,
