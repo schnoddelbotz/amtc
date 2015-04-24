@@ -14,8 +14,8 @@ var attr = DS.attr;
 var hasMany = DS.hasMany;
 
 var App = Ember.Application.create({
-  LOG_TRANSITIONS: true, // basic logging of successful transitions
-  LOG_TRANSITIONS_INTERNAL: true, // detailed logging of all routing steps
+  //LOG_TRANSITIONS: true, // basic logging of successful transitions
+  //LOG_TRANSITIONS_INTERNAL: true, // detailed logging of all routing steps
   // http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
   ready: function() {
     // turn off splash screen
@@ -212,6 +212,11 @@ App.OuMonitorRoute = Ember.Route.extend({
     }
     self.get('pollster').start();
   },
+  afterModel: function() {
+    this.controllerFor("ouMonitor").send('updateSelectedHosts');
+    this.controllerFor("ouMonitor").set('selectedHostsCount',0);
+    $("#hselect div").removeClass("isActive");
+  },
   // This is called upon exiting the Route
   deactivate: function() {
     this.get('pollster').stop();
@@ -392,50 +397,10 @@ App.OuMonitorView = Ember.View.extend({
       },
       filter: '.pc'
     });
-    //
-    var powerstates = {
-      "pc":"any",       "S0":"on",        "S3":"sleep",
-      "S4":"hibernate", "S5":"soft-off",  "S16":"no-reply",
-      "ssh":"SSH",      "rdp":"RDP",      "none":"No-OS"
-    };
-    var osicons = {
-      'SSH'     :'<i class="fa fa-fw fa-linux"></i> ',
-      'RDP'     :'<i class="fa fa-fw fa-windows"></i> ',
-      'soft-off':'<i class="fa fa-fw fa-power-off"></i> ',
-      'No-OS'   :'<i class="fa fa-fw fa-ban red"></i> ',
-    };
-    //
-    $("#hselect").html("");
-    $.each(powerstates, function(key, value) {
-      var icon = osicons[value] ? osicons[value] : '';
-      $("#hselect").append('<div id="'+value+'" class="'+key+' pc">'+icon+value+'</div>');
-      $("#"+value).click(function() {
-        modifySelection(value,$(this).attr("class").split(' ')[0]);
-      });
-    });
-    $("#hselect span").css( 'cursor', 'pointer' );
   },
-
   willClearRender: function() {
-    $("#livectrl").hide();
-    $("#hosts").hide();
     $("#hosts").selectable("destroy");
     $(".pc").removeClass("ui-selected");
-    var controller = App.__container__.lookup("controller:ouMonitor");
-    controller.send('updateSelectedHosts');
-  },
-
-
-  roomSwitched: (function(){
-    // http://madhatted.com/2013/6/8/lifecycle-hooks-in-ember-js-views
-    Ember.run.scheduleOnce('afterRender', this, this.roomSwitchCleanup);
-  }).observes('controller.hosts.@each'),
-
-  roomSwitchCleanup: function(){
-    $(".pc").removeClass("ui-selected");
-    var controller = App.__container__.lookup("controller:ouMonitor");
-    controller.send('updateSelectedHosts');
-    $("#hselect span").removeClass("isActive");
   }
 });
 App.OuHostsView = Ember.View.extend({
@@ -844,7 +809,26 @@ App.OuMonitorController = Ember.Controller.extend({
 
   laststates: Ember.computed.alias("controllers.laststates"),
 
+  /* called when group-by-powerstate-selection is done. */
+  modifySelection: function(buttonid, pclass) {
+    if ($("#"+buttonid).hasClass("isActive")) {
+      $("#hosts ."+pclass).removeClass("ui-selected");
+      $("#"+buttonid).removeClass("isActive");
+      if (buttonid=="S_pc") {
+        $("#hosts .pc").removeClass("ui-selected");
+        $("#hselect div").removeClass("isActive");
+      }
+    } else {
+      $("#hosts ."+pclass).addClass("ui-selected");
+      $("#"+buttonid).addClass("isActive");
+    }
+    this.send('updateSelectedHosts');
+  },
+
   actions: {
+    selectByState: function(stateClass) {
+      this.modifySelection('S_'+stateClass,stateClass);
+    },
     updateSelectedHosts: function() {
       var selection = [];
       $("#hosts .ui-selected").each( function(i) {
@@ -1455,28 +1439,3 @@ Ember.Handlebars.helper('format-from-now', function(date) {
   return moment.unix(date).fromNow();
 });
 
-
-// Further helpers
-
-
-// Legacy amtc-web1 needs-cleanup-stuff
-
-//// FIXME
-/* called when group-by-powerstate-selection is done. */
-function modifySelection(buttonid, pclass) {
-  if ($("#"+buttonid).hasClass("isActive")) {
-    $("#hosts ."+pclass).removeClass("ui-selected");
-    $("#"+buttonid).removeClass("isActive");
-    if (buttonid=="any") {
-      $("#hosts .pc").removeClass("ui-selected");
-      $("#hselect span").removeClass("isActive");
-    }
-  } else {
-    $("#hosts ."+pclass).addClass("ui-selected");
-    $("#"+buttonid).addClass("isActive");
-  }
-  //updatePowerController();
-  var controller = App.__container__.lookup("controller:ouMonitor");
-  controller.send('updateSelectedHosts')
-}
-/////// FIXME
