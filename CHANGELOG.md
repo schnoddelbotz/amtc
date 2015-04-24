@@ -32,6 +32,7 @@ This is a first ALPHA release coming with pre-built binaries/packages for
 * RHEL 7 / CentOS7 / Debian 7 / Ubuntu 14.04 (x86_64)
 * OS X Yosemite
 * Raspbian (arm)
+
 Changelog below lists major changes since release v0.8.2.
 
 ## amtc ##
