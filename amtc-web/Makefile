@@ -48,6 +48,8 @@ index.html: js/ember-template-compiler.js
 	  cat templates/application_header.html > index.html; \
 	fi
 ifeq ($(HAVE_NODEJS),YES)
+	# NodeJS seems available on buildhost. Pre-compile emberjs
+	# templates to increase client-side GUI performance.
 	cat /dev/null > js/compiled-templates.js
 	for t in templates/*.hbs.html templates/*/*.hbs.html; do \
 	  tpl=`basename $$t | cut -d. -f1`; \
@@ -57,11 +59,11 @@ ifeq ($(HAVE_NODEJS),YES)
 	  fi; \
 	  echo "// $$t ($$tpl) " >> js/compiled-templates.js; \
 	  ./js/compile-template.js "$$t" "$$tpl"; \
+	  echo " Pre-compiled template $$t"; \
 	done
 else
 	# No NodeJS on buildhost, build index.html that will result in
 	# client-side template compilation.
-	cat templates/application_header.html > index.html
 	for t in templates/*.hbs.html templates/*/*.hbs.html; do \
 	  tpl=`basename $$t | cut -d. -f1`; \
 	  dir=`dirname $$t`; \
