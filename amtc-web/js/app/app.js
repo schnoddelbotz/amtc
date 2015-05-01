@@ -864,7 +864,17 @@ App.OuMonitorController = Ember.Controller.extend({
 });
 App.OuStatelogController = Ember.Controller.extend({
   needs: ["hosts","ous","logdays"],
-
+  // improve, may fail if no data from today:
+  selectedDay: moment(moment().format("YYYY-MM-DD")).format("X"),
+  logdata: [],
+  watchDayAndRoom: function(){
+    var controller = this;
+    var url = 'rest-api.php/statelogs/'+this.get('model.id')+'/'+this.get('selectedDay');
+    //console.log('Room or day changed, fetch data: ' + url);
+    Ember.$.getJSON(url).then(function(data) {
+      controller.set('logdata', data);
+    });
+  }.observes('selectedDay','model.id')
 });
 App.LogdaysController = Ember.ArrayController.extend({
   logdays: function() {

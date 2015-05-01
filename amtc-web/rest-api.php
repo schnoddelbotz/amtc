@@ -37,8 +37,7 @@ if (!empty($_SESSION['authenticated']) && $_SESSION['authenticated'] === true ||
 // GET all records for given model
 $app->get('/:model', function($model) {
   $result = array($model=>array());
-  $modelClass = substr(ucfirst($model),0,-1);
-  $query = Model::factory($modelClass);
+  $query = Model::factory(substr(ucfirst($model),0,-1));
   switch ($model) {
     case 'notifications':
       $query->limit(15)->order_by_desc('tstamp');
@@ -64,8 +63,7 @@ $app->get('/:model', function($model) {
 // GET single record by id
 $app->get('/:model/:id', function($model,$id) {
   $singular = substr($model,0,-1);
-  $modelClass = ucfirst($singular);
-  $query = Model::factory($modelClass);
+  $query = Model::factory(ucfirst($singular));
   if ($result = $query->find_one($id)) {
     echo json_encode( array($singular=> $result->as_array()) );
   }
@@ -73,9 +71,7 @@ $app->get('/:model/:id', function($model,$id) {
 
 // DELETE single record
 $app->delete('/:model/:id', function($model,$id) {
-  $singular = substr($model,0,-1);
-  $modelClass = ucfirst($singular);
-  $query = Model::factory($modelClass);
+  $query = Model::factory(ucfirst(substr($model,0,-1)));
   if ($result = $query->find_one($id)) {
     $result->delete();
     // "Note: Although after destroyRecord or deleteRecord/save the adapter
@@ -89,9 +85,7 @@ $app->delete('/:model/:id', function($model,$id) {
 // PUT / update single record
 $app->put('/:model/:id', function($model,$id) use ($app) {
   $singular = substr($model,0,-1);
-  $modelClass = ucfirst($singular);
-  $query = Model::factory($modelClass);
-
+  $query = Model::factory(ucfirst($singular));
   if (($dev = $query->find_one($id)) && ($data = SlimUtil::getSubmit($app,$singular))) {
     if (isset($data['ou_path'])) {
       unset($data['ou_path']); // computed/displayed property ... avoid sending
@@ -105,8 +99,7 @@ $app->put('/:model/:id', function($model,$id) use ($app) {
 // POST / create single record
 $app->post('/:model', function($model) use ($app) {
   $singular = substr($model,0,-1);
-  $modelClass = ucfirst($singular);
-  $query = Model::factory($modelClass);
+  $query = Model::factory(ucfirst($singular));
   if (($dev = $query->create()) && ($data = SlimUtil::getSubmit($app,$singular))) {
     switch ($model) {
       case 'ous':
@@ -148,6 +141,23 @@ $app->get('/ous', function () {
     }
     $r['children'] = $kids;
     $result['ous'][] = $r;
+  }
+  echo json_encode( $result );
+});
+
+// single-day statelogs for hosts of a single OU
+$app->get('/statelogs/:ou/:startUnixTime', function ($ouid,$ctime) {
+  $result = Array();
+  $ou = OU::find_one($ouid);
+  foreach ($ou->hosts()->order_by_asc('hostname')->find_many() as $host) {
+    $hosts[] = $host->id;
+  }
+  //print_r($hosts);
+  //return;
+  // TBD: restict to OU !!!!
+  // TBD: find earlier statelogs for hosts missing from results to display "old state"
+  foreach (Statelog::where_gt('state_begin',$ctime)->where_lt('state_begin',$ctime+60*60*24)->where_in('host_id',$hosts)->find_many() as $record) {
+    $result[] = $record->as_array();
   }
   echo json_encode( $result );
 });
