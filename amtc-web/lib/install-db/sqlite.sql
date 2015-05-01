@@ -68,6 +68,10 @@ CREATE INDEX "logdata_pd" ON "statelog" ("host_id");
 CREATE VIEW  "laststate"  AS   -- ... including fake id column to make e-d happy
   SELECT host_id AS id, hostname, host_id,max(state_begin) AS state_begin,open_port,state_amt,state_http
   FROM statelog,host WHERE statelog.host_id=host.id GROUP BY host_id;
+CREATE VIEW "logday" AS
+  SELECT DISTINCT(date(state_begin,'unixepoch')) AS id
+  FROM statelog;
+
 
 -- amt(c) option sets
 CREATE TABLE "optionset" (

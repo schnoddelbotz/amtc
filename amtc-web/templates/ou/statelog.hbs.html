@@ -1,10 +1,26 @@
-More to come ...
 <div class="row">
-  <div class="col-lg-12" id="cfghosts">
-    {{#if controllers.hosts.hosts.content}}
-        {{#each controller.hosts}}
-            <div class="pc"><i class="fa fa-desktop"></i> {{hostname}}</div>
-        {{/each}}
+  <div class="col-lg-12" id="daychooser">
+    {{#if controllers.logdays.logdays}}
+      {{view Ember.Select content=controllers.logdays.logdays.content
+                          class="form-control"
+                          value=selectedDay
+                          selection=selectedDayX
+                          prompt="Choose day"
+                          optionValuePath="content.dayUnixStart"
+                          optionLabelPath="content.dayString" }}
+    {{/if}}
+  </div>
+</div>
+<p></p>
+<div class="row">
+  <div class="col-lg-12">
+    {{#if controllers.hosts.hosts}}
+      {{#each host in controller.model.hosts}}
+          <div class="pclog">
+            <i class="fa fa-desktop"></i> {{host.hostname}}
+            <!-- bars to come ... -->
+          </div>
+      {{/each}}
     {{else}}
         No hosts found in this room.
     {{/if}}

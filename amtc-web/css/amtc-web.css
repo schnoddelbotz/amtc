@@ -125,7 +125,13 @@ ul.viewmode li.active a:hover {
 .S5,.a5  { background:#aaa; } /* soft-off */
 .S16,.a16 { background:#daa; } /* no amt reply -- disables any OS scan, too */
 
-/* log view now done via morris.js */
+/* log view now done via morris.js ??? */
+div.pclog {
+  width:100%;
+  margin-top:1px;
+  background:#ccc;
+  font-size:0.7em;
+}
 /* tbd */
 
 /*

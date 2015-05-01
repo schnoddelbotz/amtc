@@ -28,12 +28,133 @@ if (!empty($_SESSION['authenticated']) && $_SESSION['authenticated'] === true ||
   return;
 }
 
-
-/*****************************************************************************/
 /**************** Only SLIM request handling below ***************************/
-/*****************************************************************************/
 
+//
+// DB-Model requests
+//
+
+// GET all records for given model
+$app->get('/:model', function($model) {
+  $result = array($model=>array());
+  $modelClass = substr(ucfirst($model),0,-1);
+  $query = Model::factory($modelClass);
+  switch ($model) {
+    case 'notifications':
+      $query->limit(15)->order_by_desc('tstamp');
+    break;
+    case 'hosts':
+      $query->order_by_asc('hostname');
+    break;
+    case 'jobs':
+      $query->order_by_asc('description');
+    break;
+    // same order by name for these...
+    case 'users':
+    case 'optionsets':
+      $query->order_by_asc('name');
+    break;
+  }
+  foreach ($query->find_many() as $record) {
+    $result[$model][] = $record->as_array();
+  }
+  echo json_encode( $result );
+})->conditions(array('model' => '(users|hosts|optionsets|jobs|notifications|laststates|logdays)'));
+
+// GET single record by id
+$app->get('/:model/:id', function($model,$id) {
+  $singular = substr($model,0,-1);
+  $modelClass = ucfirst($singular);
+  $query = Model::factory($modelClass);
+  if ($result = $query->find_one($id)) {
+    echo json_encode( array($singular=> $result->as_array()) );
+  }
+})->conditions(array('model' => '(users|hosts|optionsets|jobs|notifications|ous)'));
+
+// DELETE single record
+$app->delete('/:model/:id', function($model,$id) {
+  $singular = substr($model,0,-1);
+  $modelClass = ucfirst($singular);
+  $query = Model::factory($modelClass);
+  if ($result = $query->find_one($id)) {
+    $result->delete();
+    // "Note: Although after destroyRecord or deleteRecord/save the adapter
+    // expects an empty object e.g. {} to be returned from the server after
+    //  destroying a record."
+    // http://emberjs.com/guides/models/the-rest-adapter/
+    echo '{}';
+  }
+})->conditions(array('model' => '(ous|users|optionsets|jobs)'));
+
+// PUT / update single record
+$app->put('/:model/:id', function($model,$id) use ($app) {
+  $singular = substr($model,0,-1);
+  $modelClass = ucfirst($singular);
+  $query = Model::factory($modelClass);
+
+  if (($dev = $query->find_one($id)) && ($data = SlimUtil::getSubmit($app,$singular))) {
+    if (isset($data['ou_path'])) {
+      unset($data['ou_path']); // computed/displayed property ... avoid sending
+    }
+    $dev->set($data);
+    $dev->save();
+    echo json_encode( array($singular => $dev->as_array()) );
+  }
+})->conditions(array('model' => '(ous|users|optionsets|jobs)'));
+
+// POST / create single record
+$app->post('/:model', function($model) use ($app) {
+  $singular = substr($model,0,-1);
+  $modelClass = ucfirst($singular);
+  $query = Model::factory($modelClass);
+  if (($dev = $query->create()) && ($data = SlimUtil::getSubmit($app,$singular))) {
+    switch ($model) {
+      case 'ous':
+        unset($data['ou_path']);
+        $dev->set($data);
+      break;
+      case 'hosts':
+        $dev->ou_id = $data['ou_id'];
+        $dev->hostname = $data['hostname'];
+      break;
+      case 'jobs':
+        if (isset($data['hosts'])) {
+          $hosts = $data['hosts'];
+          unset($data['hosts']); // rcvd: array "hosts", need: string "amtc_hosts"
+        }
+        $dev->set($data);
+        $dev->user_id     = 1; // TBD: Put correct userid here!
+        if (is_array($hosts)) {
+          $dev->amtc_hosts = preg_replace('/[^\d,]/','',implode(',',$hosts));
+        }
+      break;
+      default:
+        $dev->set($data);
+    }
+    $dev->save();
+    echo json_encode( array($singular => $dev->as_array()) );
+  }
+})->conditions(array('model' => '(ous|hosts|users|optionsets|jobs)'));
+
+// special case OUs: include child OUs in reply
+$app->get('/ous', function () {
+  $result = array('ous'=>array());
+  foreach (OU::find_many() as $record) {
+    $r = $record->as_array();
+    $children = OU::where('parent_id', $r['id'])->find_many() ;
+    $kids = array();
+    foreach ($children as $childOu) {
+      $kids[] = $childOu->id;
+    }
+    $r['children'] = $kids;
+    $result['ous'][] = $r;
+  }
+  echo json_encode( $result );
+});
+
+//
 //  Non-DB-Model requests
+//
 
 // provide URI for ember-data REST adapter, based on this php script's location
 $app->get('/rest-config.js', function () use ($app) {
@@ -157,137 +278,6 @@ $app->get('/resetMonitoringJob', function () {
   }
 });
 
-// DB-Model requests
-
-/**************** CATCH-MANY *************************************************/
-
-// GET all records for given model
-$app->get('/:model', function($model) {
-  $result = array($model=>array());
-  $modelClass = substr(ucfirst($model),0,-1);
-  $query = Model::factory($modelClass);
-  switch ($model) {
-    case 'notifications':
-      $query->limit(15)->order_by_desc('tstamp');
-    break;
-    case 'hosts':
-      $query->order_by_asc('hostname');
-    break;
-    case 'jobs':
-      $query->order_by_asc('description');
-    break;
-    // same order by name for these...
-    case 'users':
-    case 'optionsets':
-      $query->order_by_asc('name');
-    break;
-  }
-  foreach ($query->find_many() as $record) {
-    $result[$model][] = $record->as_array();
-  }
-  echo json_encode( $result );
-})->conditions(array('model' => '(users|hosts|optionsets|jobs|notifications|laststates)'));
-
-// GET single record by id
-$app->get('/:model/:id', function($model,$id) {
-  $singular = substr($model,0,-1);
-  $modelClass = ucfirst($singular);
-  $query = Model::factory($modelClass);
-  if ($result = $query->find_one($id)) {
-    echo json_encode( array($singular=> $result->as_array()) );
-  }
-})->conditions(array('model' => '(users|hosts|optionsets|jobs|notifications|ous)'));
-
-// DELETE single record
-$app->delete('/:model/:id', function($model,$id) {
-  $singular = substr($model,0,-1);
-  $modelClass = ucfirst($singular);
-  $query = Model::factory($modelClass);
-  if ($result = $query->find_one($id)) {
-    $result->delete();
-    // "Note: Although after destroyRecord or deleteRecord/save the adapter
-    // expects an empty object e.g. {} to be returned from the server after
-    //  destroying a record."
-    // http://emberjs.com/guides/models/the-rest-adapter/
-    echo '{}';
-  }
-})->conditions(array('model' => '(ous|users|optionsets|jobs)'));
-
-// PUT / update single record
-$app->put('/:model/:id', function($model,$id) use ($app) {
-  $singular = substr($model,0,-1);
-  $modelClass = ucfirst($singular);
-  $query = Model::factory($modelClass);
-
-  if (($dev = $query->find_one($id)) && ($data = SlimUtil::getSubmit($app,$singular))) {
-    if (isset($data['ou_path'])) {
-      unset($data['ou_path']); // computed/displayed property ... avoid sending
-    }
-    $dev->set($data);
-    $dev->save();
-    echo json_encode( array($singular => $dev->as_array()) );
-  }
-})->conditions(array('model' => '(ous|users|optionsets|jobs)'));
-
-// POST / create single record
-$app->post('/:model', function($model) use ($app) {
-  $singular = substr($model,0,-1);
-  $modelClass = ucfirst($singular);
-  $query = Model::factory($modelClass);
-  if (($dev = $query->create()) && ($data = SlimUtil::getSubmit($app,$singular))) {
-    switch ($model) {
-      case 'ous':
-        unset($data['ou_path']);
-        $dev->set($data);
-      break;
-      case 'hosts':
-        $dev->ou_id = $data['ou_id'];
-        $dev->hostname = $data['hostname'];
-      break;
-      default:
-        $dev->set($data);
-    }
-    $dev->save();
-    echo json_encode( array($singular => $dev->as_array()) );
-  }
-})->conditions(array('model' => '(ous|hosts|users|optionsets)'));
-
-
-/**************** OUs / Rooms ************************************************/
-
-$app->get('/ous', function () {
-  $result = array('ous'=>array());
-  foreach (OU::find_many() as $record) {
-    $r = $record->as_array();
-    $children = OU::where('parent_id', $r['id'])->find_many() ;
-    $kids = array();
-    foreach ($children as $childOu) {
-      $kids[] = $childOu->id;
-    }
-    $r['children'] = $kids;
-    $result['ous'][] = $r;
-  }
-  echo json_encode( $result );
-});
-
-/**************** Scheduler items *********************************************/
-
-$app->post('/jobs', function () use ($app) {
-  if (($job = Job::create()) && ($user = SlimUtil::getSubmit($app,'job'))) {
-    if (isset($user['hosts'])) {
-      $hosts = $user['hosts'];
-      unset($user['hosts']); // rcvd: array "hosts", need: string "amtc_hosts"
-    }
-    $job->set($user);
-    $job->user_id     = 1; // FIXME!!
-    if (is_array($hosts))
-      $job->amtc_hosts = preg_replace('/[^\d,]/','',implode(',',$hosts));
-    $job->save();
-    echo json_encode( array('job'=> $job->as_array()) );
-    // if this is a interactive/type-1 job with cmd != info,
-    // add scan jobs to monitor job progress w/o manual page reloads
-  }
-});
 
 /*****************************************************************************/
 /*

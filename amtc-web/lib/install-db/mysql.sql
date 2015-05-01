@@ -75,6 +75,9 @@ CREATE VIEW laststate AS     -- ... including fake id column to make e-d happy
         FROM host h, statelog s1
         LEFT JOIN statelog s2 ON s1.host_id=s2.host_id AND s1.state_begin < s2.state_begin
         WHERE h.id=s1.host_id AND s2.state_begin IS NULL ORDER BY s1.host_id;
+CREATE VIEW logday AS
+        SELECT DISTINCT(date(from_unixtime(state_begin))) AS id
+        FROM statelog;
 
 -- amt(c) option sets
 CREATE TABLE IF NOT EXISTS optionset (

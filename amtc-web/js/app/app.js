@@ -232,7 +232,6 @@ App.OuMonitorRoute = Ember.Route.extend({
 });
 App.OusRoute = Ember.Route.extend({
   model: function(params) {
-    console.log("App.OusRoute model(), FETCH OUS");
     return this.store.find('ou');
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
@@ -509,7 +508,7 @@ App.Pollster = Ember.Object.extend({
   interval: function() {
     // tbd: make adjustable / reseatable
     // after submitting control functions, it should be increased.
-    return 7500; // Time between polls (in ms)
+    return 10000; // Time between polls (in ms)
   }.property().readOnly(),
   // Schedules the function `f` to be executed every `interval` time.
   schedule: function(f) {
@@ -864,8 +863,13 @@ App.OuMonitorController = Ember.Controller.extend({
   }
 });
 App.OuStatelogController = Ember.Controller.extend({
-  needs: ["hosts","ous"],
+  needs: ["hosts","ous","logdays"],
 
+});
+App.LogdaysController = Ember.ArrayController.extend({
+  logdays: function() {
+    return this.get('store').find('logday');
+  }.property(),
 });
 App.LaststatesController = Ember.ArrayController.extend({
   laststates: function() {
@@ -1294,6 +1298,16 @@ App.Laststate = DS.Model.extend({
   amtStateCssClass: function() {
     return 'S' + this.get('state_amt');
   }.property('state_amt'),
+});
+// Days with logdata available
+App.Logday = DS.Model.extend({
+  // id = date
+  dayString: function() {
+    return moment(this.get('id')).format("YYYY MMMM Do (dddd)");
+  }.property('id'),
+  dayUnixStart: function() {
+    return moment(this.get('id')).format("X");
+  }.property('id'),
 });
 // Jobs / scheduled tasks
 App.Job = DS.Model.extend({
