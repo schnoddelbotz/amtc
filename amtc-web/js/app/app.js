@@ -867,6 +867,13 @@ App.OuStatelogController = Ember.Controller.extend({
   // improve, may fail if no data from today:
   selectedDay: moment(moment().format("YYYY-MM-DD")).format("X"),
   logdata: [],
+  dayHours: function(){
+    var hours = [];
+    for (var i=0; i<25; i++) {
+      hours.push({hour:i, posX:i*60, textX:i*60+2});
+    }
+    return hours;
+  }.property(),
   watchDayAndRoom: function(){
     var controller = this;
     var url = 'rest-api.php/statelogs/'+this.get('model.id')+'/'+this.get('selectedDay');
