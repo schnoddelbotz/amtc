@@ -1,4 +1,9 @@
-<div class="pclog">
-  <i class="fa fa-desktop"></i> {{host.hostname}}
-  {{logSvg}}
-</div>
+<svg width="1440" height="10">
+  <rect style="fill: transparent; stroke: #ddd;" height="10" width="1440" />
+  {{#each logItems as |item|}}
+    <rect x="{{item.posX}}" y="0" width="{{item.sizeX}}" height="10" style="fill:{{item.fillColor}}; stroke-width: 0;"/>
+  {{/each}}
+  <text x="2" y="8" style="font-size:9px;">
+      {{host.hostname}}
+  </text>
+</svg>

@@ -78,7 +78,6 @@ ul.viewmode li.active a:hover {
   width:140px; float:left; margin:0px 5px 5px 0px; padding:0px; overflow:hidden;
   box-shadow: 2px 2px 3px #ccc;
   cursor:pointer;
-
 }
 .pc .hostname {
   font-weight:bold;
@@ -95,6 +94,9 @@ ul.viewmode li.active a:hover {
   padding-right: 5px;
   padding-left: 5px;
   color:#555;
+}
+.nopointer .pc {
+  cursor:default;
 }
 
 #hosts .ui-selecting {
@@ -126,11 +128,11 @@ ul.viewmode li.active a:hover {
 .S16,.a16 { background:#daa; } /* no amt reply -- disables any OS scan, too */
 
 /* log view now done via morris.js ??? */
-div.pclog {
-  width:100%;
-  margin-top:1px;
-  background:#ccc;
-  font-size:0.7em;
+div.logs div {
+  margin-top:0px;
+  margin-bottom:0px;
+  padding:0;
+  height:11px;
 }
 /* tbd */
 

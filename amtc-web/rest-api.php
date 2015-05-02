@@ -157,7 +157,7 @@ $app->get('/statelogs/:ou/:startUnixTime', function ($ouid,$ctime) {
   // TBD: restict to OU !!!!
   // TBD: find earlier statelogs for hosts missing from results to display "old state"
   foreach (Statelog::where_gt('state_begin',$ctime)
-            ->where_lt('state_begin',$ctime+86400*24)
+            ->where_lt('state_begin',$ctime+86400)
             ->where_in('host_id',$hosts)
             ->find_many() as $record) {
     $result[] = $record->as_array();

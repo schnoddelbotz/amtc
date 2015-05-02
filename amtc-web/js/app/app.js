@@ -1320,7 +1320,8 @@ App.Logday = DS.Model.extend({
     return moment(this.get('id')).format("YYYY MMMM Do (dddd)");
   }.property('id'),
   dayUnixStart: function() {
-    return moment(this.get('id')).format("X");
+    var tstr = this.get('id')+' 00:00:00 +0200';
+    return moment(tstr,"YYYY-MM-DD HH:mm:ss Z").unix();
   }.property('id'),
 });
 // Jobs / scheduled tasks
@@ -1419,25 +1420,44 @@ App.TreeMenuNodeComponent = Ember.Component.extend({
 });
 App.StateLogComponent = Ember.Component.extend({
   bli: 'blabla',
-  logSvg: function() {
+  logItems: function() {
     var host = this.get('controller.host');
     var logs = this.get('controller.logdata');
     var hostid = host.get('id');
-    var output = 'TBD: ';
+    var output = [];
+    var day0h = this.get('controller.selectedDay');
     // SVG ... tbd
+    // SVG width: 1440px = 60minutes*24
     // http://madhatted.com/2014/11/24/scalable-vector-ember
     logs.forEach(function(log) {
       if (hostid==log.host_id) {
-        output += ' t: ' + log.state_begin;
+        var dayMinute = (log.state_begin - day0h)/60;
+        log.hostname = host.get('hostname');
+        log.posX = dayMinute;
+        log.sizeX = 1440-dayMinute;
+        // unsuck ...:
+        if (log.open_port==22 && log.state_http==200) {
+          log.fillColor = '#337ab7'; // linux
+        } else if (log.open_port==3389 && log.state_http==200) {
+          log.fillColor = '#5cb85c'; // windows
+        } else if (log.state_amt==5 && log.state_http==200) {
+          log.fillColor = '#aaa'; // off + AMT reachable
+        } else if (log.state_amt==16 || log.state_http!=200) {
+          log.fillColor = '#d9534f'; // AMT unreachable
+        } else if (log.state_amt==3) {
+          log.fillColor = 'orange'; // sleep
+        } else if (log.state_amt==4) {
+          log.fillColor = '#aae'; // hibernate
+        } else if (log.state_amt==0 && log.state_http==200 && log.open_port==0) {
+          log.fillColor = 'yellow'; // reachable, but no OS detected/running
+        } else {
+          log.fillColor = 'black'; // what? f_ix-me
+        }
+        output.push(log);
       }
     });
     return output;
-  }.property(),
-  actions: {
-    hello: function(name) {
-      console.log("Hello", name);
-    }
-  }
+  }.property('controller.logdata')
 });
 
 // https://gist.github.com/pwfisher/b4d27d984ad5868baab6
