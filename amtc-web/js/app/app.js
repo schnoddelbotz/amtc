@@ -1413,6 +1413,24 @@ App.TreeMenuNodeComponent = Ember.Component.extend({
     return this.get('selectedNode') === this.get('node.id');
   }.property('selectedNode', 'node.id')
 });
+App.StateLogComponent = Ember.Component.extend({
+  bli: 'blabla',
+  isMe: function() {
+    var host = this.get('controller.host');
+    var log = this.get('controller.logdata');
+    console.log("TBD: draw for host "+host.get('hostname')+ " ... log "+log);
+    for (i in log) {
+      //console.log(i);
+      //console.log(i.get('host_id'));
+    }
+    return 'tbd';
+  }.property(),
+  actions: {
+    hello: function(name) {
+      console.log("Hello", name);
+    }
+  }
+});
 
 // https://gist.github.com/pwfisher/b4d27d984ad5868baab6
 // {{ radio-button name='dish' value='spam' groupValue=selectedDish }} Spam
@@ -1462,4 +1480,3 @@ Ember.Handlebars.helper('format-from-now', function(date) {
   }
   return moment.unix(date).fromNow();
 });
-

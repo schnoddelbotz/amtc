@@ -14,14 +14,12 @@
 <p></p>
 <div class="row">
   <div class="col-lg-12">
-    tbd -- draw: {{logdata.length}}
     {{#if controllers.hosts.hosts}}
-      {{#each host in controller.model.hosts}}
-          <div class="pclog">
-            <i class="fa fa-desktop"></i> {{host.hostname}}
-            <!-- bars to come ... -->
-          </div>
+     {{#if controller.logdata}}
+      {{#each controller.model.hosts as |host|}}
+          {{state-log host=host logdata=logdata}}
       {{/each}}
+     {{/if}}
     {{else}}
         No hosts found in this room.
     {{/if}}
