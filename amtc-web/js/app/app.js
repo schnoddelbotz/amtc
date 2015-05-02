@@ -874,7 +874,11 @@ App.OuStatelogController = Ember.Controller.extend({
     Ember.$.getJSON(url).then(function(data) {
       controller.set('logdata', data);
     });
-  }.observes('selectedDay','model.id')
+  }.observes('selectedDay','model.id'),
+  //updateLogComponent: function(){
+    // better do svg stuff here...?
+    //console.log('yeah...');
+  //}.observes('logdata')
 });
 App.LogdaysController = Ember.ArrayController.extend({
   logdays: function() {
@@ -1415,15 +1419,19 @@ App.TreeMenuNodeComponent = Ember.Component.extend({
 });
 App.StateLogComponent = Ember.Component.extend({
   bli: 'blabla',
-  isMe: function() {
+  logSvg: function() {
     var host = this.get('controller.host');
-    var log = this.get('controller.logdata');
-    console.log("TBD: draw for host "+host.get('hostname')+ " ... log "+log);
-    for (i in log) {
-      //console.log(i);
-      //console.log(i.get('host_id'));
-    }
-    return 'tbd';
+    var logs = this.get('controller.logdata');
+    var hostid = host.get('id');
+    var output = 'TBD: ';
+    // SVG ... tbd
+    // http://madhatted.com/2014/11/24/scalable-vector-ember
+    logs.forEach(function(log) {
+      if (hostid==log.host_id) {
+        output += ' t: ' + log.state_begin;
+      }
+    });
+    return output;
   }.property(),
   actions: {
     hello: function(name) {

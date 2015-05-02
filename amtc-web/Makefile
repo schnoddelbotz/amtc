@@ -108,6 +108,11 @@ clean:
 	rm -f css/{b,f,h,sb,st}*.css js/{b,e,h,j,m,s}*.js js/jq*.map \
 	 lib/{paris,idiorm}.php js/compiled-templates.js
 
+# rebuild without nodejs and merging js/css
+debug:
+	rm -f index.html js/jslibs.js css/styles.css
+	HAVE_NODEJS=no MERGE_CSS=no MERGE_JS=no make
+
 # remove single js/css files (to keep concat+compress version only)
 distclean:
 	rm -f css/{b,f,h,sb}*.css js/{compile,b,e,h,jq,m,s}*.js
