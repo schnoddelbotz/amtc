@@ -1441,7 +1441,8 @@ App.StateLogComponent = Ember.Component.extend({
     var hostid = host.get('id');
     var output = [];
     var day0h = this.get('controller.selectedDay');
-    //var today = moment(moment().format("YYYY-MM-DDT00:00:00.000Z")).unix();
+    var now = moment().unix();
+    var today = moment(moment().format("YYYY-MM-DDT00:00:00.000Z")).unix();
     // SVG ... tbd
     // SVG width: 1440px = 60minutes*24
     // http://madhatted.com/2014/11/24/scalable-vector-ember
@@ -1473,11 +1474,12 @@ App.StateLogComponent = Ember.Component.extend({
         output.push(log);
       }
     });
-    // TBD: last entry shouldn't show bar exceeding current time of day
-    //  if (day0h == today) {
-    //     var nowentry = {posX = lastEntry; sizeX= toNow};
-    //     output.push(nowentry)
-    //  }
+    // if looking at today's log, indicate current time
+    if (day0h == today) {
+      var nowMinute = Math.round((now-today)/60);
+      var nowentry = {posX: nowMinute, sizeX: 1440-nowMinute, fillColor:'white;fill-opacity:0.5'};
+      output.push(nowentry)
+    }
     return output;
   }.property('controller.logdata')
 });
