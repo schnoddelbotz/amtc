@@ -864,8 +864,8 @@ App.OuMonitorController = Ember.Controller.extend({
 });
 App.OuStatelogController = Ember.Controller.extend({
   needs: ["hosts","ous","logdays"],
-  // improve, may fail if no data from today:
-  selectedDay: moment(moment().format("YYYY-MM-DD")).format("X"),
+  // improve, may fail if no data from today, TZ? :-/
+  selectedDay: moment(moment().format("YYYY-MM-DDT00:00:00.000Z")).unix(),
   logdata: [],
   dayHours: function(){
     var hours = [];
@@ -881,11 +881,7 @@ App.OuStatelogController = Ember.Controller.extend({
     Ember.$.getJSON(url).then(function(data) {
       controller.set('logdata', data);
     });
-  }.observes('selectedDay','model.id'),
-  //updateLogComponent: function(){
-    // better do svg stuff here...?
-    //console.log('yeah...');
-  //}.observes('logdata')
+  }.observes('selectedDay','model.id')
 });
 App.LogdaysController = Ember.ArrayController.extend({
   logdays: function() {
@@ -1444,7 +1440,7 @@ App.StateLogComponent = Ember.Component.extend({
         log.timeBegin = moment.unix(log.state_begin).format("HH:MM:ss");
         // unsuck ...:
         if (log.open_port==22 && log.state_http==200) {
-          log.fillColor = '#337ab7'; // linux
+          log.fillColor = '#63aae7;'; // linux
         } else if (log.open_port==3389 && log.state_http==200) {
           log.fillColor = '#5cb85c'; // windows
         } else if (log.state_amt==5 && log.state_http==200) {

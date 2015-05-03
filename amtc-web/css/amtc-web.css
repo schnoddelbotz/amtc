@@ -125,7 +125,10 @@ ul.viewmode li.active a:hover {
 .S3,.a3  { background:orange; } /* sleep (suspend-to-ram) */
 .S4,.a4  { background:#aae; } /* hibernate (suspend-to-disk) */
 .S5,.a5  { background:#aaa; } /* soft-off */
-.S16,.a16 { background:#daa; } /* no amt reply -- disables any OS scan, too */
+.S16,.a16 { background:#d9534f; } /* no amt reply -- disables any OS scan, too */
+.S0.none { background:yellow; }
+.S0.rdp  { background:#5cb85c;}
+.S0.ssh  { background:#63aae7;}
 
 /* log view now done via morris.js ??? */
 div.logs div {
