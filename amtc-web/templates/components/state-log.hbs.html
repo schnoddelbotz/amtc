@@ -1,4 +1,4 @@
-<svg width="1440" height="10" preserveAspectRatio="xMinYMin meet" viewBox="0 0 1440 10" style="width: 100%; max-width:1440px; height: auto;">
+<svg width="1440" height="10" preserveAspectRatio="none" viewBox="0 0 1440 10" style="width: 100%; max-width:1440px; height: auto;">
   <rect style="fill: transparent; stroke: #ddd;" height="10" width="1440">
     <title>{{host.hostname}}</title>
   </rect>
@@ -7,7 +7,7 @@
       <title>{{host.hostname}} beginning {{item.timeBegin}} [{{item.state_amt}}|{{item.open_port}}|{{item.state_http}}]</title>
     </rect>
   {{/each}}
-  <text x="2" y="8" style="font-size:9px;">
+  <text x="2" y="8" style="font-size:9px; letter-spacing:2;">
       {{host.hostname}}
   </text>
 </svg>
