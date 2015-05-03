@@ -402,6 +402,15 @@ App.OuMonitorView = Ember.View.extend({
     $(".pc").removeClass("ui-selected");
   }
 });
+App.OuStatelogView = Ember.View.extend({
+  keyDown: function(e) {
+    if(e) {
+      //console.log('key: '+e.keyCode);
+      // tbd ...
+      //this.get('controller').send('changeDay', { foo: bar });
+    }
+  }
+});
 App.OuHostsView = Ember.View.extend({
   // add/remove hosts view
   didInsertElement: function() {
@@ -1430,14 +1439,15 @@ App.StateLogComponent = Ember.Component.extend({
     var hostid = host.get('id');
     var output = [];
     var day0h = this.get('controller.selectedDay');
+    //var today = moment(moment().format("YYYY-MM-DDT00:00:00.000Z")).unix();
     // SVG ... tbd
     // SVG width: 1440px = 60minutes*24
     // http://madhatted.com/2014/11/24/scalable-vector-ember
     logs.forEach(function(log) {
-      if (hostid==log.host_id) {
+      if (hostid==log.host_id && day0h != null) {
         var dayMinute = (log.state_begin - day0h)/60;
         log.hostname = host.get('hostname');
-        log.posX = dayMinute;
+        log.posX = dayMinute > 0 ? dayMinute : 0;
         log.sizeX = 1440-dayMinute;
         log.timeBegin = moment.unix(log.state_begin).format("MMM DD HH:mm:ss");
         // unsuck ...:
@@ -1461,6 +1471,11 @@ App.StateLogComponent = Ember.Component.extend({
         output.push(log);
       }
     });
+    // TBD: last entry shouldn't show bar exceeding current time of day
+    //  if (day0h == today) {
+    //     var nowentry = {posX = lastEntry; sizeX= toNow};
+    //     output.push(nowentry)
+    //  }
     return output;
   }.property('controller.logdata')
 });
