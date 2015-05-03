@@ -1307,6 +1307,8 @@ App.Laststate = DS.Model.extend({
     this.get('state_http')== 200  && this.get('state_amt')==5 && (cc='fa fa-power-off fa-fw'); // AMT ok, powered down
     this.get('open_port') == 22   && (cc = "fa fa-linux fa-fw");
     this.get('open_port') == 3389 && (cc = "fa fa-windows fa-fw");
+    this.get('state_amt') == 3 && (cc = "fa fa-bed fa-fw"); // sleeping
+    this.get('state_amt') == 4 && (cc = "fa fa-rocket fa-fw"); // hibernating
     return new Ember.Handlebars.SafeString('<i class="'+cc+'"></i> ');
   }.property('open_port','state_http','state_amt'),
   openPortCssClass: function() {
@@ -1450,7 +1452,7 @@ App.StateLogComponent = Ember.Component.extend({
         log.posX = dayMinute > 0 ? dayMinute : 0;
         log.sizeX = 1440-dayMinute;
         log.timeBegin = moment.unix(log.state_begin).format("MMM DD HH:mm:ss");
-        // unsuck ...:
+        // unsuck ...: use css classes as monitor
         if (log.open_port==22 && log.state_http==200) {
           log.fillColor = '#63aae7;'; // linux
         } else if (log.open_port==3389 && log.state_http==200) {
@@ -1458,7 +1460,7 @@ App.StateLogComponent = Ember.Component.extend({
         } else if (log.state_amt==5 && log.state_http==200) {
           log.fillColor = '#aaa'; // off + AMT reachable
         } else if (log.state_amt==16 || log.state_http!=200) {
-          log.fillColor = '#d9534f'; // AMT unreachable
+          log.fillColor = '#e9635f'; // AMT unreachable
         } else if (log.state_amt==3) {
           log.fillColor = 'orange'; // sleep
         } else if (log.state_amt==4) {

@@ -114,7 +114,7 @@ ul.viewmode li.active a:hover {
   border-radius:5px;
   padding:5px;
   border:1px solid #aaa;
-  width:75px;
+  width:80px;
   display:block;
   float:left;
   background-repeat:no-repeat;
@@ -125,17 +125,17 @@ ul.viewmode li.active a:hover {
 .S3,.a3  { background:orange; } /* sleep (suspend-to-ram) */
 .S4,.a4  { background:#aae; } /* hibernate (suspend-to-disk) */
 .S5,.a5  { background:#aaa; } /* soft-off */
-.S16,.a16 { background:#d9534f; } /* no amt reply -- disables any OS scan, too */
+.S16,.a16 { background:#e9635f; } /* #d9534f;*/ /* no amt reply -- disables any OS scan, too */
 .S0.none { background:yellow; }
 .S0.rdp  { background:#5cb85c;}
 .S0.ssh  { background:#63aae7;}
 
 /* log view now done via morris.js ??? */
 div.logs div {
-  margin-top:0px;
+  margin-top:1px;
   margin-bottom:0px;
   padding:0;
-  height:11px;
+  max-height:11px;
 }
 /* tbd */
 
