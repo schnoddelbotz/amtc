@@ -152,8 +152,15 @@ $app->get('/statelogs/:ou/:startUnixTime', function ($ouid,$ctime) {
   foreach ($ou->hosts()->order_by_asc('hostname')->find_many() as $host) {
     $hosts[] = $host->id;
   }
-  // TBD: restict to OU !!!!
-  // TBD: find earlier statelogs for hosts missing from results to display "old state"
+  // find 'previous-day[s]-state' for each host
+  foreach ($hosts as $hostid) {
+    $record = Statelog::where('host_id',$hostid)->
+                        where_lt('state_begin',$ctime)->
+                        order_by_desc('state_begin')->
+                        limit(1)->find_one();
+    if ($record)
+      $result[] = $record->as_array();
+  }
   foreach (Statelog::where_gt('state_begin',$ctime)
             ->where_lt('state_begin',$ctime+86400)
             ->where_in('host_id',$hosts)
