@@ -869,7 +869,7 @@ App.OuStatelogController = Ember.Controller.extend({
   logdata: [],
   dayHours: function(){
     var hours = [];
-    for (var i=0; i<25; i++) {
+    for (var i=0; i<24; i++) {
       hours.push({hour:i, posX:i*60, textX:i*60+2});
     }
     return hours;
@@ -1426,7 +1426,6 @@ App.TreeMenuNodeComponent = Ember.Component.extend({
   }.property('selectedNode', 'node.id')
 });
 App.StateLogComponent = Ember.Component.extend({
-  bli: 'blabla',
   logItems: function() {
     var host = this.get('controller.host');
     var logs = this.get('controller.logdata');
