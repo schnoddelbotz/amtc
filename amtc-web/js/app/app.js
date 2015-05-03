@@ -1442,6 +1442,7 @@ App.StateLogComponent = Ember.Component.extend({
         log.hostname = host.get('hostname');
         log.posX = dayMinute;
         log.sizeX = 1440-dayMinute;
+        log.timeBegin = moment.unix(log.state_begin).format("HH:MM:ss");
         // unsuck ...:
         if (log.open_port==22 && log.state_http==200) {
           log.fillColor = '#337ab7'; // linux

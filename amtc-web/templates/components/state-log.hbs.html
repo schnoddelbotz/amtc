@@ -4,7 +4,7 @@
   </rect>
   {{#each logItems as |item|}}
     <rect x="{{item.posX}}" y="0" width="{{item.sizeX}}" height="10" style="fill:{{item.fillColor}}; stroke-width: 0;">
-      <title>{{host.hostname}}</title>
+      <title>{{host.hostname}} beginning {{item.timeBegin}} [{{item.state_amt}}|{{item.open_port}}|{{item.state_http}}]</title>
     </rect>
   {{/each}}
   <text x="2" y="8" style="font-size:9px;">
