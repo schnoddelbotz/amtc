@@ -865,6 +865,8 @@ App.OuMonitorController = Ember.Controller.extend({
 App.OuStatelogController = Ember.Controller.extend({
   needs: ["hosts","ous","logdays"],
   // improve, may fail if no data from today, TZ? :-/
+  // selectedDay should take last element of logdays ...
+  // and use: http://momentjs.com/timezone/ -- tbd
   selectedDay: moment(moment().format("YYYY-MM-DDT00:00:00.000Z")).unix(),
   logdata: [],
   dayHours: function(){

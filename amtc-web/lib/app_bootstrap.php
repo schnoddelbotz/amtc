@@ -33,7 +33,7 @@ if (defined("AMTC_PDOSTRING")) {
 // Initialize http://www.slimframework.com/
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
-$app->config('debug', false); // ... and enables custom $app->error() handler
+$app->config('debug', false); // false enables custom error handler below
 $app->response()->header('Content-Type', 'application/json;charset=utf-8');
 $app->notFound(function () {
   echo json_encode(Array('error'=>'Not found'));
