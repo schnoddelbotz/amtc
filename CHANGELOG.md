@@ -1,14 +1,16 @@
 v0.8.5~alpha3
 =============
 
-Released May 15, 2015.
+Released May 5, 2015.
 
 ## amtc-web ##
 
-- amtc-web1-style statelogs available again, now as SVGs
+- amtc-web1-style statelogs available again, now as SVGs!
+- drop redundant rest-api routes using catch-many functions
+- re-coloured host states in host control view, streamlined icons
 
 The 'logdays' view has been added to the DB to support statelog.
-There is no auto-update feature for the DB yet ...
+There is no auto-update feature for the DB yet(?) - update manually.
 
 
 v0.8.5~alpha2
