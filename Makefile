@@ -34,7 +34,7 @@ DATADIR   ?= var/lib
 AMTCWEBDIR = amtc-web
 
 # for farmbuild target - build hosts
-HOSTS_deb  = debian7 ubuntu14 raspbian7
+HOSTS_deb  = debian8 ubuntu14 raspbian7
 HOSTS_rpm  = fedora20 centos7
 
 # note: debian derivates (ubuntu, raspbian...) have /etc/d_v, too.
@@ -96,7 +96,7 @@ deb: clean
 	echo  -e "#!/bin/sh -e\nchown www-data:www-data /var/lib/amtc-web /etc/amtc-web\nchmod 770 /var/lib/amtc-web /etc/amtc-web\na2enmod headers\na2enmod rewrite\nservice apache2 restart" > debian/postinst
 	perl -pi -e 's@Description: .*@Description: Intel AMT/DASH remote power management tool@' debian/control
 	perl -pi -e 's@^Depends: (.*)@Depends: $$1, apache2|lighttpd|nginx, php5-curl, php5-sqlite|php5-mysql|php5-pgsql@' debian/control
-	perl -pi -e 's@^Build-Depends: (.*)@Build-Depends: $$1, curl, vim-common, libcurl3, libcurl4-gnutls-dev, libgnutls-dev@' debian/control
+	perl -pi -e 's@^Build-Depends: (.*)@Build-Depends: $$1, curl, vim-common, libcurl3, libcurl4-gnutls-dev@' debian/control
 	debuild -i -us -uc -b
 
 # remove debian/ subdirectory and trash package(s) built
