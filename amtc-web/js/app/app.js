@@ -616,8 +616,9 @@ App.LoginController = Ember.Controller.extend({
         url: 'rest-api.php/logout',
         success: function(xhr, status, err) {
           if (xhr.error) {
-            humane.log('<i class="fa fa-meh-o"></i> Not logged in!',
-               { timeout: 500, clickToClose: false });
+            self.set('isLoggedIn', false);
+            App.eraseCookie('isLoggedIn');
+            self.transitionToRoute('login');
           } else if (xhr.message && xhr.message=="success") {
             humane.log('<i class="fa fa-smile-o"></i> Signed out successfully',
                { timeout: 1000, clickToClose: false });
@@ -1505,7 +1506,7 @@ App.RadioButtonComponent = Ember.Component.extend({
 // Handlebars helpers
 
 // markdown to html conversion
-var showdown = new Showdown.converter();
+var showdown = new showdown.Converter();
 Ember.Handlebars.helper('format-markdown', function(input) {
   if (input) {
     var md = showdown.makeHtml(input);
