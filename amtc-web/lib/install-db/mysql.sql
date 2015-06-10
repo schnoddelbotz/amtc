@@ -70,28 +70,23 @@ CREATE TABLE IF NOT EXISTS statelog (
 CREATE TRIGGER timestampTrigger BEFORE INSERT ON statelog FOR EACH ROW SET new.state_begin = UNIX_TIMESTAMP(NOW());
 CREATE INDEX logdata_ld ON statelog (state_begin);
 CREATE INDEX logdata_pd ON statelog (host_id);
--- work around 'View's SELECT contains a subquery in the FROM clause' for laststate view:
-CREATE VIEW statelogsorted as
-  SELECT
-    host_id AS host_id,
-    state_begin AS state_begin,
-    open_port AS open_port,
-    state_amt AS state_amt,
-    state_http AS state_http
-  FROM statelog
-  ORDER BY state_begin DESC;
 CREATE VIEW laststate AS -- ... including fake id column to make e-d happy
-  SELECT h.*, s.*
-  FROM `host` h
-  LEFT JOIN
-    statelogsorted AS s
-  ON
-    h.id = s.host_id AND
-    s.state_begin <= NOW()
-  WHERE
-    s.state_begin IS NOT NULL
-  GROUP BY
-    h.id;
+  SELECT
+      `h`.`id` AS `id`,
+      `h`.`hostname` AS `hostname`,
+      `s`.`host_id` AS `host_id`,
+      `s`.`open_port` AS `open_port`,
+      `s`.`state_amt` AS `state_amt`,
+      `s`.`state_http` AS `state_http`,
+      (SELECT max(state_begin)
+        FROM statelog
+        WHERE host_id=`h`.`id`) AS `state_begin`
+  FROM
+      (`host` `h`
+      LEFT JOIN `statelog` `s` ON ((`s`.`host_id` = `h`.`id`)))
+  GROUP BY `h`.`id`
+  HAVING (`state_begin` IS NOT NULL);
+
 CREATE VIEW logday AS
   SELECT DISTINCT(date(from_unixtime(state_begin))) AS id
   FROM statelog;
