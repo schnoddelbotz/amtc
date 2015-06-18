@@ -207,6 +207,12 @@ class AmtcwebSpooler {
   }
 
   static function execMonitoringJob(Job $job,$opt) {
+    // fetch last state of all hosts
+    $laststates = Array();
+    foreach( Laststate::find_many() as $host ) {
+      $laststates[$host->hostname] = $host->as_array();
+    }
+    //
     $optsetgroup = Array();
     $job->last_started = time();
     $job->job_status = Job::STATUS_RUNNING;
@@ -224,7 +230,7 @@ class AmtcwebSpooler {
       if (count($hosts) < $maxThreads) {
         $job->amtc_hosts = implode(',', $hosts);
         $job->ou_id = $ou_array[0]; // one OU setting fits all here, as it's the same...
-        self::updateHostState( self::execAmtCommand($job,$opt), $opt );
+        self::updateHostState( self::execAmtCommand($job,$opt), $opt, $laststates );
       } else {
         // more than maxThreads hosts to scan, slice hosts array
         $hostsCompleted = 0;
@@ -233,7 +239,7 @@ class AmtcwebSpooler {
           $hostsCompleted += count($workpack);
           $job->amtc_hosts = implode(',', $workpack);
           $job->ou_id = $ou_array[0]; // one OU setting fits all here, as it's the same...
-          self::updateHostState( self::execAmtCommand($job,$opt), $opt );
+          self::updateHostState( self::execAmtCommand($job,$opt), $opt, $laststates );
         }
       }
     }
@@ -303,14 +309,9 @@ class AmtcwebSpooler {
     return json_decode($res);
   }
 
-  static function updateHostState($data /* = amtc json_decoded output */,$opt) {
+  static function updateHostState($data /* = amtc json_decoded output */,$opt,$last/*states*/) {
     // map amtc string output to db-usable open_port(int) value
     $rportmap = array('ssh'=>22, 'rdp'=>3389, 'none'=>0, 'skipped'=>0, 'noscan'=>0);
-    // fetch last state of all hosts
-    $last = Array();
-    foreach( Laststate::find_many() as $host ) {
-      $last[$host->hostname] = $host->as_array();
-    }
     // map hostname -> id (amtc has no clue of those IDs...); improve...
     $hostnameMap = Array();
     foreach (Host::find_many() as $host) {

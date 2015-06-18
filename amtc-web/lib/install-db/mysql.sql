@@ -2,7 +2,7 @@
 -- mysql.sql - part of amtc-web, part of amtc
 -- https://github.com/schnoddelbotz/amtc
 --
--- amtc-web SQLite schema-only dump
+-- amtc-web MySQL schema-only dump
 --
 
 SET foreign_key_checks = 0;
@@ -70,23 +70,11 @@ CREATE TABLE IF NOT EXISTS statelog (
 CREATE TRIGGER timestampTrigger BEFORE INSERT ON statelog FOR EACH ROW SET new.state_begin = UNIX_TIMESTAMP(NOW());
 CREATE INDEX logdata_ld ON statelog (state_begin);
 CREATE INDEX logdata_pd ON statelog (host_id);
-CREATE VIEW laststate AS -- ... including fake id column to make e-d happy
-  SELECT
-      `h`.`id` AS `id`,
-      `h`.`hostname` AS `hostname`,
-      `s`.`host_id` AS `host_id`,
-      `s`.`open_port` AS `open_port`,
-      `s`.`state_amt` AS `state_amt`,
-      `s`.`state_http` AS `state_http`,
-      (SELECT max(state_begin)
-        FROM statelog
-        WHERE host_id=`h`.`id`) AS `state_begin`
-  FROM
-      (`host` `h`
-      LEFT JOIN `statelog` `s` ON ((`s`.`host_id` = `h`.`id`)))
-  GROUP BY `h`.`id`
-  HAVING (`state_begin` IS NOT NULL);
-
+CREATE VIEW laststate AS     -- ... including fake id column to make e-d happy
+  SELECT s1.*,h.hostname,h.id AS id
+  FROM host h, statelog s1
+  LEFT JOIN statelog s2 ON s1.host_id=s2.host_id AND s1.state_begin < s2.state_begin
+  WHERE h.id=s1.host_id AND s2.state_begin IS NULL ORDER BY s1.host_id;
 CREATE VIEW logday AS
   SELECT DISTINCT(date(from_unixtime(state_begin))) AS id
   FROM statelog;
