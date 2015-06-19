@@ -135,7 +135,7 @@
             <div class="panel-body">
                 <div class="list-group">
                     {{#if controllers.notifications.notifications}}
-                      {{#each msg in controllers.notifications.notifications.content}}
+                      {{#each controllers.notifications.notifications.content as |msg|}}
                         <a href="#" class="list-group-item">
                          <i class={{msg.cssClass}}></i> {{msg.message}}
                          <span class="pull-right text-muted small"><em>{{format-from-now msg.tstamp}}</em></span>

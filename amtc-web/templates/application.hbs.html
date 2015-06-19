@@ -26,7 +26,7 @@
             </a>
             <ul class="dropdown-menu dropdown-messages">
               {{#if controllers.notifications.notifications}}
-                {{#each msg in controllers.notifications.notifications.content}}
+                {{#each controllers.notifications.notifications.content as |msg|}}
                   <li>
                     <a href="#">
                       <div>

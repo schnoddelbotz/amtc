@@ -930,7 +930,7 @@ App.LaststatesController = Ember.ArrayController.extend({
     var laststates = this.get('laststates');
     hosts = laststates.filterBy('state_amt', 5);
     for (var i=0; i<hosts.get('length'); i++) {
-      list.push(hosts[i]._data.hostname);
+      list.push(hosts[i]._internalModel._data.hostname);
     }
     return list.join();
   }.property('laststates.@each.state_amt'),
@@ -940,7 +940,7 @@ App.LaststatesController = Ember.ArrayController.extend({
     var laststates = this.get('laststates');
     hosts = laststates.filterBy('state_http', 0);
     for (var i=0; i<hosts.get('length'); i++) {
-      list.push(hosts[i]._data.hostname);
+      list.push(hosts[i]._internalModel._data.hostname);
     }
     return list.join();
   }.property('laststates.@each.state_http'),
@@ -950,7 +950,7 @@ App.LaststatesController = Ember.ArrayController.extend({
     var laststates = this.get('laststates');
     hosts = laststates.filterBy('open_port', 3389);
     for (var i=0; i<hosts.get('length'); i++) {
-      list.push(hosts[i]._data.hostname);
+      list.push(hosts[i]._internalModel._data.hostname);
     }
     return list.join();
   }.property('laststates.@each.open_port'),
@@ -960,7 +960,7 @@ App.LaststatesController = Ember.ArrayController.extend({
     var laststates = this.get('laststates');
     hosts = laststates.filterBy('open_port', 22);
     for (var i=0; i<hosts.get('length'); i++) {
-      list.push(hosts[i]._data.hostname);
+      list.push(hosts[i]._internalModel._data.hostname);
     }
     return list.join();
   }.property('laststates.@each.open_port'),
@@ -993,7 +993,7 @@ App.OptionsetController = Ember.Controller.extend({
     },
 
     doneEditingReturn: function() {
-      console.log(this.get('model'));
+      //console.log(this.get('model'));
       this.get('model').save().then(function() {
         humane.log('<i class="fa fa-save"></i> Saved successfully',
           { timeout: 800 });
@@ -1298,6 +1298,7 @@ App.Laststate = DS.Model.extend({
   open_port: attr('number'),
   state_amt: attr('number'),
   state_http: attr('number'),
+  hostname: attr('string'),
 
   lastScan: function() {
     return moment.unix(this.get('state_begin')).fromNow();

@@ -9,8 +9,8 @@
 export JQUERY      = 2.1.3
 export JQUERYUI    = 1.11.4
 export BOOTSTRAP   = 3.3.4
-export EMBERJS     = 1.11.1
-export EMBERDATA   = 1.0.0-beta.16.1
+export EMBERJS     = 1.13.2
+export EMBERDATA   = 1.13.2
 export FONTAWESOME = 4.3.0
 
 SHELL = bash
@@ -89,7 +89,8 @@ css/styles.css: $(CSSFILES) $(ZIPSRC)
 	[ $(MERGE_CSS) = YES ] && cat css/amtc-web.css >> css/styles.css || true
 
 js/jslibs.js: index.html $(JSFILES) $(ZIPSRC)
-	cat $(JSFILES) > js/jslibs.js
+	rm -f js/jslibs.js
+	for JSFILE in $(JSFILES); do cat $$JSFILE >> js/jslibs.js; echo >> js/jslibs.js; done
 ifeq ($(HAVE_NODEJS),YES)
 	cat js/compiled-templates.js >> js/jslibs.js
 	[ $(MERGE_JS) = YES ] && node -e 'var u=require("uglify-js"); console.log(u.minify("js/app/app.js").code);' >> js/jslibs.js || true

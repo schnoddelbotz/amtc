@@ -1,5 +1,5 @@
 {{#if controllers.ous.ous.content}}
-  {{#each node in controllers.ous.ous.content}}
+  {{#each controllers.ous.ous.content as |node|}}
     {{#if node.isRootLevel}}
         {{tree-menu-node node=node action="selectNode" selectedNode=selectedNode}}
     {{/if}}

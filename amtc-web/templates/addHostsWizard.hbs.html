@@ -43,7 +43,7 @@
     {{#if hostname}}
       <h3>Preview</h3>
       <div id="addHostsPreview">
-        {{#each host in hostsToAdd}}
+        {{#each hostsToAdd as |host|}}
           <div class="pc preview"><i class="fa fa-desktop"></i> {{host}}</div>
         {{/each}}
         <div class="clearfix"><br><br></div>
