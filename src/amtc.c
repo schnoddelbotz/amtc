@@ -27,8 +27,9 @@
 #define CMD_POWERRESET 3
 #define CMD_POWERCYCLE 4
 #define CMD_SHUTDOWN   5
-#define CMD_ENUMERATE  6
-#define CMD_MODIFY     7
+#define CMD_REBOOT     6
+#define CMD_ENUMERATE  7
+#define CMD_MODIFY     8
 #define MAX_HOSTS      255
 #define PORT_SSH       22
 #define PORT_RDP       3389
@@ -45,7 +46,7 @@ unsigned char *acmds[] = {
   /* WS-MAN / DASH / AMT6-9+ versions */
   wsman_info, wsman_up,wsman_down,wsman_reset,wsman_reset,
   /* generic wsman enumerations using -E <classname> */
-  wsman_shutdown_graceful, wsman_xenum,
+  wsman_shutdown_graceful, wsman_reset_graceful, wsman_xenum,
   /* AMT config settings via wsman -- cfgcmd 0..5  */
   wsman_solredir_disable, wsman_solredir_enable,
   wsman_webui_disable, wsman_webui_enable,
@@ -53,7 +54,7 @@ unsigned char *acmds[] = {
 };
 const char *hcmds[] = {
   "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE",
-  "SHUTDOWN","ENUMERATE","MODIFY"
+  "SHUTDOWN","REBOOT","ENUMERATE","MODIFY"
 };
 const char *powerstate[] = { /* AMT/ACPI */
  "S0 (on)", "S1 (cpu stop)", "S2 (cpu off)", "S3 (sleep)",
@@ -128,7 +129,7 @@ bool  enforceScans = false; // enforce SSH/RDP scan even if no AMT success
 int main(int argc,char **argv,char **envp) {
   int c;
 
-  while ((c = getopt(argc, argv, "IUDRSCLE:M:5gndeqvjsrp:t:w:m:c:")) != -1)
+  while ((c = getopt(argc, argv, "IBUDRSCLE:M:5gndeqvjsrp:t:w:m:c:")) != -1)
   switch (c) {
     case 'I': cmd = CMD_INFO;                break;
     case 'U': cmd = CMD_POWERUP;             break;
@@ -136,6 +137,7 @@ int main(int argc,char **argv,char **envp) {
     case 'C': cmd = CMD_POWERCYCLE;          break;
     case 'R': cmd = CMD_POWERRESET;          break;
     case 'S': cmd = CMD_SHUTDOWN; useWsmanShift=5; break;
+    case 'B': cmd = CMD_REBOOT; useWsmanShift=5; break;
     case 'E': cmd = CMD_ENUMERATE; quiet=1; useWsmanShift=5; do_enumerate=get_enum_class(optarg); break;
     case 'M': cmd = CMD_MODIFY; useWsmanShift=5; do_modify=optarg; break;
     case 'L': list_wsman_cmds();             break;

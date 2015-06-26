@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsman="http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd" xmlns:n1="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_PowerManagementService">
+<s:Header>
+  <wsa:Action s:mustUnderstand="true">http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_PowerManagementService/RequestPowerStateChange</wsa:Action>
+  <wsa:To s:mustUnderstand="true">http://192.168.0.100:16992/wsman</wsa:To>
+  <wsman:ResourceURI s:mustUnderstand="true">http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_PowerManagementService</wsman:ResourceURI>
+  <wsa:MessageID s:mustUnderstand="true">uuid:7022adc5-da76-4c9b-8ad7-9743b7b205f2</wsa:MessageID>
+  <wsa:ReplyTo><wsa:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</wsa:Address></wsa:ReplyTo>
+  <wsman:SelectorSet>
+    <wsman:Selector Name="Name">Intel(r) AMT Power Management Service</wsman:Selector>
+    <wsman:Selector Name="SystemName">Intel(r) AMT</wsman:Selector>
+    <wsman:Selector Name="CreationClassName">CIM_PowerManagementService</wsman:Selector>
+    <wsman:Selector Name="SystemCreationClassName">CIM_ComputerSystem</wsman:Selector>
+  </wsman:SelectorSet>
+</s:Header>
+<s:Body>
+  <n1:RequestPowerStateChange_INPUT>
+    <n1:PowerState>14</n1:PowerState>
+    <n1:ManagedElement>
+      <wsa:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</wsa:Address>
+      <wsa:ReferenceParameters>
+        <wsman:ResourceURI>http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ComputerSystem</wsman:ResourceURI>
+        <wsman:SelectorSet>
+          <wsman:Selector Name="Name">ManagedSystem</wsman:Selector>
+          <wsman:Selector Name="CreationClassName">CIM_ComputerSystem</wsman:Selector>
+        </wsman:SelectorSet>
+      </wsa:ReferenceParameters>
+    </n1:ManagedElement>
+  </n1:RequestPowerStateChange_INPUT>
+</s:Body>
+</s:Envelope>

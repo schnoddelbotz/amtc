@@ -808,8 +808,8 @@ App.OuHostsController = Ember.Controller.extend({
 });
 App.OuMonitorController = Ember.Controller.extend({
   needs: ["hosts","ous","laststates"],
-  commandActions: ["powerdown","powerup","powercycle","reset","shutdown"],
-  shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R", shutdown:"S"},
+  commandActions: ["powerdown","powerup","powercycle","reset","shutdown","reboot"],
+  shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R", shutdown:"S", reboot:"B"},
 
   selectedCmd: null,
   selectedHosts: [], // EMBER.MUTABLEARRAY?

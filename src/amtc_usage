@@ -11,6 +11,7 @@
   -C(ycle)    powercycle
   -R(eset)    reset
   -S(hutdown) using AMT graceful shutdown (AMT 9.0+)
+  -(re)B(oot) using AMT graceful reset    (AMT 9.0+)
   -L(ist)  valid wsman <classname>s for -E(numeration)
   -E(numerate)<classname>       enumerate/list settings
   -M(odify)   <setting>=<value> modify wsman settings
