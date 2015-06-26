@@ -930,7 +930,7 @@ App.LaststatesController = Ember.ArrayController.extend({
     var laststates = this.get('laststates');
     hosts = laststates.filterBy('state_amt', 5);
     for (var i=0; i<hosts.get('length'); i++) {
-      list.push(hosts[i]._internalModel._data.hostname);
+      list.push(hosts[i].get('hostname'));
     }
     return list.join();
   }.property('laststates.@each.state_amt'),
@@ -940,7 +940,7 @@ App.LaststatesController = Ember.ArrayController.extend({
     var laststates = this.get('laststates');
     hosts = laststates.filterBy('state_http', 0);
     for (var i=0; i<hosts.get('length'); i++) {
-      list.push(hosts[i]._internalModel._data.hostname);
+      list.push(hosts[i].get('hostname'));
     }
     return list.join();
   }.property('laststates.@each.state_http'),
@@ -950,7 +950,7 @@ App.LaststatesController = Ember.ArrayController.extend({
     var laststates = this.get('laststates');
     hosts = laststates.filterBy('open_port', 3389);
     for (var i=0; i<hosts.get('length'); i++) {
-      list.push(hosts[i]._internalModel._data.hostname);
+      list.push(hosts[i].get('hostname'));
     }
     return list.join();
   }.property('laststates.@each.open_port'),
@@ -960,7 +960,7 @@ App.LaststatesController = Ember.ArrayController.extend({
     var laststates = this.get('laststates');
     hosts = laststates.filterBy('open_port', 22);
     for (var i=0; i<hosts.get('length'); i++) {
-      list.push(hosts[i]._internalModel._data.hostname);
+      list.push(hosts[i].get('hostname'));
     }
     return list.join();
   }.property('laststates.@each.open_port'),
@@ -1484,6 +1484,55 @@ App.StateLogComponent = Ember.Component.extend({
     }
     return output;
   }.property('controller.logdata')
+});
+App.MySelectComponent = Ember.Component.extend({
+  // http://emberjs.com/deprecations/v1.x/#toc_ember-select
+  // possible passed-in values with their defaults:
+  content: [],
+  prompt: null,
+  optionValuePath: 'id',
+  optionLabelPath: 'title',
+
+  action: Ember.K, // action to fire on change
+
+  // shadow the passed-in `selection` to avoid
+  // leaking changes to it via a 2-way binding
+  _selection: Ember.computed.reads('selection'),
+
+  actions: {
+    change: function() {
+      const selectEl = this.$('select')[0];
+      const selectedIndex = selectEl.selectedIndex;
+      const content = this.get('content');
+
+      // decrement index by 1 if we have a prompt
+      const hasPrompt = !!this.get('prompt');
+      const contentIndex = hasPrompt ? selectedIndex - 1 : selectedIndex;
+
+      var ary = content.toArray();
+      const selection = ary[contentIndex];
+
+      // set the local, shadowed selection to avoid leaking
+      // changes to `selection` out via 2-way binding
+      this.set('_selection', selection);
+
+      const changeCallback = this.get('action');
+      changeCallback(selection);
+    }
+  }
+});
+App.IsEqualHelper = Ember.Helper.helper(function(params) {
+  var leftSide = params[0];
+  var rightSide = params[1];
+  return leftSide === rightSide;
+});
+App.IsNotHelper = Ember.Helper.helper(function(value) {
+  return !value;
+});
+App.ReadPathHelper = Ember.Helper.helper(function(params){
+  var object = params[0];
+  var path = params[1];
+  return Ember.get(object, path);
 });
 
 // https://gist.github.com/pwfisher/b4d27d984ad5868baab6

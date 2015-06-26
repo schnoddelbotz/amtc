@@ -20,13 +20,14 @@
 
     <div class="form-group">
       {{#if controllers.ous.ous.content}}
-      {{view Ember.Select content=controllers.ous.ous.content
-                          class="form-control"
-                          value=model.ou_id.id
-                          selection=model.ou_id
-                          prompt="Choose OU"
-                          optionValuePath="content.id"
-                          optionLabelPath="content.name" }}
+        {{my-select
+          content=controllers.ous.ous.content
+          selection=model.ou_id
+          action=(action (mut model.ou_id))
+          prompt="Choose Organizational Unit (OU) / Room"
+          optionValuePath="id"
+          optionLabelPath="name"
+        }}
       {{/if}}
     </div>
 
