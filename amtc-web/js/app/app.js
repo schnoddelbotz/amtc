@@ -132,39 +132,39 @@ App.ApplicationAdapter = DS.RESTAdapter.extend({});
 App.Router.map(function() {
   this.route('login');
   this.route('setup');
-  this.resource('logs');
-  this.resource('energy');
-  this.resource('systemhealth');
-  this.resource('page', { path: '/page/:id' });
+  this.route('logs');
+  this.route('energy');
+  this.route('systemhealth');
+  this.route('page', { path: '/page/:id' });
 
-  this.resource('ous', function() {
+  this.route('ous', function() {
     this.route('new');
   });
-  this.resource('ou', { path: '/ou/:id' }, function() {
+  this.route('ou', { path: '/ou/:id' }, function() {
     this.route('edit');
     this.route('hosts');
     this.route('monitor');
     this.route('statelog');
   });
 
-  this.resource('users', function() {
+  this.route('users', function() {
     this.route('new');
   });
-  this.resource('user', { path: '/user/:id' }, function() {
+  this.route('user', { path: '/user/:id' }, function() {
     this.route('edit');
   });
 
-  this.resource('optionsets', function() {
+  this.route('optionsets', function() {
     this.route('new');
   });
-  this.resource('optionset', { path: '/optionset/:id' }, function() {
+  this.route('optionset', { path: '/optionset/:id' }, function() {
     this.route('edit');
   });
 
-  this.resource('schedules', function() {
+  this.route('schedules', function() {
     this.route('new');
   });
-  this.resource('schedule', { path: '/schedule/:id' }, function() {
+  this.route('schedule', { path: '/schedule/:id' }, function() {
     this.route('edit');
   });
 });
@@ -673,16 +673,16 @@ App.UserEditController = Ember.Controller.extend({
         console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
-        device.save().then(
-          App.successMessage('Deleted successfully','trash',this,'users')
-        );
+        device.save().then(function(){
+          App.successMessage('Deleted successfully','trash',this,'users');
+        });
       }
     },
     doneEditingReturn: function() {
       console.log(this.get('model'));
-      this.get('model').save().then(
-        App.successMessage('Saved successfully','save',this,'users')
-      );
+      this.get('model').save().then(function(){
+        App.successMessage('Saved successfully','save',this,'users');
+      });
     }
   }
 });
@@ -703,15 +703,15 @@ App.OuEditController = Ember.Controller.extend({
       if (confirm("Really delete this OU?")) {
         var device = this.get('model');
         device.deleteRecord();
-        device.save().then(
-          App.successMessage('Deleted successfully','trash',this,'ous')
-        );
+        device.save().then(function(){
+          App.successMessage('Deleted successfully','trash',this,'ous');
+        });
       }
     },
     doneEditingReturn: function() {
-      this.get('model').save().then(
-        App.successMessage('Saved successfully','save',this,'ous')
-      );
+      this.get('model').save().then(function(){
+        App.successMessage('Saved successfully','save',this,'ous');
+      });
     }
   }
 });
@@ -946,15 +946,15 @@ App.OptionsetController = Ember.Controller.extend({
         console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
-        device.save().then(
-          App.successMessage('Deleted successfully','trash',this,'optionsets')
-        );
+        device.save().then(function(){
+          App.successMessage('Deleted successfully','trash',this,'optionsets');
+        });
       }
     },
     doneEditingReturn: function() {
-      this.get('model').save().then(
-        App.successMessage('Saved successfully','save',this,'optionsets')
-      );
+      this.get('model').save().then(function(){
+        App.successMessage('Saved successfully','save',this,'optionsets');
+      });
     }
   }
 });
@@ -986,9 +986,9 @@ App.ScheduleController = Ember.Controller.extend({
         console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
-        device.save().then(
-          App.successMessage('Deleted successfully','trash',this,'schedules')
-        );
+        device.save().then(function(){
+          App.successMessage('Deleted successfully','trash',this,'schedules');
+        });
       }
     },
 
@@ -1001,9 +1001,9 @@ App.ScheduleController = Ember.Controller.extend({
         this.set('model.amtc_cmd', newCommand.cchar);
       }
 
-      this.get('model').save().then(
-        App.successMessage('Saved successfully','save',this,'schedules')
-      );
+      this.get('model').save().then(function(){
+        App.successMessage('Saved successfully','save',this,'schedules');
+      });
     }
   }
 });
@@ -1498,7 +1498,7 @@ App.RadioButtonComponent = Ember.Component.extend({
 
 // markdown to html conversion
 Ember.Handlebars.helper('format-markdown', function(input) {
-  var showdown = new showdown.Converter();
+  var showdown = new window.showdown.Converter();
   if (input) {
     var md = showdown.makeHtml(input);
     md = md.replace("<h1 id=",'<h1 class="page-header" id=');
