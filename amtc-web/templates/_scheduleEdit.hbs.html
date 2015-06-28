@@ -19,12 +19,13 @@
     </div>
 
     <div class="form-group">
+      <label for="action">OU / Room</label>
       {{#if controllers.ous.ous.content}}
         {{my-select
           content=controllers.ous.ous.content
           selection=model.ou_id
           action=(action (mut model.ou_id))
-          prompt="Choose Organizational Unit (OU) / Room"
+          prompt="Choose Organizational Unit / Room"
           optionValuePath="id"
           optionLabelPath="name"
         }}
@@ -33,7 +34,15 @@
 
     <div class="form-group">
       <label for="action">Action</label>
-      {{view Ember.Select value=model.amtc_cmd content=validCommands optionValuePath="content.cchar" optionLabelPath="content.cmd"}}
+      {{my-select
+        content=validCommands
+        selection=model.amtc_cmd
+        action=(action (mut newCommand))
+        optionValuePath="cchar"
+        optionLabelPath="cmd"
+        comparisonAttr="cchar"
+        prompt="Select command to execute"
+      }}
     </div>
 
     <div class="form-group">

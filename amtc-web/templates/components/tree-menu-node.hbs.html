@@ -16,7 +16,7 @@
 {{/if}}
 
 {{#if node.isExpanded}}
-  {{#each child in node.children}}
+  {{#each node.children as |child|}}
     <ul class="nav ember-view">
       {{tree-menu-node node=child action="selectNode" selectedNode=selectedNode}}
     </ul>

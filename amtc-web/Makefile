@@ -10,7 +10,7 @@ export JQUERY      = 2.1.3
 export JQUERYUI    = 1.11.4
 export BOOTSTRAP   = 3.3.4
 export EMBERJS     = 1.13.2
-export EMBERDATA   = 1.13.2
+export EMBERDATA   = 1.13.4
 export FONTAWESOME = 4.3.0
 
 SHELL = bash

@@ -10,6 +10,8 @@
  *  http://emberjs.com/guides/routing/generated-objects/
  */
 
+'use strict';
+
 var attr = DS.attr;
 var hasMany = DS.hasMany;
 
@@ -59,15 +61,15 @@ var App = Ember.Application.create({
   },
   // SB-Admin 2 responsiveness helper
   windowResizeHandler: function() {
-    topOffset = 50;
-    width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+    var topOffset = 50;
+    var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
     if (width < 768) {
       $('div.navbar-collapse').addClass('collapse');
       topOffset = 100; // 2-row-menu
     } else {
       $('div.navbar-collapse').removeClass('collapse');
     }
-    height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
+    var height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
     height = height - topOffset;
     if (height < 1) height = 1;
     if (height > topOffset) {
@@ -107,6 +109,9 @@ var App = Ember.Application.create({
     this.createCookie(name, "", -1);
   }
 });
+
+// default Adapter for emberjs 2.0 is JSONAdapter - override it (until migrated?)
+App.ApplicationAdapter = DS.RESTAdapter.extend({});
 
 // Routes
 
@@ -698,6 +703,9 @@ App.OuController = Ember.Controller.extend({
 App.OuEditController = Ember.Controller.extend({
   needs: ["optionsets","ous"],
   actions: {
+    setOptionset: function() {
+      console.log();
+    },
     removeOu: function () {
       if (confirm("Really delete this OU?")) {
         console.log('FINALLY Remove it' + this.get('controllers.ous.ous'));
@@ -723,7 +731,6 @@ App.OuEditController = Ember.Controller.extend({
         });
       }
     },
-
     doneEditingReturn: function() {
       this.get('model').save().then(function() {
         humane.log('<i class="fa fa-save"></i> Saved successfully',
@@ -874,11 +881,13 @@ App.OuMonitorController = Ember.Controller.extend({
 });
 App.OuStatelogController = Ember.Controller.extend({
   needs: ["hosts","ous","logdays"],
-  // improve, may fail if no data from today, TZ? :-/
-  // selectedDay should take last element of logdays ...
-  // and use: http://momentjs.com/timezone/ -- tbd
-  selectedDay: moment(moment().format("YYYY-MM-DDT00:00:00.000Z")).unix(),
+  selectedDay: null, // selectedDay should take last element of logdays ...
   logdata: [],
+  actions: {
+    selectLogday: function(args) {
+      this.set('selectedDay', args.get('dayUnixStart'));
+    }
+  },
   dayHours: function(){
     var hours = [];
     for (var i=0; i<24; i++) {
@@ -928,7 +937,7 @@ App.LaststatesController = Ember.ArrayController.extend({
   stateOffList: function() {
     var list = [];
     var laststates = this.get('laststates');
-    hosts = laststates.filterBy('state_amt', 5);
+    var hosts = laststates.filterBy('state_amt', 5);
     for (var i=0; i<hosts.get('length'); i++) {
       list.push(hosts[i].get('hostname'));
     }
@@ -938,7 +947,7 @@ App.LaststatesController = Ember.ArrayController.extend({
   stateUnreachableList: function() {
     var list = [];
     var laststates = this.get('laststates');
-    hosts = laststates.filterBy('state_http', 0);
+    var hosts = laststates.filterBy('state_http', 0);
     for (var i=0; i<hosts.get('length'); i++) {
       list.push(hosts[i].get('hostname'));
     }
@@ -948,7 +957,7 @@ App.LaststatesController = Ember.ArrayController.extend({
   stateRDPList: function() {
     var list = [];
     var laststates = this.get('laststates');
-    hosts = laststates.filterBy('open_port', 3389);
+    var hosts = laststates.filterBy('open_port', 3389);
     for (var i=0; i<hosts.get('length'); i++) {
       list.push(hosts[i].get('hostname'));
     }
@@ -958,7 +967,7 @@ App.LaststatesController = Ember.ArrayController.extend({
   stateSSHList: function() {
     var list = [];
     var laststates = this.get('laststates');
-    hosts = laststates.filterBy('open_port', 22);
+    var hosts = laststates.filterBy('open_port', 22);
     for (var i=0; i<hosts.get('length'); i++) {
       list.push(hosts[i].get('hostname'));
     }
@@ -1020,14 +1029,15 @@ App.ScheduleController = Ember.Controller.extend({
   needs: ["ous"],
   currentOU: null,
   ouTree: null,
-  commandActions: ["powerdown","powerup","powercycle","reset","shutdown"],
-  shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R", shutdown:"S"},
+  commandActions: ["powerdown","powerup","powercycle","reset","shutdown","reboot"],
+  shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R", shutdown:"S", reboot:"B"},
   validCommands: [
     {cmd: "powerdown", cchar: "D"},
     {cmd: "powerup",   cchar: "U"},
     {cmd: "reset",     cchar: "R"},
     {cmd: "cycle",     cchar: "C"},
     {cmd: "shutdown",  cchar: "S"},
+    {cmd: "reboot",    cchar: "B"},
   ],
 
   actions: {
@@ -1053,6 +1063,13 @@ App.ScheduleController = Ember.Controller.extend({
 
     doneEditingReturn: function() {
       this.set('model.job_type', 2 /* scheduled task */ );
+
+      // select dropdown will set newCommand when selection is altered
+      if (this.get('newCommand')) {
+        var newCommand = this.get('newCommand');
+        this.set('model.amtc_cmd', newCommand.cchar);
+      }
+
       this.get('model').save().then(function() {
         humane.log('<i class="fa fa-save"></i> Saved successfully',
           { timeout: 1000 });
@@ -1185,17 +1202,6 @@ App.Ou = DS.Model.extend({
   logging: attr('boolean'),
   children: DS.hasMany('ou', {inverse: 'parent_id'}),
   hosts: DS.hasMany('host'),//, {inverse: null}),
-
-  /// Improve: feels hackish, but makes the dropdown+save work...
-  optionsetid: function(key,value) {
-    if (value) {
-      return value;
-    }
-    else {
-      console.log('get optionset -> ' + this.get('optionset_id.id'));
-      return this.get('optionset_id');
-    }
-  }.property('optionset_id'),
 
   // return ou/room path-style string of 'parent directories'
   ou_path: function() {
@@ -1491,7 +1497,8 @@ App.MySelectComponent = Ember.Component.extend({
   content: [],
   prompt: null,
   optionValuePath: 'id',
-  optionLabelPath: 'title',
+  optionLabelPath: null,//'title',
+  comparisonAttr: null,
 
   action: Ember.K, // action to fire on change
 
@@ -1500,6 +1507,7 @@ App.MySelectComponent = Ember.Component.extend({
   _selection: Ember.computed.reads('selection'),
 
   actions: {
+    // change() { ... } syntax breaks nodejs build. fix
     change: function() {
       const selectEl = this.$('select')[0];
       const selectedIndex = selectEl.selectedIndex;
@@ -1522,12 +1530,23 @@ App.MySelectComponent = Ember.Component.extend({
   }
 });
 App.IsEqualHelper = Ember.Helper.helper(function(params) {
+  // http://emberjs.com/deprecations/v1.x/#toc_ember-select
+  // ^ uses ES6/Babel function([params]) that will transpile
+  // into better params validation as done here
   var leftSide = params[0];
   var rightSide = params[1];
+
+  // kludge to allow <select> comparison for non-ember-data records.
+  // used by scheduleEdit.hbs -- improve/fix...
+  var comparisonAttr = params[2]; // null by component's default
+  if (comparisonAttr) {
+    return leftSide[comparisonAttr] === rightSide;
+  }
+
   return leftSide === rightSide;
 });
 App.IsNotHelper = Ember.Helper.helper(function(value) {
-  return !value;
+  return !value[0];
 });
 App.ReadPathHelper = Ember.Helper.helper(function(params){
   var object = params[0];
@@ -1556,8 +1575,8 @@ App.RadioButtonComponent = Ember.Component.extend({
 // Handlebars helpers
 
 // markdown to html conversion
-var showdown = new showdown.Converter();
 Ember.Handlebars.helper('format-markdown', function(input) {
+  var showdown = new showdown.Converter();
   if (input) {
     var md = showdown.makeHtml(input);
     md = md.replace("<h1 id=",'<h1 class="page-header" id=');

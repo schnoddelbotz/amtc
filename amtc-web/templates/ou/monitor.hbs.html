@@ -5,7 +5,7 @@
       {{!-- triggers loading laststates - but host display should not depend on it --}}
     {{/if}}
     {{#if controllers.hosts.hosts}}
-      {{#each host in controller.model.hosts}}
+      {{#each controller.model.hosts as |host|}}
         <div class="pc {{host.laststate.amtStateCssClass}} {{host.laststate.openPortCssClass}}" hostDbId={{host.id}}>
           <div>
             <span class="porticon">
@@ -50,7 +50,7 @@
         <div id="ctrl">
           <h5>Action for selected <span id="numselected">{{selectedHostsCount}}</span>&nbsp;hosts</h5>
           <form>
-            {{#each cmd in commandActions}}
+            {{#each commandActions as |cmd|}}
               <label>{{radio-button name='cmd' value=cmd groupValue=selectedCmd}} {{cmd}}</label>
             {{/each}}
             ... using a inter-command-delay of {{input type="text" size=3 value=selectedDelay}} seconds

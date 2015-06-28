@@ -4,7 +4,21 @@
       <h1 class="page-header">{{model.name}}</h1>
   </div>
   <div class="col-lg-7">
-    {{view "navigation"}}
+    <ul class="nav nav-pills viewmode">
+      {{#link-to "ou.monitor" tagName="li"}}
+        <a href={{"view.href"}}>Control</a>
+      {{/link-to}}
+      {{#link-to "ou.statelog" tagName="li"}}
+        <a href={{"view.href"}}>State Log</a>
+      {{/link-to}}
+      <li><a href="#messages-pills" data-toggle="tab">Energy</a></li>
+      {{#link-to "ou.edit" tagName="li"}}
+        <a href={{"view.href"}}>Edit OU</a>
+      {{/link-to}}
+      {{#link-to "ou.hosts" tagName="li"}}
+        <a href={{"view.href"}}>Edit Hosts</a>
+      {{/link-to}}
+    </ul>
   </div>
 </div>
 {{outlet}}

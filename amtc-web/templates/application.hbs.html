@@ -94,29 +94,37 @@
                     <a href="#"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                 </li>
                 <li>
-                    <a {{bindAttr href="view.href"}}>
+                    <a href="#">
                         <i class="fa fa-sitemap fa-fw"></i> Monitor / Control Hosts
                     </a>
                     <ul class="nav nav-second-level in">
                         {{partial "ouSelection"}}
                     </ul>
                 </li>
-                {{#linkTo 'logs' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>{{/linkTo}}
-                {{#linkTo 'energy' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-area-chart fa-fw"></i> Energy Consumption</a>{{/linkTo}}
+                {{#linkTo 'logs' tagName="li"}}
+                    <a href="#/logs"><i class="fa fa-align-left fa-fw"></i> OS and Powerstate Logs</a>
+                {{/linkTo}}
+                {{#linkTo 'energy' tagName="li"}}
+                    <a href="#/energy"><i class="fa fa-area-chart fa-fw"></i> Energy Consumption</a>
+                {{/linkTo}}
                 <li>
                     <a href="#"><i class="fa fa-wrench fa-fw"></i> Administration<span class="fa arrow"></span></a>
                     <ul class="nav nav-second-level">
-
-                        {{#linkTo 'ous' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>{{/linkTo}}
-
-                        {{#linkTo 'schedules' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-clock-o fa-fw"></i> Power Schedule</a>{{/linkTo}}
-
-                        {{#linkTo 'users' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-users fa-fw"></i> Users</a>{{/linkTo}}
-
+                        <li>
+                            <a href="#/ous"><i class="fa fa-university fa-fw"></i> Hosts and Rooms</a>
+                        </li>
+                        <li>
+                            <a href="#/schedules"><i class="fa fa-clock-o fa-fw"></i> Power Schedule</a>
+                        </li>
+                        <li>
+                            <a href="#/users"><i class="fa fa-users fa-fw"></i> Users</a>
+                        </li>
                         <li>
                             <a href="#/systemhealth"><i class="fa fa-heartbeat fa-fw"></i> System health</a>
                         </li>
-                        {{#linkTo 'optionsets' tagName="li"}}<a {{bindAttr href="view.href"}}><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>{{/linkTo}}
+                        <li>
+                            <a href="#/optionsets"><i class="fa fa-terminal fa-fw"></i> Basic Configuration</a>
+                        </li>
                     </ul>
                     <!-- /.nav-second-level -->
                 </li>

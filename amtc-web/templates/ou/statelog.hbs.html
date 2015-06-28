@@ -1,12 +1,14 @@
 <div class="row">
-  <div class="col-lg-12" id="daychooser">
+  <div class="col-lg-12">
     {{#if controllers.logdays.logdays}}
-      {{view Ember.Select content=controllers.logdays.logdays.content
-                          class="form-control"
-                          value=selectedDay
-                          prompt="Choose day"
-                          optionValuePath="content.dayUnixStart"
-                          optionLabelPath="content.dayString" }}
+      {{my-select
+        content=controllers.logdays.logdays.content
+        selection=selectedDay
+        action=(action 'selectLogday')
+        prompt="Choose day"
+        optionValuePath="dayUnixStart"
+        optionLabelPath="dayString"
+      }}
     {{/if}}
   </div>
 </div>
@@ -29,15 +31,15 @@
 <div class="row">
   <div class="col-lg-12 logs">
     {{#if controllers.hosts.hosts}}
-     {{#if controller.logdata}}
-      {{#each controller.model.hosts as |host|}}
+      {{#if controller.logdata}}
+        {{#each controller.model.hosts as |host|}}
           {{state-log host=host logdata=logdata selectedDay=selectedDay}}
-      {{/each}}
-     {{else}}
+        {{/each}}
+      {{else}}
        <h4>No log entries</h4>
-     {{/if}}
-    {{else}}
+        [[else]]
         No hosts found in this room.
+      {{/if}}
     {{/if}}
   </div>
 </div>

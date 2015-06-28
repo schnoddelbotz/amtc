@@ -6,8 +6,12 @@
   {{/if}}
 
   {{#each content key="@guid" as |item|}}
-    <option value="{{read-path item optionValuePath}}" selected={{is-equal item selection}}>
-      {{read-path item optionLabelPath}}
-     </option>
+    <option value="{{read-path item optionValuePath}}" selected={{is-equal item selection comparisonAttr}}>
+      {{#if optionLabelPath}}
+        {{read-path item optionLabelPath}}
+      {{else}}
+        {{item}}
+      {{/if}}
+    </option>
   {{/each}}
 </select>

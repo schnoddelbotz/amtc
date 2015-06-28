@@ -60,11 +60,10 @@
 
               <div class="form-group">
                   <label>Select desired PHP <a target="new" href="http://php.net/manual/en/intro.pdo.php">PDO DB Driver</a></label>
-                  {{view Ember.Select
-                                class="form-control"
-                                content=dbs
-                                value=selectedDB
-                                prompt="Select PDO driver"
+                  {{my-select
+                    content=dbs
+                    action=(action (mut selectedDB))
+                    prompt="Select PDO driver"
                   }}
               </div>
 
