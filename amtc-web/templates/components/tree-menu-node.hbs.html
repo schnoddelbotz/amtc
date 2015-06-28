@@ -11,7 +11,7 @@
   </li>
 {{else}}
   <li {{action "selectNode" node}} class={{isSelected}}>
-    <a href="#"><!--<i class="fa fa-caret-right"></i>-->{{node.name}}</a>
+    {{#link-to 'ou.monitor' node}}{{node.name}}{{/link-to}}
   </li>
 {{/if}}
 
