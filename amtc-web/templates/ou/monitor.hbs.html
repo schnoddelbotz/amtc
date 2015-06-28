@@ -5,7 +5,7 @@
       {{!-- triggers loading laststates - but host display should not depend on it --}}
     {{/if}}
     {{#if controllers.hosts.hosts}}
-      {{#each controller.model.hosts as |host|}}
+      {{#each model.hosts as |host|}}
         <div class="pc {{host.laststate.amtStateCssClass}} {{host.laststate.openPortCssClass}}" hostDbId={{host.id}}>
           <div>
             <span class="porticon">
@@ -32,7 +32,7 @@
 
 <div class="row">
   <div class="col-lg-12">
-    {{#if controller.model.hosts.length}}
+    {{#if model.hosts.length}}
     <div id="livectrl">
       <h5>Select hosts above like files in Finder/Explorer or by state below</h5>
       <p id="hselect">
