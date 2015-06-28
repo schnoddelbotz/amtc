@@ -39,7 +39,7 @@ $app->notFound(function () {
   echo json_encode(Array('error'=>'Not found'));
 });
 $app->error(function (\Exception $e) {
-  echo json_encode( array('exceptionMessage'=> substr($e->getMessage(),0,128).'...') );
+  echo strlen($e->getMessage()) >  128 ? substr($e->getMessage(),0,128).'...' : $e->getMessage();
 });
 
 class SlimUtil {

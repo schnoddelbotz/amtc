@@ -18,6 +18,7 @@ var hasMany = DS.hasMany;
 var App = Ember.Application.create({
   //LOG_TRANSITIONS: true, // basic logging of successful transitions
   //LOG_TRANSITIONS_INTERNAL: true, // detailed logging of all routing steps
+  //LOG_RESOLVER: true,
   // http://discuss.emberjs.com/t/equivalent-to-document-ready-for-ember/2766
   ready: function() {
     // turn off splash screen
@@ -109,6 +110,14 @@ var App = Ember.Application.create({
     this.createCookie(name, "", -1);
   }
 });
+
+Ember.onerror = function(err) {
+  var msg = 'Unkown error occured: '+ err;
+  if (typeof err.errors !== 'undefined') {
+    msg = err + '<p class="errDetails">' + err.errors[0].details + '</p>';
+  }
+  humane.log('<i class="fa fa-frown-o"></i> '+msg, { timeout: 0, clickToClose: true });
+}
 
 // default Adapter for emberjs 2.0 is JSONAdapter - override it (until migrated?)
 App.ApplicationAdapter = DS.RESTAdapter.extend({});
@@ -665,14 +674,8 @@ App.UserEditController = Ember.Controller.extend({
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
           window.location.href = '#/users';
-        }, function(response){
-          var res = jQuery.parseJSON(response.responseText);
-          var msg = (typeof res.exceptionMessage=='undefined') ?
-                    'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
-                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-        }
-      )};
+        });
+      }
     },
 
     doneEditingReturn: function() {
@@ -681,15 +684,7 @@ App.UserEditController = Ember.Controller.extend({
         humane.log('<i class="fa fa-save"></i> Saved successfully',
           { timeout: 800 });
         window.location.href = '#/users';
-      }, function(response){
-        var res = jQuery.parseJSON(response.responseText);
-        var msg = (typeof res.exceptionMessage=='undefined') ?
-                   'Check console, please.' : res.exceptionMessage;
-        humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
-                   '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-        device.rollback();
-        }
-      );
+      });
     }
   }
 });
@@ -721,13 +716,6 @@ App.OuEditController = Ember.Controller.extend({
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
           window.location.href = '#/ous';
-        }, function(response){
-          var res = jQuery.parseJSON(response.responseText);
-          var msg = (typeof res.exceptionMessage=='undefined') ?
-                    'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
-                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-          device.rollback();
         });
       }
     },
@@ -736,13 +724,7 @@ App.OuEditController = Ember.Controller.extend({
         humane.log('<i class="fa fa-save"></i> Saved successfully',
             { timeout: 800 });
         window.location.href = '#/ous';
-      }, function(response){
-          var res = jQuery.parseJSON(response.responseText);
-          var msg = (typeof res.exceptionMessage=='undefined') ?
-                    'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
-                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-      } );
+      });
     }
   }
 });
@@ -862,20 +844,11 @@ App.OuMonitorController = Ember.Controller.extend({
       record.set('description', "Interactive");
       record.set('job_type', 1 /*interactive*/);
       record.save().then(function() {
-        humane.log('<i class="fa fa-save"></i> Submitted',
-          { timeout: 1000 });
-        // de-uglify:
-         $("#hosts .pc").removeClass("ui-selected");
+        humane.log('<i class="fa fa-save"></i> Submitted', { timeout: 1000 });
+        $("#hosts .pc").removeClass("ui-selected");
         var controller = App.__container__.lookup("controller:ouMonitor");
         controller.send('updateSelectedHosts');
-      }, function(response){
-        var res = jQuery.parseJSON(response.responseText);
-        var msg = (typeof res.exceptionMessage=='undefined') ?
-                   'Check console, please.' : res.exceptionMessage;
-        humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
-                   '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-        }
-      );
+      });
     }
   }
 });
@@ -991,14 +964,8 @@ App.OptionsetController = Ember.Controller.extend({
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
           window.location.href = '#/optionsets';
-        }, function(response){
-          var res = jQuery.parseJSON(response.responseText);
-          var msg = (typeof res.exceptionMessage=='undefined') ?
-                    'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
-                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-        }
-      )};
+        });
+      }
     },
 
     doneEditingReturn: function() {
@@ -1007,14 +974,7 @@ App.OptionsetController = Ember.Controller.extend({
         humane.log('<i class="fa fa-save"></i> Saved successfully',
           { timeout: 800 });
         window.location.href = '#/optionsets';
-      }, function(response){
-        var res = jQuery.parseJSON(response.responseText);
-        var msg = (typeof res.exceptionMessage=='undefined') ?
-                   'Check console, please.' : res.exceptionMessage;
-        humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
-                   '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-        }
-      );
+      });
     }
   }
 });
@@ -1051,14 +1011,8 @@ App.ScheduleController = Ember.Controller.extend({
             { timeout: 1500, clickToClose: false });
           console.log("FIXME - transtionToRoute doesnt work here...");
           window.location.href = '#/schedules';
-        }, function(response){
-          var res = jQuery.parseJSON(response.responseText);
-          var msg = (typeof res.exceptionMessage=='undefined') ?
-                    'Check console, please.' : res.exceptionMessage;
-          humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
-                     '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-        }
-      )};
+        });
+      }
     },
 
     doneEditingReturn: function() {
@@ -1074,14 +1028,7 @@ App.ScheduleController = Ember.Controller.extend({
         humane.log('<i class="fa fa-save"></i> Saved successfully',
           { timeout: 1000 });
         window.location.href = '#/schedules';
-      }, function(response){
-        var res = jQuery.parseJSON(response.responseText);
-        var msg = (typeof res.exceptionMessage=='undefined') ?
-                   'Check console, please.' : res.exceptionMessage;
-        humane.log('<i class="fa fa-meh-o"></i> Ooops! Fatal error:'+
-                   '<p>'+msg+'</p>', { timeout: 0, clickToClose: true });
-        }
-      );
+      });
     }
   }
 });
@@ -1161,7 +1108,7 @@ App.SetupController = Ember.Controller.extend({
         authurl: this.get('authurl'),
         importDemo: this.get('importDemo'),
         installHtaccess: this.get('installHtaccess'),
-      };
+      }
       $.ajax({type:"POST", url:"rest-api.php/submit-configuration",
               data:jQuery.param(d), dataType:"json"}).then(function(response) {
         console.log(response);

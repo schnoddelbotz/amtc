@@ -14,6 +14,12 @@ ul.nav li.is-selected {
   background:#eee;
 }
 
+p.errDetails {
+  font-size:0.7em;
+  background:#ddd;
+  color:red;
+}
+
 /* increase header height for 'logo' */
 @media(min-width:768px) {
   .sidebar { margin-top: 60px; }
