@@ -62,7 +62,6 @@ var App = Ember.Application.create({
   },
   successMessage: function(messageText,faClass,caller,redirTo) {
     humane.log('<i class="fa fa-'+faClass+'"></i> '+messageText, { timeout: 1500, clickToClose: false });
-    console.log("SUCCESSMESSAGE FROM "+caller);
     window.location.href = '#/'+redirTo;
   },
   // SB-Admin 2 responsiveness helper
@@ -179,13 +178,11 @@ Ember.Route.reopen({
 
 App.PageRoute = Ember.Route.extend({
   model: function(params) {
-    console.log("PageRoute model() fetching single page");
     return this.store.find('page', params.id);
   }
 });
 App.OuRoute = Ember.Route.extend({
   model: function(params) {
-    //console.log("App.OuRoute model(), find and set currentOU -> " + params.id);
     this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('ou', params.id);
   },
@@ -198,7 +195,6 @@ App.IndexRoute = Ember.Route.extend({
     if (Ember.isNone(self.get('pollster'))) {
       self.set('pollster', App.Pollster.create({
         onPoll: function() {
-          // console.log('IDXpoll!');
           self.send('refresh');
         }
       }));
@@ -257,7 +253,6 @@ App.OusRoute = Ember.Route.extend({
 });
 App.OusNewRoute = Ember.Route.extend({
   model: function() {
-    console.log("OusNewRoute model() creating new OU");
     return this.store.createRecord('ou');
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
@@ -265,7 +260,6 @@ App.OusNewRoute = Ember.Route.extend({
 App.LaststatesRoute = Ember.Route.extend({
   // RETURN last states via db view laststates (->table statelogs)
   model: function(params) {
-    console.log("App.LaststatesRoute model(), fetch last state of pcs");
     return this.store.find('laststate');
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
@@ -278,21 +272,18 @@ App.UserRoute = Ember.Route.extend({
 });
 App.UsersRoute = Ember.Route.extend({
   model: function() {
-    console.log("UsersRoute model() fetching users");
     return this.store.find('user');
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
 });
 App.UsersNewRoute = Ember.Route.extend({
   model: function() {
-    console.log("UsersNewRoute model() creating new user");
     return this.store.createRecord('user');
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
 });
 App.OptionsetRoute = Ember.Route.extend({
   model: function(params) {
-    console.log("OptionsetRoute model() for id " + params.id);
     //this.set('currentOU', params.id); // hmm, unneeded? better...how?
     return this.store.find('optionset', params.id);
   },
@@ -300,28 +291,24 @@ App.OptionsetRoute = Ember.Route.extend({
 });
 App.OptionsetsRoute = Ember.Route.extend({
   model: function() {
-    console.log("OptionsetsRoute model() fetching optionsets");
     return this.store.find('optionset');
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
 });
 App.OptionsetsNewRoute = Ember.Route.extend({
   model: function() {
-    console.log("OptionsetsNewRoute model() creating new optionset");
     return this.store.createRecord('optionset');
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
 });
 App.NotificationsRoute = Ember.Route.extend({
   model: function() {
-    console.log("NotificationsRoute model() fetching notifications");
     return this.store.find('notification');
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
 });
 App.SetupRoute = Ember.Route.extend({
   setupController: function(controller,model) {
-    console.log('ApplicationRoute setupController() triggering /phptests');
     this._super(controller,model);
       var p=this;
       $.ajax( { url: "rest-api.php/phptests", type: "GET" }).then(
@@ -360,21 +347,18 @@ App.SetupRoute = Ember.Route.extend({
 });
 App.SchedulesRoute = Ember.Route.extend({
   model: function() {
-    console.log("SchedulesRoute model() fetching jobs with type=sched");
     return this.store.find('job');
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
 });
 App.SchedulesNewRoute = Ember.Route.extend({
   model: function() {
-    console.log("SchedulesNewRoute create record");
     return this.store.createRecord('job');
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
 });
 App.ScheduleRoute = Ember.Route.extend({
   model: function(params) {
-    console.log("SchedulesRoute model() fetching job with id=" + params.id);
     return this.store.find('job', params.id);
   },
   beforeModel: function(t) {App.ensureLoginForTarget(this,t);}
@@ -424,7 +408,6 @@ App.OuMonitorView = Ember.View.extend({
 App.OuStatelogView = Ember.View.extend({
   keyDown: function(e) {
     if(e) {
-      //console.log('key: '+e.keyCode);
       // tbd ...
       //this.get('controller').send('changeDay', { foo: bar });
     }
@@ -433,7 +416,6 @@ App.OuStatelogView = Ember.View.extend({
 App.OuHostsView = Ember.View.extend({
   // add/remove hosts view
   didInsertElement: function() {
-    console.log('OuHostsView making hosts selectable');
     $("#cfghosts").selectable({
       stop: function(){
         // trigger controller -- selection was modified
@@ -551,10 +533,8 @@ App.Pollster = Ember.Object.extend({
   },
   // Starts the pollster, i.e. executes the `onPoll` function every interval.
   start: function() {
-    //console.log('Stopping all existing timers');
     // ensures we don't create more traffic than desired...
     Ember.run.cancelTimers();
-    //console.log('Starting timer ');
     this.set('timer', this.schedule(this.get('onPoll')));
   }
 });
@@ -574,7 +554,6 @@ App.ApplicationController = Ember.Controller.extend({
       this.transitionToRoute('search', { query: query });
     },
     selectNode: function(node) {
-      //console.log('TreeMenuComponent node: ' + node);
       this.set('selectedNode', node.get('id'));
       this.transitionToRoute('ou.monitor', node.get('id') )
     },
@@ -670,7 +649,6 @@ App.UserEditController = Ember.Controller.extend({
   actions: {
     removeUser: function () {
       if (confirm("Really delete this user?")) {
-        console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
         device.save().then(function(){
@@ -679,7 +657,6 @@ App.UserEditController = Ember.Controller.extend({
       }
     },
     doneEditingReturn: function() {
-      console.log(this.get('model'));
       this.get('model').save().then(function(){
         App.successMessage('Saved successfully','save',this,'users');
       });
@@ -696,9 +673,6 @@ App.OuController = Ember.Controller.extend({
 App.OuEditController = Ember.Controller.extend({
   needs: ["optionsets","ous"],
   actions: {
-    setOptionset: function() {
-      console.log();
-    },
     removeOu: function () {
       if (confirm("Really delete this OU?")) {
         var device = this.get('model');
@@ -721,12 +695,7 @@ App.OusController = Ember.ArrayController.extend({
   }.property()
 });
 App.OusIndexController = Ember.Controller.extend({
-  needs: ["ous","optionsets"],
-  // needs: ['application'],
-  // currentUser: Ember.computed.alias('controllers.application.currentUser'),
-  //  addPost: function() {
-  //  console.log('Adding a post for ', this.get('currentUser.name'));
-  // }
+  needs: ["ous","optionsets"]
 });
 App.OusNewController = App.OuEditController;
 // Client PCs
@@ -858,7 +827,6 @@ App.OuStatelogController = Ember.Controller.extend({
   watchDayAndRoom: function(){
     var controller = this;
     var url = 'rest-api.php/statelogs/'+this.get('model.id')+'/'+this.get('selectedDay');
-    //console.log('Room or day changed, fetch data: ' + url);
     Ember.$.getJSON(url).then(function(data) {
       controller.set('logdata', data);
     });
@@ -943,7 +911,6 @@ App.OptionsetController = Ember.Controller.extend({
   actions: {
     removeOptionset: function () {
       if (confirm("Really delete this optionset?")) {
-        console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
         device.save().then(function(){
@@ -983,7 +950,6 @@ App.ScheduleController = Ember.Controller.extend({
   actions: {
     removeSchedule: function () {
       if (confirm("Really delete this job?")) {
-        console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
         device.save().then(function(){
@@ -1086,7 +1052,6 @@ App.SetupController = Ember.Controller.extend({
       }
       $.ajax({type:"POST", url:"rest-api.php/submit-configuration",
               data:jQuery.param(d), dataType:"json"}).then(function(response) {
-        console.log(response);
         if (typeof response.errorMsg != "undefined")
           humane.log('<i class="fa fa-meh-o"></i> Save failed: <br>'+response.errorMsg, { timeout: 0, clickToClose: true, addnCls: 'humane-error'});
         else {
@@ -1096,8 +1061,6 @@ App.SetupController = Ember.Controller.extend({
           }, 2000);
         }
       }, function(response){
-        console.log("what happened?");
-        console.log(response);
         if (response.responseText=='INSTALLTOOL_LOCKED') {
           humane.log('<i class="fa fa-meh-o"></i> Setup is LOCKED!<br>'+
             'Setup is intended for initial installation only.<br>'+
@@ -1150,11 +1113,9 @@ App.Ou = DS.Model.extend({
     return this.get('children').get('length') == 0;
   }.property('children').cacheable(),
   isExpandedObserver: function() {
-    //console.log('isExpanded: ' + this.get('id'));
     if (this.get('isExpanded')) {
       var children = this.get('children.content');
       if (children) {
-        //console.log('Sorting children');
         //children.sort(App.Ou.compareNodes);
       }
     }
@@ -1355,12 +1316,10 @@ App.TreeMenuNodeComponent = Ember.Component.extend({
       this.toggleProperty('node.isSelected');
     },
     selectNode: function(node) {
-      //console.log('selectedNode: ' + node);
       this.sendAction('action', node);
     }
   },
   isSelected: function() {
-    //console.log("'" + this.get('selectedNode') + "' :: '" + this.get('node.id') + "'");
     return this.get('selectedNode') === this.get('node.id');
   }.property('selectedNode', 'node.id')
 });
