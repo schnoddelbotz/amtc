@@ -6,9 +6,9 @@
 # Downloads, unpacks, concatenates and compresses JS/CSS dependencies
 
 # define versions to fetch
-export JQUERY      = 2.1.3
+export JQUERY      = 2.1.4
 export JQUERYUI    = 1.11.4
-export BOOTSTRAP   = 3.3.4
+export BOOTSTRAP   = 3.3.5
 export EMBERJS     = 1.13.2
 export EMBERDATA   = 1.13.4
 export FONTAWESOME = 4.3.0
@@ -159,10 +159,10 @@ fonts/fontawesome-webfont.woff:
 	rm -rf fa.zip font-awesome-$(FONTAWESOME)
 
 lib/Slim/Slim.php:
-	curl -Lso slim.zip https://github.com/slimphp/Slim/zipball/master
+	curl -Lso slim.zip https://github.com/slimphp/Slim/archive/2.x.zip
 	unzip -q slim.zip
-	mv slimphp-Slim-*/Slim lib
-	rm -rf slimphp-Slim-* slim.zip
+	mv Slim-2.x/Slim lib
+	rm -rf Slim-2.x slim.zip
 
 # install example/default .htpasswd + .htaccess
 basic-auth/.htaccess:

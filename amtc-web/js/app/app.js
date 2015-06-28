@@ -60,6 +60,11 @@ var App = Ember.Application.create({
   pad: function(number, length) {
     return (number+"").length >= length ?  number + "" : this.pad("0" + number, length);
   },
+  successMessage: function(messageText,faClass,caller,redirTo) {
+    humane.log('<i class="fa fa-'+faClass+'"></i> '+messageText, { timeout: 1500, clickToClose: false });
+    console.log("SUCCESSMESSAGE FROM "+caller);
+    window.location.href = '#/'+redirTo;
+  },
   // SB-Admin 2 responsiveness helper
   windowResizeHandler: function() {
     var topOffset = 50;
@@ -662,29 +667,22 @@ App.NotificationsController = Ember.ArrayController.extend({
 });
 App.UserEditController = Ember.Controller.extend({
   needs: ["ous"],
-
   actions: {
     removeUser: function () {
       if (confirm("Really delete this user?")) {
         console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
-        device.save().then(function() {
-          humane.log('<i class="fa fa-trash"></i> Deleted successfully',
-            { timeout: 1500, clickToClose: false });
-          console.log("FIXME - transtionToRoute doesnt work here...");
-          window.location.href = '#/users';
-        });
+        device.save().then(
+          App.successMessage('Deleted successfully','trash',this,'users')
+        );
       }
     },
-
     doneEditingReturn: function() {
       console.log(this.get('model'));
-      this.get('model').save().then(function() {
-        humane.log('<i class="fa fa-save"></i> Saved successfully',
-          { timeout: 800 });
-        window.location.href = '#/users';
-      });
+      this.get('model').save().then(
+        App.successMessage('Saved successfully','save',this,'users')
+      );
     }
   }
 });
@@ -703,28 +701,17 @@ App.OuEditController = Ember.Controller.extend({
     },
     removeOu: function () {
       if (confirm("Really delete this OU?")) {
-        console.log('FINALLY Remove it' + this.get('controllers.ous.ous'));
         var device = this.get('model');
-        console.log("DEV id: "+device.id);
-        console.log("DEL: "+device.get('isDeleted'));
         device.deleteRecord();
-        console.log("DEL: "+device.get('isDeleted'));
-
-        device.save().then(function(x) {
-          console.log('DELETE SUCCESS');
-          humane.log('<i class="fa fa-trash"></i> Deleted successfully',
-            { timeout: 1500, clickToClose: false });
-          console.log("FIXME - transtionToRoute doesnt work here...");
-          window.location.href = '#/ous';
-        });
+        device.save().then(
+          App.successMessage('Deleted successfully','trash',this,'ous')
+        );
       }
     },
     doneEditingReturn: function() {
-      this.get('model').save().then(function() {
-        humane.log('<i class="fa fa-save"></i> Saved successfully',
-            { timeout: 800 });
-        window.location.href = '#/ous';
-      });
+      this.get('model').save().then(
+        App.successMessage('Saved successfully','save',this,'ous')
+      );
     }
   }
 });
@@ -959,22 +946,15 @@ App.OptionsetController = Ember.Controller.extend({
         console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
-        device.save().then(function() {
-          humane.log('<i class="fa fa-trash"></i> Deleted successfully',
-            { timeout: 1500, clickToClose: false });
-          console.log("FIXME - transtionToRoute doesnt work here...");
-          window.location.href = '#/optionsets';
-        });
+        device.save().then(
+          App.successMessage('Deleted successfully','trash',this,'optionsets')
+        );
       }
     },
-
     doneEditingReturn: function() {
-      //console.log(this.get('model'));
-      this.get('model').save().then(function() {
-        humane.log('<i class="fa fa-save"></i> Saved successfully',
-          { timeout: 800 });
-        window.location.href = '#/optionsets';
-      });
+      this.get('model').save().then(
+        App.successMessage('Saved successfully','save',this,'optionsets')
+      );
     }
   }
 });
@@ -1006,12 +986,9 @@ App.ScheduleController = Ember.Controller.extend({
         console.log('FINALLY Remove it');
         var device = this.get('model');
         device.deleteRecord();
-        device.save().then(function() {
-          humane.log('<i class="fa fa-trash"></i> Deleted successfully',
-            { timeout: 1500, clickToClose: false });
-          console.log("FIXME - transtionToRoute doesnt work here...");
-          window.location.href = '#/schedules';
-        });
+        device.save().then(
+          App.successMessage('Deleted successfully','trash',this,'schedules')
+        );
       }
     },
 
@@ -1024,11 +1001,9 @@ App.ScheduleController = Ember.Controller.extend({
         this.set('model.amtc_cmd', newCommand.cchar);
       }
 
-      this.get('model').save().then(function() {
-        humane.log('<i class="fa fa-save"></i> Saved successfully',
-          { timeout: 1000 });
-        window.location.href = '#/schedules';
-      });
+      this.get('model').save().then(
+        App.successMessage('Saved successfully','save',this,'schedules')
+      );
     }
   }
 });

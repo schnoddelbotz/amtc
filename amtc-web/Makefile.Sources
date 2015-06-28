@@ -23,7 +23,6 @@ css/humane-original.css https://raw.githubusercontent.com/wavded/humane-js/maste
 
 
 # PHP libs
-lib/Slim/Slim.php https://github.com/codeguy/Slim/zipball/master
 lib/idiorm.php https://raw.githubusercontent.com/j4mie/idiorm/master/idiorm.php
 lib/paris.php https://raw.githubusercontent.com/j4mie/paris/master/paris.php
 
