@@ -70,11 +70,17 @@ CREATE TABLE IF NOT EXISTS statelog (
 CREATE TRIGGER timestampTrigger BEFORE INSERT ON statelog FOR EACH ROW SET new.state_begin = UNIX_TIMESTAMP(NOW());
 CREATE INDEX logdata_ld ON statelog (state_begin);
 CREATE INDEX logdata_pd ON statelog (host_id);
-CREATE VIEW laststate AS     -- ... including fake id column to make e-d happy
-  SELECT s1.*,h.hostname,h.id AS id
-  FROM host h, statelog s1
-  LEFT JOIN statelog s2 ON s1.host_id=s2.host_id AND s1.state_begin < s2.state_begin
-  WHERE h.id=s1.host_id AND s2.state_begin IS NULL ORDER BY s1.host_id;
+CREATE TABLE IF NOT EXISTS laststate (
+  id                INTEGER      NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  host_id           INTEGER      NOT NULL,
+  hostname          VARCHAR(64)  NOT NULL,
+  state_begin       INTEGER,
+  open_port         INTEGER      DEFAULT NULL,
+  state_amt         INTEGER(1),
+  state_http        INTEGER(2),
+
+  FOREIGN KEY(host_id) REFERENCES host(id)
+);
 CREATE VIEW logday AS
   SELECT DISTINCT(date(from_unixtime(state_begin))) AS id
   FROM statelog;

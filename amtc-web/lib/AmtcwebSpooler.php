@@ -322,12 +322,22 @@ class AmtcwebSpooler {
       if (!isset($last[$host])) {
         isset($opt['v']) && printf("NEW %s: initially set [%d|%d|%d] (%s)\n", $host,
                                 $hostnow->amt, $hostnow->http, $rportmap[$hostnow->oport], $hostnow->msg);
+        // Insert into statelog/history table
         $r = Statelog::create();
         $r->state_amt  = $hostnow->amt;
         $r->state_http = $hostnow->http;
         $r->host_id    = $hostnameMap[$host];
         $r->open_port  = $rportmap[$hostnow->oport];
         $r->save();
+        // Insert into current-state/laststate table
+        $x = Laststate::create();
+        $x->state_amt  = $hostnow->amt;
+        $x->state_http = $hostnow->http;
+        $x->host_id    = $hostnameMap[$host];
+        $x->hostname   = $host;
+        $x->state_begin= time();
+        $x->open_port  = $rportmap[$hostnow->oport];
+        $x->save();
         // save $hostnow->msg here!
       } elseif ( $hostnow->amt  != $last[$host]['state_amt'] ||
                  $hostnow->http != $last[$host]['state_http'] ||
@@ -342,6 +352,14 @@ class AmtcwebSpooler {
         $r->host_id    = $hostnameMap[$host];
         $r->open_port  = $rportmap[$hostnow->oport];
         $r->save();
+        $x = Model::factory('Laststate')->find_one($hostnameMap[$host]);
+        $x->state_amt  = $hostnow->amt;
+        $x->state_http = $hostnow->http;
+        $x->host_id    = $hostnameMap[$host];
+        $x->hostname   = $host;
+        $x->state_begin= time();
+        $x->open_port  = $rportmap[$hostnow->oport];
+        $x->save();
         // save $hostnow->msg here!
       } else {
         // this should happen most of the time: no change. only tell in -debug mode.

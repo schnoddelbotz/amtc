@@ -15,4 +15,4 @@ INSERT INTO user VALUES(2,1,1,0,1,'spooler','cron-based job spooler' );
 INSERT INTO notification (user_id,ntype,message) values (1,'warning','Congrats, amtc-web installed!');
 
 -- task for scheduled monitoring
-INSERT INTO job VALUES(1,3,0,1414277995,1,'I',NULL,NULL,NULL,NULL,60,1,127,NULL,NULL,NULL,'Monitoring');
+INSERT INTO job VALUES(1,3,0,20141218131717,1,'I',NULL,NULL,NULL,NULL,60,1,127,NULL,NULL,NULL,'Monitoring');

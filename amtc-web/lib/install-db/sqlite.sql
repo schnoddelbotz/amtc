@@ -65,9 +65,17 @@ CREATE TABLE "statelog" (
 );
 CREATE INDEX "logdata_ld" ON "statelog" ("state_begin");
 CREATE INDEX "logdata_pd" ON "statelog" ("host_id");
-CREATE VIEW  "laststate"  AS   -- ... including fake id column to make e-d happy
-  SELECT host_id AS id, hostname, host_id,max(state_begin) AS state_begin,open_port,state_amt,state_http
-  FROM statelog,host WHERE statelog.host_id=host.id GROUP BY host_id;
+CREATE TABLE "laststate" (
+  "id"                INTEGER      PRIMARY KEY AUTOINCREMENT,
+  "host_id"           INTEGER      NOT NULL,
+  "hostname"          VARCHAR(64)  NOT NULL,
+  "state_begin"       INTEGER(4)   DEFAULT (strftime('%s','now')),
+  "open_port"         INTEGER      DEFAULT NULL,
+  "state_amt"         INTEGER(1),
+  "state_http"        INTEGER(2),
+
+  FOREIGN KEY(host_id) REFERENCES host(id)
+);
 CREATE VIEW "logday" AS
   SELECT DISTINCT(date(state_begin,'unixepoch','localtime')) AS id
   FROM statelog;
