@@ -352,7 +352,7 @@ class AmtcwebSpooler {
         $r->host_id    = $hostnameMap[$host];
         $r->open_port  = $rportmap[$hostnow->oport];
         $r->save();
-        $x = Model::factory('Laststate')->find_one($hostnameMap[$host]);
+        $x = Model::factory('Laststate')->where('host_id',$hostnameMap[$host])->find_one();
         $x->state_amt  = $hostnow->amt;
         $x->state_http = $hostnow->http;
         $x->host_id    = $hostnameMap[$host];
