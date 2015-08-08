@@ -1,0 +1,167 @@
+.TH "AMTC" "1" "November 8, 2014" "" ""
+.SH NAME
+.PP
+amtc \- Intel vPro/AMT remote power management tool
+.SH SYNOPSIS
+.PP
+amtc [\f[I]action\f[]] [\f[I]options\f[]] [\f[I]host(s)\f[]]...
+.SH DESCRIPTION
+.PP
+amtc uses libcurl and pthreads to talk to intel vPro equipped client
+machines in a parallel fashion.
+It can be used to efficently query and control powerstate of a bunch of
+machines with a single command call.
+.PP
+If no \f[I]action\f[] is specified, power state is queried
+(\f[C]\-I\f[]).
+.SH ACTIONS
+.TP
+.B \-I
+Info \- query power state
+.RS
+.RE
+.TP
+.B \-U
+Power\-Up \- power\-on from any sleep\- or power\-off state
+.RS
+.RE
+.TP
+.B \-D
+Power\-Down \- performs an unclean shutdown, power off
+.RS
+.RE
+.TP
+.B \-C
+Power\-Cycle \- equivalent for turning off and on again
+.RS
+.RE
+.TP
+.B \-R
+Reset \- mimics pressing a workstation\[aq]s reset button
+.RS
+.RE
+.TP
+.B \-S
+Shutdown \- For AMT 9.0+ systems running windows, request shutdown
+.RS
+.RE
+.TP
+.B \-B
+reBoot \- For AMT 9.0+ systems running windows, initiate reboot
+.RS
+.RE
+.TP
+.B \-L
+List WS\-Man classes available
+.RS
+.RE
+.TP
+.B \-E
+Enumerate given WS\-Man class (rudimentary, undecoded output)
+.RS
+.RE
+.TP
+.B \-M
+Modify boolean configuration parameters
+.RS
+.RE
+.SH OPTIONS
+.TP
+.B \-5
+for AMT 5.0 hosts
+.RS
+.RE
+.TP
+.B \-d
+for AMT 9.0+ hosts \- use WS\-Man/DASH
+.RS
+.RE
+.TP
+.B \-m(aximum)
+number of parallel workers to use [40]
+.RS
+.RE
+.TP
+.B \-p(asswdfile)
+specify file containing AMT password
+.RS
+.RE
+.TP
+.B \-j(son)
+produces JSON output of host states
+.RS
+.RE
+.TP
+.B \-q(uiet)
+only report unsuccessful operations
+.RS
+.RE
+.TP
+.B \-r(DP)\-scan
+probe TCP port 3389 for OS detection
+.RS
+.RE
+.TP
+.B \-s(SH)\-scan
+probe TCP port 22 for OS detection
+.RS
+.RE
+.TP
+.B \-e(nforce)
+rdp/ssh probes, regardless of AMT state
+.RS
+.RE
+.TP
+.B \-t(imeout)
+in seconds, for amt and tcp scans [5]
+.RS
+.RE
+.TP
+.B \-g(nutls)
+will use TLS and port 16993 [notls/16992]
+.RS
+.RE
+.TP
+.B \-c(acert)
+specify TLS CA cert file [/etc/amt\-ca.crt]
+.RS
+.RE
+.TP
+.B \-n(oVerify)
+will skip cert verification for TLS
+.RS
+.RE
+.TP
+.B \-v(erbose)
+detailed progress, debug by using \-vvv
+.RS
+.RE
+.TP
+.B \-w(ait)
+in seconds / float, after each pc.
+one thread.
+.RS
+.RE
+.SH ENVIRONMENT
+.TP
+.B AMT_PASSWORD
+may be set and will be used if \f[C]\-p\f[] wasn\[aq]t given.
+.RS
+.RE
+.SH BUGS
+.PP
+Please report new ones on the github issue tracker (see URL below).
+On OSX, connection timeout does currently not affect OS probes.
+IPv6 OS probes and name resolution need to be fixed.
+.SH SEE ALSO
+.PP
+See \f[I]README.md\f[] file on the github repository for mor details.
+.PP
+To have a web\-frontend for amtc and scheduled power\-management, take a
+look at amtc\-web.
+Once installed, amtc\-web comes with it own documentation available at
+<http://localhost/amtc-web/#/pages/about>.
+.PP
+amtc on github: <https://github.com/schnoddelbotz/amtc>.
+.SH AUTHORS
+jan\@hacker.ch.

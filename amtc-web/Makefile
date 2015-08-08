@@ -11,7 +11,7 @@ export JQUERYUI    = 1.11.4
 export BOOTSTRAP   = 3.3.5
 export EMBERJS     = 1.13.2
 export EMBERDATA   = 1.13.4
-export FONTAWESOME = 4.3.0
+export FONTAWESOME = 4.4.0
 
 SHELL = bash
 MERGE_JS    ?= YES

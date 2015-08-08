@@ -70,7 +70,7 @@ install: dist
 	cp $(AMTCWEBDIR)/_httpd_conf_example $(DESTDIR)/etc/amtc-web/amtc-web_httpd.conf
 	ln -s ../../amtc-web/amtc-web_httpd.conf $(DESTDIR)/etc/apache2/$(APACHECONFD)
 
-dist: amtc amtc-web
+dist: amtc amtc-web amtc-manpage
 	echo "Preparing clean distribution in dist/"
 	rm -rf dist
 	mkdir -p dist/$(BINDIR) dist/$(WWWDIR) dist/$(ETCDIR)/cron.d dist/$(DATADIR)
@@ -85,6 +85,8 @@ dist: amtc amtc-web
 	cd dist/$(WWWDIR) && ln -s /$(ETCDIR)/amtc-web config && ln -s /$(DATADIR)/amtc-web data
 	cd dist/$(WWWDIR) && perl -pi -e "s@AuthUserFile .*@AuthUserFile /$(ETCDIR)/amtc-web/.htpasswd@" basic-auth/.htaccess
 
+amtc-manpage:
+	cd src && make man/man1/amtc.1
 
 # build package, depending on current os
 package:

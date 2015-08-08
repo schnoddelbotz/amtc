@@ -31,6 +31,12 @@ amt.h:
 	perl -pi -e 's/(0x\S\S)$$/$$1, 0x00/' amt.h
 	perl -pi -e 's/(\d+);$$/$$1 + 1 .";"/e' amt.h
 
+# the file is on the repo to avoid pandoc build dependency.
+# upon changes to .md version, .1 should be deleted+rebuilt+comitted
+man/man1/amtc.1:
+	mkdir -p man/man1
+	pandoc amtc.1.md -s -t man > man/man1/amtc.1
+
 clean:
-	rm -f cmd_*.h wsman_*.h amtc_usage.h amt.h amtc *.o
+	rm -f cmd_*.h wsman_*.h amtc_usage.h amt.h amtc *.o man
 
