@@ -31,6 +31,7 @@ BINDIR    ?= usr/bin
 WWWDIR    ?= usr/share/amtc-web
 ETCDIR    ?= etc
 DATADIR   ?= var/lib
+MANDIR    ?= usr/share/man
 AMTCWEBDIR = amtc-web
 
 # for farmbuild target - build hosts
@@ -73,8 +74,9 @@ install: dist
 dist: amtc amtc-web amtc-manpage
 	echo "Preparing clean distribution in dist/"
 	rm -rf dist
-	mkdir -p dist/$(BINDIR) dist/$(WWWDIR) dist/$(ETCDIR)/cron.d dist/$(DATADIR)
+	mkdir -p dist/$(BINDIR) dist/$(WWWDIR) dist/$(ETCDIR)/cron.d dist/$(DATADIR) dist/$(MANDIR)/man1
 	cp src/amtc dist/$(BINDIR)
+	cp src/man/man1/amtc.1 dist/$(MANDIR)/man1
 	cp -R $(AMTCWEBDIR)/* dist/$(WWWDIR)
 	cd dist/$(WWWDIR) && make distclean && mv _htaccess_example .htaccess && \
 	   rm -f basic-auth/_htaccess.default config/_htpasswd.default data/amtc-web.db \
