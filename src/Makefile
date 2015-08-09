@@ -38,5 +38,5 @@ man/man1/amtc.1:
 	pandoc amtc.1.md -s -t man > man/man1/amtc.1
 
 clean:
-	rm -f cmd_*.h wsman_*.h amtc_usage.h amt.h amtc *.o man
+	rm -f cmd_*.h wsman_*.h amtc_usage.h amt.h amtc *.o
 
