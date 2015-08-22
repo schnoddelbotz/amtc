@@ -9,8 +9,8 @@
 export JQUERY      = 2.1.4
 export JQUERYUI    = 1.11.4
 export BOOTSTRAP   = 3.3.5
-export EMBERJS     = 1.13.2
-export EMBERDATA   = 1.13.4
+export EMBERJS     = 1.13.9
+export EMBERDATA   = 1.13.11
 export FONTAWESOME = 4.4.0
 
 SHELL = bash
@@ -97,6 +97,7 @@ ifeq ($(HAVE_NODEJS),YES)
 else
 	[ $(MERGE_JS) = YES ] && cat js/app/app.js >> js/jslibs.js || true
 endif
+	test `uname -s` = "Darwin" && perl -pi -e 's@/usr/bin/amtc@/usr/local/bin/amtc@' js/jslibs.js || true
 
 
 # compress targets

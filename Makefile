@@ -27,8 +27,8 @@ SHELL = bash
 RPMBUILD  ?= $(HOME)/rpmbuild
 RPMSRC    ?= "$(RPMBUILD)/SOURCES/amtc-$(AMTCV).tar.gz"
 DESTDIR   ?= /
-BINDIR    ?= usr/bin
-WWWDIR    ?= usr/share/amtc-web
+BINDIR    ?= $(shell test `uname -s` = "Darwin" && echo usr/local/bin || echo usr/bin)
+WWWDIR    ?= $(shell test `uname -s` = "Darwin" && echo usr/local/share/amtc-web || echo usr/share/amtc-web)
 ETCDIR    ?= etc
 DATADIR   ?= var/lib
 MANDIR    ?= usr/share/man
@@ -130,6 +130,9 @@ osxpkg: clean
 	cp osxpkgresources/ch.hacker.amtc-web.plist osxpkgroot/Library/LaunchDaemons
 	chmod +x osxpkgscripts/postinstall
 	mv osxpkgroot/etc/apache2/conf.d osxpkgroot/etc/apache2/other
+	perl -pi -e 's@usr/share@usr/local/share@' osxpkgroot/etc/apache2/other/amtc-web_httpd.conf
+	perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Allow from all@Require all granted@sm' osxpkgroot/etc/apache2/other/amtc-web_httpd.conf
+	perl -pi -e 'BEGIN{undef $$/;} s@Order allow,deny\n\s+Deny from all@Require all denied@smg' osxpkgroot/etc/apache2/other/amtc-web_httpd.conf
 	pkgbuild --root osxpkgroot --scripts osxpkgscripts \
 		 --identifier ch.hacker.amtc --version $(AMTCV) amtc.pkg
 	productbuild --synthesize --package amtc.pkg Distribution.xml

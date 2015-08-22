@@ -6,7 +6,7 @@
     <string>ch.hacker.amtc-web</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/share/amtc-web/cli/amtc-web.phpsh</string>
+        <string>/usr/local/share/amtc-web/cli/amtc-web.phpsh</string>
         <string>runJobs</string>
     </array>
     <key>StartInterval</key>

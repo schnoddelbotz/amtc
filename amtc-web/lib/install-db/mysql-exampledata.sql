@@ -111,3 +111,14 @@ INSERT INTO statelog (host_id,open_port,state_amt,state_http) VALUES (22,0,0,200
 INSERT INTO statelog (host_id,open_port,state_amt,state_http) VALUES (23,22,0,200);
 INSERT INTO statelog (host_id,open_port,state_amt,state_http) VALUES (24,22,0,200);
 INSERT INTO statelog (host_id,open_port,state_amt,state_http) VALUES (25,22,0,200);
+
+INSERT INTO laststate (host_id,open_port,state_amt,state_http,hostname) VALUES (16,22,0,200,'labpc-e20-01');
+INSERT INTO laststate (host_id,open_port,state_amt,state_http,hostname) VALUES (17,22,0,200,'labpc-e20-02');
+INSERT INTO laststate (host_id,open_port,state_amt,state_http,hostname) VALUES (18,22,0,200,'labpc-e20-03');
+INSERT INTO laststate (host_id,open_port,state_amt,state_http,hostname) VALUES (19,22,0,200,'labpc-e20-04');
+INSERT INTO laststate (host_id,open_port,state_amt,state_http,hostname) VALUES (20,22,0,200,'labpc-e20-05');
+INSERT INTO laststate (host_id,open_port,state_amt,state_http,hostname) VALUES (21,22,0,200,'labpc-e20-06');
+INSERT INTO laststate (host_id,open_port,state_amt,state_http,hostname) VALUES (22,0,0,200,'labpc-e20-07');
+INSERT INTO laststate (host_id,open_port,state_amt,state_http,hostname) VALUES (23,22,0,200,'labpc-e20-08');
+INSERT INTO laststate (host_id,open_port,state_amt,state_http,hostname) VALUES (24,22,0,200,'labpc-e20-09');
+INSERT INTO laststate (host_id,open_port,state_amt,state_http,hostname) VALUES (25,22,0,200,'labpc-e20-10');
