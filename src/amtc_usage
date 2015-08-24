@@ -6,20 +6,21 @@
 
  actions
   -I(nfo)     query powerstate via AMT [default]
-  -U(p)       powerup given host(s) 
+  -U(p)       powerup given host(s)
   -D(own)     powerdown
   -C(ycle)    powercycle
   -R(eset)    reset
   -S(hutdown) using AMT graceful shutdown (AMT 9.0+)
   -(re)B(oot) using AMT graceful reset    (AMT 9.0+)
+  -T(erminal) start SOL terminal session (single host)
   -L(ist)  valid wsman <classname>s for -E(numeration)
   -E(numerate)<classname>       enumerate/list settings
   -M(odify)   <setting>=<value> modify wsman settings
               where supported settings: webui,sol or ping
               and supported values    : on or off
  options
-  -5          for AMT 5.0 hosts
-  -d          for AMT 9.0+ hosts - use WS-Man/DASH
+  -5          for AMT 5.0 hosts (only; default is v6-8 EOI)
+  -d          required for AMT 9.0+ hosts - use WS-Man/DASH
   -m(aximum)  number of parallel workers to use [40]
   -p(asswdfile) specify file containing AMT password
   -j(son)     produces JSON output of host states

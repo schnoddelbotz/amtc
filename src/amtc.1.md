@@ -51,6 +51,8 @@ If no *action* is specified, power state is queried (`-I`).
 -M
 :   Modify boolean configuration parameters
 
+-T
+:   Start AMT SOL terminal session for a single host
 
 # OPTIONS
 

@@ -18,7 +18,7 @@ HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset \
 	wsman_ping_enable wsman_ping_disable \
 	wsman_shutdown_graceful wsman_reset_graceful
 
-amtc: amtc.c
+amtc: amtc.c tcp.c redir.c
 
 amtc.c: amt.h
 
