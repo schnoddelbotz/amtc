@@ -1,0 +1,3 @@
+[submodule "src/amtterm"]
+	path = src/amtterm
+	url = git://git.kraxel.org/amtterm

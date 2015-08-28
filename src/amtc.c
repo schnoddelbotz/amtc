@@ -3,10 +3,6 @@
 
   written by jan@hacker.ch, 2013
   http://jan.hacker.ch/projects/amtc/
-
-  includes amtterm code
-  Copyright (C) 2007 Gerd Hoffmann <kraxel@redhat.com>
-  for AMT SOL client functionality (amtc -T)
 */
 #include <stdlib.h>
 #include <stdio.h>
@@ -23,12 +19,18 @@
 #include <curl/curl.h>
 #include <errno.h>
 #include "amt.h"
+
+#ifdef WITH_GPL_AMTTERM
 // includes for amtterm
 #include <fcntl.h>
 #include <termios.h>
 #include <signal.h>
 #include <sys/ioctl.h>
 #include "redir.h"
+// defines for included amtterm
+#define APPNAME "amtc-amtterm"
+#define BUFSIZE 512
+#endif
 
 #define THREAD_ID      pthread_self(  )
 #define CMD_INFO       0
@@ -50,9 +52,6 @@
 #define SCANRESULT_SSH_OPEN    22
 #define SCANRESULT_NONE_RUN    999
 #define SCANRESULT_RDP_OPEN    3389
-// defines for included amtterm
-#define APPNAME "amtc-amtterm"
-#define BUFSIZE 512
 
 unsigned char *acmds[] = {
   /* SOAP/XML request bodies as included via amt.h, AMT6-8 */
@@ -248,7 +247,12 @@ int main(int argc,char **argv,char **envp) {
   get_amt_pw();
 
   if (cmd==CMD_TERMINAL) {
+#ifdef WITH_GPL_AMTTERM
     return amtterm_session();
+#else
+    printf("This version of amtc was compiled without amtterm (GPL) support.\n");
+    exit(ENOTSUP);
+#endif
   }
 
   sem_init(&mutex, 0, 1);
@@ -651,176 +655,15 @@ struct addrinfo* lookup_host (const char *host) {
   return NULL;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// Code below was copied from amtterm.c (version 1.4) from
-//   https://www.kraxel.org/cgit/amtterm/tree/amtterm.c
-// Dependencies redir.c and tcp.c have also been copied from amtterm.
-//
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- *  amtterm -- Intel AMT serial-over-lan client, console version.
- *
- *  Copyright (C) 2007 Gerd Hoffmann <kraxel@redhat.com
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
-
-/* ------------------------------------------------------------------ */
-
-static int recv_tty(void *cb_data, unsigned char *buf, int len)
-{
-//    struct redir *r = cb_data;
-
-    return write(STDOUT_FILENO, buf, len);
-}
-
-static void state_tty(void *cb_data, enum redir_state old, enum redir_state new)
-{
-    struct redir *r = cb_data;
-
-    if (r->verbose)
-  fprintf(stderr, APPNAME ": %s -> %s (%s)\n",
-    redir_state_name(old), redir_state_name(new),
-    redir_state_desc(new));
-    switch (new) {
-    case REDIR_RUN_SOL:
-  if (r->verbose)
-      fprintf(stderr,
-        "serial-over-lan redirection ok\n"
-        "connected now, use ^] to escape\n");
-  break;
-    case REDIR_ERROR:
-  fprintf(stderr, APPNAME ": ERROR: %s\n", r->err);
-  break;
-    default:
-  break;
-    }
-}
-
-static int redir_loop(struct redir *r)
-{
-    unsigned char buf[BUFSIZE+1];
-    struct timeval tv;
-    int rc, i;
-    fd_set set;
-
-    for(;;) {
-  if (r->state == REDIR_CLOSED ||
-      r->state == REDIR_ERROR)
-      break;
-
-  FD_ZERO(&set);
-  if (r->state == REDIR_RUN_SOL)
-      FD_SET(STDIN_FILENO,&set);
-  FD_SET(r->sock,&set);
-  tv.tv_sec  = HEARTBEAT_INTERVAL * 4 / 1000;
-  tv.tv_usec = 0;
-  switch (select(r->sock+1,&set,NULL,NULL,&tv)) {
-  case -1:
-      perror("select");
-      return -1;
-  case 0:
-      fprintf(stderr,"select: timeout\n");
-      return -1;
-  }
-
-  if (FD_ISSET(STDIN_FILENO,&set)) {
-      /* stdin has data */
-      rc = read(STDIN_FILENO,buf,BUFSIZE);
-      switch (rc) {
-      case -1:
-    perror("read(stdin)");
-    return -1;
-      case 0:
-    fprintf(stderr,"EOF from stdin\n");
-    return -1;
-      default:
-    if (buf[0] == 0x1d) {
-        if (r->verbose)
-      fprintf(stderr, "\n" APPNAME ": saw ^], exiting\n");
-        redir_sol_stop(r);
-                }
-                for (i = 0; i < rc; i++) {
-                    /* meet BIOS expectations */
-                    if (buf[i] == 0x0a)
-                        buf[i] = 0x0d;
-    }
-    if (-1 == redir_sol_send(r, buf, rc))
-        return -1;
-    break;
-      }
-  }
-
-  if (FD_ISSET(r->sock,&set)) {
-      if (-1 == redir_data(r))
-    return -1;
-  }
-    }
-    return 0;
-}
-
-/* ------------------------------------------------------------------ */
-
-struct termios  saved_attributes;
-int             saved_fl;
-
-static void tty_save(void)
-{
-    fcntl(STDIN_FILENO,F_GETFL,&saved_fl);
-    tcgetattr (STDIN_FILENO, &saved_attributes);
-}
-
-static void tty_noecho(void)
-{
-    struct termios tattr;
-
-    memcpy(&tattr,&saved_attributes,sizeof(struct termios));
-    tattr.c_lflag &= ~(ECHO);
-    tcsetattr (STDIN_FILENO, TCSAFLUSH, &tattr);
-}
-
-static void tty_raw(void)
-{
-    struct termios tattr;
-
-    fcntl(STDIN_FILENO,F_SETFL,O_NONBLOCK);
-    memcpy(&tattr,&saved_attributes,sizeof(struct termios));
-    tattr.c_lflag &= ~(ISIG|ICANON|ECHO);
-    tattr.c_cc[VMIN] = 1;
-    tattr.c_cc[VTIME] = STDIN_FILENO;
-    tcsetattr (STDIN_FILENO, TCSAFLUSH, &tattr);
-}
-
-static void tty_restore(void)
-{
-    fcntl(STDIN_FILENO,F_SETFL,saved_fl);
-    tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
-}
-
 /* ------------------------------------------------------------------ */
 
 // adapted amtterm.c main() ...
+#ifdef WITH_GPL_AMTTERM
+#include "amtc-amtterm.c"
 int amtterm_session()
 {
   struct host *host = &hostlist[0];
   struct redir r;
-  char *h;
-  int c;
 
   memset(&r, 0, sizeof(r));
   r.verbose = 1;
@@ -850,3 +693,4 @@ int amtterm_session()
 
   exit(0);
 }
+#endif

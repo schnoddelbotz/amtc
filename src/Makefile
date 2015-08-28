@@ -9,6 +9,8 @@ CFLAGS=-I. -Wall
 AMTCV=$(shell cat ../version)
 APP=amtc-$(AMTCV)
 OS=$(shell uname -s)
+AMTTERM_TARGETS=$(shell test -z "${WITH_GPL_AMTTERM}" && echo '' || echo amtterm/tcp.c amtterm/redir.c )
+AMTTERM_DEFINE=$(shell test -z "${WITH_GPL_AMTTERM}" && echo '' || echo '-DWITH_GPL_AMTTERM' )
 
 HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset \
 	cmd_powercycle wsman_info wsman_info_step2 wsman_up wsman_down \
@@ -18,7 +20,13 @@ HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset \
 	wsman_ping_enable wsman_ping_disable \
 	wsman_shutdown_graceful wsman_reset_graceful
 
-amtc: amtc.c tcp.c redir.c
+amtc: amtc.c $(AMTTERM_TARGETS)
+	if [ ! -z "${WITH_GPL_AMTTERM}" ]; then \
+	  git submodule init; \
+	  git submodule update; \
+	  sed -e '1,/* ----/d' amtterm/amtterm.c -e '/static void usage/,1000d' amtterm/amtterm.c > amtc-amtterm.c; \
+	fi
+	$(CC) $(LDLIBS) $(CFLAGS) $(AMTTERM_DEFINE) $(AMTTERM_TARGETS) amtc.c -o amtc
 
 amtc.c: amt.h
 
