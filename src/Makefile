@@ -20,13 +20,15 @@ HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset \
 	wsman_ping_enable wsman_ping_disable \
 	wsman_shutdown_graceful wsman_reset_graceful
 
-amtc: amtc.c $(AMTTERM_TARGETS)
+amtc: amtc-amtterm.c amtc.c $(AMTTERM_TARGETS)
+	$(CC) $(CFLAGS) $(AMTTERM_DEFINE) $(AMTTERM_TARGETS) amtc.c $(LDLIBS) -o amtc
+
+amtc-amtterm.c:
 	if [ ! -z "${WITH_GPL_AMTTERM}" ]; then \
 	  git submodule init; \
 	  git submodule update; \
 	  sed -e '1,/* ----/d' amtterm/amtterm.c -e '/static void usage/,1000d' amtterm/amtterm.c > amtc-amtterm.c; \
 	fi
-	$(CC) $(LDLIBS) $(CFLAGS) $(AMTTERM_DEFINE) $(AMTTERM_TARGETS) amtc.c -o amtc
 
 amtc.c: amt.h
 
