@@ -26,7 +26,7 @@
 #include <termios.h>
 #include <signal.h>
 #include <sys/ioctl.h>
-#include "redir.h"
+#include "amtterm/redir.h"
 // defines for included amtterm
 #define APPNAME "amtc-amtterm"
 #define BUFSIZE 512

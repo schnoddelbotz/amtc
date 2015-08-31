@@ -9,8 +9,9 @@ CFLAGS=-I. -Wall
 AMTCV=$(shell cat ../version)
 APP=amtc-$(AMTCV)
 OS=$(shell uname -s)
-AMTTERM_TARGETS=$(shell test -z "${WITH_GPL_AMTTERM}" && echo '' || echo amtterm/tcp.c amtterm/redir.c )
-AMTTERM_DEFINE=$(shell test -z "${WITH_GPL_AMTTERM}" && echo '' || echo '-DWITH_GPL_AMTTERM' )
+WITH_GPL_AMTTERM ?= Yes
+AMTTERM_TARGETS=$(shell test "${WITH_GPL_AMTTERM}" =  "Yes" && echo amtterm/tcp.c amtterm/redir.c || echo '' )
+AMTTERM_DEFINE=$(shell test "${WITH_GPL_AMTTERM}" = "Yes" && echo '-DWITH_GPL_AMTTERM' || echo '' )
 
 HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset \
 	cmd_powercycle wsman_info wsman_info_step2 wsman_up wsman_down \
@@ -24,10 +25,10 @@ amtc: amtc-amtterm.c amtc.c $(AMTTERM_TARGETS)
 	$(CC) $(CFLAGS) $(AMTTERM_DEFINE) $(AMTTERM_TARGETS) amtc.c $(LDLIBS) -o amtc
 
 amtc-amtterm.c:
-	if [ ! -z "${WITH_GPL_AMTTERM}" ]; then \
+	if [ "${WITH_GPL_AMTTERM}" = "Yes" ]; then \
 	  git submodule init; \
 	  git submodule update; \
-	  sed -e '1,/* ----/d' amtterm/amtterm.c -e '/static void usage/,1000d' amtterm/amtterm.c > amtc-amtterm.c; \
+	  sed -e '1,/* ----/d' -e '/static void usage/,1000d' amtterm/amtterm.c > amtc-amtterm.c; \
 	fi
 
 amtc.c: amt.h
