@@ -28,6 +28,10 @@ if (defined("AMTC_PDOSTRING")) {
   ORM::configure(AMTC_PDOSTRING);
   ORM::configure('username', AMTC_DBUSER);
   ORM::configure('password', AMTC_DBPASS);
+  // small hack to enforce constraint checking for sqlite; requires 3.6+
+  if (substr(AMTC_PDOSTRING,0,6)=='sqlite') {
+    ORM::raw_execute('PRAGMA foreign_keys = ON');
+  }
 }
 
 // Initialize http://www.slimframework.com/

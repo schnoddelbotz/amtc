@@ -80,7 +80,7 @@ $app->delete('/:model/:id', function($model,$id) {
     // http://emberjs.com/guides/models/the-rest-adapter/
     echo '{}';
   }
-})->conditions(array('model' => '(ous|users|optionsets|jobs)'));
+})->conditions(array('model' => '(ous|users|optionsets|jobs|hosts)'));
 
 // PUT / update single record
 $app->put('/:model/:id', function($model,$id) use ($app) {

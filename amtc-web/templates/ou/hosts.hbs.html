@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-lg-12">
-    <p>Add, remove or enable/disable hosts for this OU here.</p>
+    <p>Select hosts to delete or add new ones using the form at the page bottom.</p>
   </div>
 </div>
 <div class="row">
@@ -12,12 +12,21 @@
   <div class="col-lg-12" id="cfghosts">
     {{#if controllers.hosts.hosts.content}}
         {{#each model.hosts}}
-            <div class="pc"><i class="fa fa-desktop"></i> {{hostname}}</div>
+            <div class="pc" hostDbId={{id}}>&nbsp; <i class="fa fa-desktop"></i> {{hostname}}</div>
         {{/each}}
     {{else}}
         No hosts found in this room.
     {{/if}}
   </div>
+  {{#if selectedHostsCount}}
+    <div class="col-lg-12">
+     <p>
+      <button class="btn btn-default" {{action 'deleteSelectedHosts'}}>
+        <i class="fa fa-trash"></i> DELETE selected {{selectedHostsCount}} hosts
+      </button>
+    </p>
+    </div>
+  {{/if}}
 </div>
 
 {{partial "addHostsWizard"}}

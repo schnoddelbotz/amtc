@@ -8,10 +8,10 @@
 # define versions to fetch
 export JQUERY      = 2.1.4
 export JQUERYUI    = 1.11.4
-export BOOTSTRAP   = 3.3.5
-export EMBERJS     = 1.13.9
-export EMBERDATA   = 1.13.11
-export FONTAWESOME = 4.4.0
+export BOOTSTRAP   = 3.3.6
+export EMBERJS     = 1.13.11
+export EMBERDATA   = 1.13.15
+export FONTAWESOME = 4.5.0
 
 SHELL = bash
 MERGE_JS    ?= YES

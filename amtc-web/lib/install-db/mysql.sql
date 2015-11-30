@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS host (
   id                INTEGER      NOT NULL AUTO_INCREMENT PRIMARY KEY,
   ou_id             INTEGER      NOT NULL,
   hostname          VARCHAR(64)  NOT NULL,
-  enabled           INTEGER      DEFAULT 1,
+  enabled           INTEGER      DEFAULT 1, -- STILL not used :(
 
   FOREIGN KEY(ou_id) REFERENCES ou(id)
 );
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS statelog (
   state_amt         INTEGER(1),
   state_http        INTEGER(2),
 
-  FOREIGN KEY(host_id) REFERENCES host(id)
+  FOREIGN KEY(host_id) REFERENCES host(id) ON DELETE CASCADE
 );
 CREATE TRIGGER timestampTrigger BEFORE INSERT ON statelog FOR EACH ROW SET new.state_begin = UNIX_TIMESTAMP(NOW());
 CREATE INDEX logdata_ld ON statelog (state_begin);
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS laststate (
   state_amt         INTEGER(1),
   state_http        INTEGER(2),
 
-  FOREIGN KEY(host_id) REFERENCES host(id)
+  FOREIGN KEY(host_id) REFERENCES host(id) ON DELETE CASCADE
 );
 CREATE VIEW logday AS
   SELECT DISTINCT(date(from_unixtime(state_begin))) AS id
@@ -124,6 +124,6 @@ CREATE TABLE job (
   proc_pid          INTEGER, -- process id of currently running job
 
   description       VARCHAR(32), -- to reference it e.g. in logs (insb. sched)
-  FOREIGN KEY(ou_id) REFERENCES ou(id),
+  FOREIGN KEY(ou_id) REFERENCES ou(id) ON DELETE CASCADE,
   FOREIGN KEY(user_id) REFERENCES user(id)
 );

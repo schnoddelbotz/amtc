@@ -50,7 +50,7 @@ CREATE TABLE "host" (
   "hostname"          VARCHAR(64)  NOT NULL,
   "enabled"           INTEGER      DEFAULT 1,
 
-  FOREIGN KEY(ou_id) REFERENCES ou(id)
+  FOREIGN KEY(ou_id) REFERENCES ou(id) ON DELETE RESTRICT
 );
 
 -- state logging of hosts. log occurs upon state change.
@@ -61,7 +61,7 @@ CREATE TABLE "statelog" (
   "state_amt"         INTEGER(1),
   "state_http"        INTEGER(2),
 
-  FOREIGN KEY(host_id) REFERENCES host(id)
+  FOREIGN KEY(host_id) REFERENCES host(id) ON DELETE CASCADE
 );
 CREATE INDEX "logdata_ld" ON "statelog" ("state_begin");
 CREATE INDEX "logdata_pd" ON "statelog" ("host_id");
@@ -74,7 +74,7 @@ CREATE TABLE "laststate" (
   "state_amt"         INTEGER(1),
   "state_http"        INTEGER(2),
 
-  FOREIGN KEY(host_id) REFERENCES host(id)
+  FOREIGN KEY(host_id) REFERENCES host(id) ON DELETE CASCADE
 );
 CREATE VIEW "logday" AS
   SELECT DISTINCT(date(state_begin,'unixepoch','localtime')) AS id
@@ -120,7 +120,7 @@ CREATE TABLE "job" (
   "proc_pid"          INTEGER, -- process id of currently running job
 
   "description"       VARCHAR(32), -- to reference it e.g. in logs (insb. sched)
-  FOREIGN KEY(ou_id) REFERENCES ou(id),
+  FOREIGN KEY(ou_id) REFERENCES ou(id) ON DELETE CASCADE,
   FOREIGN KEY(user_id) REFERENCES user(id)
 );
 

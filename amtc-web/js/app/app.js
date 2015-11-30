@@ -118,7 +118,7 @@ var App = Ember.Application.create({
 Ember.onerror = function(err) {
   var msg = 'Unkown error occured: '+ err;
   if (typeof err.errors !== 'undefined') {
-    msg = err + '<p class="errDetails">' + err.errors[0].details + '</p>';
+    msg = err + '<p class="errDetails">' + err.errors[0].detail + '</p>';
   }
   humane.log('<i class="fa fa-frown-o"></i> '+msg, { timeout: 0, clickToClose: true });
 }
@@ -419,8 +419,8 @@ App.OuHostsView = Ember.View.extend({
     $("#cfghosts").selectable({
       stop: function(){
         // trigger controller -- selection was modified
-        //var controller = App.__container__.lookup("controller:ouHosts");
-        //controller.send('updateSelectedHosts');
+        var controller = App.__container__.lookup("controller:ouHosts");
+        controller.send('updateHostSelection');
       },
       filter: '.pc'
     });
@@ -674,11 +674,18 @@ App.OuEditController = Ember.Controller.extend({
   needs: ["optionsets","ous"],
   actions: {
     removeOu: function () {
-      if (confirm("Really delete this OU?")) {
+      if (confirm("Really delete this OU and associated Jobs?")) {
         var device = this.get('model');
         device.deleteRecord();
         device.save().then(function(){
           App.successMessage('Deleted successfully','trash',this,'ous');
+        }, function(err) {
+          device.rollbackAttributes(); // restore 'menu entry' for room deleted above
+          var msg = "Unknown error occured!";
+          if (typeof err.errors !== 'undefined') {
+            msg = err + '<p class="errDetails">' + err.errors[0].detail + '</p>';
+          }
+          humane.log('<i class="fa fa-warning"></i> '+msg, { clickToClose: true });
         });
       }
     },
@@ -712,6 +719,8 @@ App.OuHostsController = Ember.Controller.extend({
   padNum:3,
   hostname: null,
   domainName: null,
+  selectedHosts: [],
+  selectedHostsCount: 0,
 
   hostsToAdd: function() {
     if (!this.get('addMultiple')) {
@@ -734,6 +743,29 @@ App.OuHostsController = Ember.Controller.extend({
   }.property('hostname','numHosts','domainName','padNum','startNum','addMultiple'),
 
   actions: {
+    updateHostSelection: function() {
+      var selection = [];
+      $("#cfghosts .ui-selected").each( function(i) {
+        selection.push( $(this).attr("hostDbId") );
+      });
+      this.set('selectedHosts', selection);
+      this.set('selectedHostsCount', $(".ui-selected").length);
+    },
+
+    deleteSelectedHosts: function() {
+      var selection = this.get('selectedHosts');
+      var idx;
+      if (confirm("Permanently DELETE selected host(s) and associated logs?")) {
+        for (idx=0; idx<selection.length; idx++) {
+          var host = this.store.getById('host', selection[idx]);
+          host.deleteRecord();
+          host.save();
+        }
+        $("#cfghosts .pc").removeClass("ui-selected");
+        this.set('selectedHostsCount', 0);
+      }
+    },
+
     saveNewHosts: function() {
       var ouid = this.get('model.id');
       //var ou = this.store.find('ou', ouid); // async

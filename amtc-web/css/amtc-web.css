@@ -105,10 +105,10 @@ ul.viewmode li.active a:hover {
   cursor:default;
 }
 
-#hosts .ui-selecting {
+#hosts .ui-selecting, #cfghosts .ui-selecting {
   background:black; color:gray;
 }
-#hosts .ui-selected, .isActive  {
+#hosts .ui-selected, #cfghosts .ui-selected, .isActive  {
   background:black; color:white;
 }
 .addr {
