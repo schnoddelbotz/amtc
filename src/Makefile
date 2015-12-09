@@ -26,8 +26,10 @@ amtc: amtc-amtterm.c amtc.c $(AMTTERM_TARGETS)
 
 amtc-amtterm.c:
 	if [ "${WITH_GPL_AMTTERM}" = "Yes" ]; then \
+	  cd .. ; \
 	  git submodule init; \
 	  git submodule update; \
+	  cd src; \
 	  sed -e '1,/* ----/d' -e '/static void usage/,1000d' amtterm/amtterm.c > amtc-amtterm.c; \
 	fi
 

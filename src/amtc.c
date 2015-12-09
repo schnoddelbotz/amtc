@@ -333,6 +333,13 @@ static void *process_single_client(void* num) {
   else
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS , acmds[cmd+useWsmanShift+cfgcmd]);
 
+  if (useTLS) {
+    // http://curl.haxx.se/libcurl/c/CURLOPT_SSLVERSION.html
+    // required for RHEL7+ -- will recieve "NSS error -12272 (SSL_ERROR_BAD_MAC_ALERT)" without it.
+    // The page above states CURL_SSLVERSION_TLSv1_0 was introduced with curl 7.34.0.
+    // But it works on RHEL with 7.29. Please report if this is an issue for you.
+    curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_0);
+  }
   if (noVerifyCert) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
