@@ -13,10 +13,10 @@ features
 * currently builds fine on linux and OSX (and windows via cygwin; unverified since 0.4.0)
 * allows quick and comfortable mass-power control via shell and...
 * comes with a [EmberJS](http://www.emberjs.com/)-based web interface called `amtc-web`,
-  that depends on [Slim](http://www.slimframework.com/) and 
+  that depends on [Slim](http://www.slimframework.com/) and
   [Idiorm and Paris](http://j4mie.github.io/idiormandparis/) to provide a JSON backend
   for these `amtc-web` features:
-  * realtime power state monitoring via AMT© including OS TCP port probing/detection
+  * power state monitoring via AMT© including OS TCP port probing/detection
   * anachronous OOB power control using a database-driven job queue
   * power/OS-monitoring logging with [notyet:] graphing
   * management of master file data like rooms and hosts to control
@@ -45,7 +45,10 @@ usage
   -D(own)     powerdown
   -C(ycle)    powercycle
   -R(eset)    reset
+  -X          select PXE as device for next boot (AMT 9.0+)
+  -H          select HDD as device for next boot (AMT 9.0+)
   -S(hutdown) using AMT graceful shutdown (AMT 9.0+)
+  -(re)B(oot) using AMT graceful reset    (AMT 9.0+)
   -L(ist)  valid wsman <classname>s for -E(numeration)
   -E(numerate)<classname>       enumerate/list settings
   -M(odify)   <setting>=<value> modify wsman settings
@@ -101,14 +104,14 @@ license
 This project is published under the [MIT license](LICENSE.txt).
 It heavily relies on bundled 3rd party OSS components that are listed in the
 in-app ['about' page](amtc-web/pages/about.md) of amtc-web;
-their individual license texts have been bundled into 
+their individual license texts have been bundled into
 [LICENSES-3rd-party.txt](amtc-web/LICENSES-3rd-party.txt). That file is also
 distributed with any [release of amtc](https://github.com/schnoddelbotz/amtc/releases).
 
 alternatives
 ============
 - [amttool](http://www.kraxel.org/cgit/amtterm/tree/amttool):
-  Without amttool, there would be no amtc. Thanks! 
+  Without amttool, there would be no amtc. Thanks!
   amttool is implemented in perl and intended for interactive, verbose single-host operation.
   amtc is implemented in C, and by using threads optimized for quick, succinct (non-)interactive mass-operation.
 - [amttool_tng](http://sourceforge.net/projects/amttool-tng):

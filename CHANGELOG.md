@@ -1,3 +1,24 @@
+v0.8.5
+======
+
+__to be released__
+
+## amtc ##
+
+- integrate boot device selection support provided by [maratoid](https://github.com/maratoid/amtc) (`-X` and `-H`)
+- avoid 'NSS error -12272 (SSL_ERROR_BAD_MAC_ALERT)' for TLS connection attempts on RHEL7+
+- integrated [amtterm](https://www.kraxel.org/cgit/amtterm/) functionality (if compiled with WITH_GPL_AMTTERM=Yes) (`-T`)
+- OS X El Capitan: Install amtc in /usr/local/bin due to [SIP](https://en.wikipedia.org/wiki/System_Integrity_Protection)
+- add AMT 9.0 graceful shutdown/reboot commands (`-S` and `-B`)
+- add a very basic manpage
+
+## amtc-web ##
+
+- fix performance issues of the power state log DB tables
+- use more generic Ember.onerror to handle errors
+- add possibility to correctly delete hosts and rooms through GUI
+
+
 v0.8.5~alpha3
 =============
 
