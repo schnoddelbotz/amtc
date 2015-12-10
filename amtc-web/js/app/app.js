@@ -785,8 +785,8 @@ App.OuHostsController = Ember.Controller.extend({
 });
 App.OuMonitorController = Ember.Controller.extend({
   needs: ["hosts","ous","laststates"],
-  commandActions: ["powerdown","powerup","powercycle","reset","shutdown","reboot"],
-  shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R", shutdown:"S", reboot:"B"},
+  commandActions: ["powerdown","powerup","powercycle","reset","shutdown","reboot","bootpxe","boothdd"],
+  shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R", shutdown:"S", reboot:"B", bootpxe:"X", boothdd:"H"},
 
   selectedCmd: null,
   selectedHosts: [], // EMBER.MUTABLEARRAY?
@@ -968,8 +968,8 @@ App.ScheduleController = Ember.Controller.extend({
   needs: ["ous"],
   currentOU: null,
   ouTree: null,
-  commandActions: ["powerdown","powerup","powercycle","reset","shutdown","reboot"],
-  shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R", shutdown:"S", reboot:"B"},
+  commandActions: ["powerdown","powerup","powercycle","reset","shutdown","reboot", "bootpxe", "boothdd"],
+  shortActions: {powerdown:"D", powerup:"U", powercycle:"C", reset:"R", shutdown:"S", reboot:"B", bootpxe:"X", boothdd:"H"},
   validCommands: [
     {cmd: "powerdown", cchar: "D"},
     {cmd: "powerup",   cchar: "U"},
@@ -977,6 +977,8 @@ App.ScheduleController = Ember.Controller.extend({
     {cmd: "cycle",     cchar: "C"},
     {cmd: "shutdown",  cchar: "S"},
     {cmd: "reboot",    cchar: "B"},
+    {cmd: "bootpxe",   cchar: "X"},
+    {cmd: "boothdd",   cchar: "H"},
   ],
 
   actions: {
