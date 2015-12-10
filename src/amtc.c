@@ -43,6 +43,8 @@
 #define CMD_ENUMERATE  7
 #define CMD_MODIFY     8
 #define CMD_TERMINAL   9
+#define CMD_PXEBOOT    10
+#define CMD_HDDBOOT    11
 #define MAX_HOSTS      255
 #define PORT_SSH       22
 #define PORT_RDP       3389
@@ -55,19 +57,21 @@
 
 unsigned char *acmds[] = {
   /* SOAP/XML request bodies as included via amt.h, AMT6-8 */
-  cmd_info,cmd_powerup,cmd_powerdown,cmd_powerreset,cmd_powercycle,
+  cmd_info, cmd_powerup, cmd_powerdown, cmd_powerreset, cmd_powercycle,
   /* WS-MAN / DASH / AMT6-9+ versions */
-  wsman_info, wsman_up,wsman_down,wsman_reset,wsman_reset,
+  wsman_info, wsman_up, wsman_down, wsman_reset, wsman_reset,
   /* generic wsman enumerations using -E <classname> */
   wsman_shutdown_graceful, wsman_reset_graceful, wsman_xenum,
   /* AMT config settings via wsman -- cfgcmd 0..5  */
   wsman_solredir_disable, wsman_solredir_enable,
   wsman_webui_disable, wsman_webui_enable,
-  wsman_ping_disable, wsman_ping_enable
+  wsman_ping_disable, wsman_ping_enable,
+  // HAXX ! ... for boot device selection
+  wsman_pxeboot, wsman_hddboot, wsman_bootconfig
 };
 const char *hcmds[] = {
   "INFO","POWERUP","POWERDOWN","POWERRESET","POWERCYCLE",
-  "SHUTDOWN","REBOOT","ENUMERATE","MODIFY"
+  "SHUTDOWN","REBOOT","ENUMERATE","MODIFY", "AMTTERM", "PXEBOOT", "HDDBOOT"
 };
 const char *powerstate[] = { /* AMT/ACPI */
  "S0 (on)", "S1 (cpu stop)", "S2 (cpu off)", "S3 (sleep)",
@@ -142,13 +146,15 @@ bool  enforceScans = false; // enforce SSH/RDP scan even if no AMT success
 int main(int argc,char **argv,char **envp) {
   int c;
 
-  while ((c = getopt(argc, argv, "IBUDRSCLTE:M:5gndeqvjsrp:t:w:m:c:")) != -1)
+  while ((c = getopt(argc, argv, "HXFIBUDRSCLTE:M:5gndeqvjsrp:t:w:m:c:")) != -1)
   switch (c) {
     case 'I': cmd = CMD_INFO;                break;
     case 'U': cmd = CMD_POWERUP;             break;
     case 'D': cmd = CMD_POWERDOWN;           break;
     case 'C': cmd = CMD_POWERCYCLE;          break;
     case 'R': cmd = CMD_POWERRESET;          break;
+    case 'X': cmd = CMD_PXEBOOT; useWsmanShift = 9; break;
+    case 'H': cmd = CMD_HDDBOOT; useWsmanShift = 9; break;
     case 'S': cmd = CMD_SHUTDOWN; useWsmanShift=5; break;
     case 'B': cmd = CMD_REBOOT; useWsmanShift=5; break;
     case 'T': cmd = CMD_TERMINAL;            break;
@@ -333,8 +339,7 @@ static void *process_single_client(void* num) {
   else
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS , acmds[cmd+useWsmanShift+cfgcmd]);
 
-#if LIBCURL_VERSION_MAJOR >= 7
-#if LIBCURL_VERSION_MINOR >= 29
+#if LIBCURL_VERSION_MAJOR > 7 || (LIBCURL_VERSION_MAJOR==7 && LIBCURL_VERSION_MINOR >= 29)
   if (useTLS) {
     // http://curl.haxx.se/libcurl/c/CURLOPT_SSLVERSION.html
     // required for RHEL7+ -- will recieve "NSS error -12272 (SSL_ERROR_BAD_MAC_ALERT)" without it.
@@ -342,7 +347,6 @@ static void *process_single_client(void* num) {
     // But it works on RHEL with 7.29. Please report if this is an issue for you.
     curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_0);
   }
-#endif
 #endif
 
   if (noVerifyCert) {
@@ -378,6 +382,11 @@ static void *process_single_client(void* num) {
       res = curl_easy_perform(curl);
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
     } else { printf("YUKES. fixme wsman-enum\n"); }
+  }
+  // 'save' boot device selection
+  if ((cmd==CMD_PXEBOOT || cmd==CMD_HDDBOOT) && http_code==200) {
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS , wsman_bootconfig);
+    res = curl_easy_perform(curl);
   }
 
   char umsg[100];

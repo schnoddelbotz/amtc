@@ -10,6 +10,8 @@
   -D(own)     powerdown
   -C(ycle)    powercycle
   -R(eset)    reset
+  -X          select PXE as device for next boot (AMT 9.0+)
+  -H          select HDD as device for next boot (AMT 9.0+)
   -S(hutdown) using AMT graceful shutdown (AMT 9.0+)
   -(re)B(oot) using AMT graceful reset    (AMT 9.0+)
   -T(erminal) start SOL terminal session (single host)
