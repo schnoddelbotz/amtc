@@ -95,7 +95,7 @@ js/jslibs.js: index.html $(JSFILES) $(ZIPSRC)
 	for JSFILE in $(JSFILES); do cat $$JSFILE >> js/jslibs.js; echo >> js/jslibs.js; done
 	# small work-around for freebsd, where make won't support $(shell ) commands / vars --
 	# template compiler won't become part of $(JSFILES) there, so just append it to jslibs.js
-	/usr/bin/env node -v >/dev/null 2>&1 || ( test -z "$(TPL_COMPILER_NODEJS)" && echo "">>js/jslibs.js; cat js/ember-template-compiler.js >> js/jslibs.js)
+	/usr/bin/env node -v >/dev/null 2>&1 || if [ -z "$(TPL_COMPILER_NODEJS)" ]; then echo >>js/jslibs.js; cat js/ember-template-compiler.js >> js/jslibs.js; echo >>js/jslibs.js; fi
 	#
 	if [ "$(HAVE_NODEJS)" = YES ]; then \
 	  cat js/compiled-templates.js >> js/jslibs.js ; \
