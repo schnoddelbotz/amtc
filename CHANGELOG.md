@@ -1,7 +1,7 @@
 v0.8.5
 ======
 
-__to be released__
+Released December 11, 2015.
 
 ## amtc ##
 
@@ -90,7 +90,7 @@ Changelog below lists major changes since release v0.8.2.
 * [RPM] user 'amtc-web' is created for background amtc exec
 * [OSX/DEB] the webserver user is used for amtc exec
 
-## Known issues ##
+## Known issues (as of v0.8.5~alpha1) ##
 
 * No statelog graphs as in amtc-web1 yet
 * Current DB-stored monitoring interval of 1 minute is not GUI-accessible
