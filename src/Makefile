@@ -26,14 +26,17 @@ all: amtc
 amtc: amtc-amtterm.c amtc.c $(AMTTERM_TARGETS)
 	$(CC) $(CFLAGS) $(AMTTERM_DEFINE) $(AMTTERM_TARGETS) amtc.c $(LDLIBS) -o amtc
 
-amtc-amtterm.c:
-	if [ "${WITH_GPL_AMTTERM}" = "Yes" ]; then \
-	  cd .. ; \
-	  git submodule init; \
-	  git submodule update; \
-	  cd src; \
-	  sed -e '1,/* ----/d' -e '/static void usage/,1000d' amtterm/amtterm.c > amtc-amtterm.c; \
+amtterm/tcp.c: amtterm/.git
+amtterm/redir.c: amtterm/.git
+amtterm/.git:
+	if [ -d ../.git ]; then \
+		cd .. ; git submodule init; git submodule update; cd src; \
+	else \
+		rm -rf amtterm; git clone git://git.kraxel.org/amtterm; \
 	fi
+
+amtc-amtterm.c: amtterm/.git
+	sed -e '1,/* ----/d' -e '/static void usage/,1000d' amtterm/amtterm.c > amtc-amtterm.c
 
 amtc.c: amt.h
 
