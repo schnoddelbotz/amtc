@@ -93,6 +93,10 @@ css/styles.css: $(CSSFILES) $(ZIPSRC) css/sb-admin-2.css
 js/jslibs.js: index.html $(JSFILES) $(ZIPSRC)
 	rm -f js/jslibs.js
 	for JSFILE in $(JSFILES); do cat $$JSFILE >> js/jslibs.js; echo >> js/jslibs.js; done
+	# small work-around for freebsd, where make won't support $(shell ) commands / vars --
+	# template compiler won't become part of $(JSFILES) there, so just append it to jslibs.js
+	/usr/bin/env node -v &>/dev/null || ( test -z "$(TPL_COMPILER_NODEJS)" && cat js/ember-template-compiler.js >> js/jslibs.js)
+	#
 	if [ "$(HAVE_NODEJS)" = YES ]; then \
 	  cat js/compiled-templates.js >> js/jslibs.js ; \
 	  [ $(MERGE_JS) = YES ] && node -e 'var u=require("uglify-js"); console.log(u.minify("js/app/app.js").code);' >> js/jslibs.js || true ; \
@@ -111,7 +115,7 @@ index.html.gz: index.html
 	gzip -c --best index.html > index.html.gz
 
 # remove any non-repo / downloaded / built files
-# fixme: rm {a,b}*.xxx fails on freebsd
+# Improve: rm {a,b}*.xxx fails on freebsd
 clean:
 	rm -rf index.html fonts css/plugins js/plugins {.,css,js}/*.gz lib/Slim
 	rm -f css/{b,f,h,sb,st}*.css js/{b,e,h,j,m,s}*.js js/jq*.map \
@@ -166,7 +170,7 @@ js/bootstrap.min.js:
 	curl -Lso bs.zip https://github.com/twbs/bootstrap/releases/download/v$(BOOTSTRAP)/bootstrap-$(BOOTSTRAP)-dist.zip
 	unzip -q bs.zip
 	mkdir -p fonts
-	cd bootstrap-$(BOOTSTRAP)-dist; mv css/bootstrap.min.css ../css; mv js/bootstrap.min.js ../js
+	cd bootstrap-$(BOOTSTRAP)-dist; mv css/bootstrap.min.css ../css; mv js/bootstrap.min.js ../js; cd ..
 	rm -rf bootstrap-$(BOOTSTRAP)-dist bs.zip
 
 css/sb-admin-2.css:
