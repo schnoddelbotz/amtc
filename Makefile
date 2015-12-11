@@ -156,15 +156,9 @@ install-package: package
 
 # uninstall any installed package and remove ANY file/directory created by amtc-web
 purge:
-ifeq ($(PKGTYPE),osxpkg)
-	-sudo pkgutil --forget ch.hacker.amtc
-	-sudo launchctl disable system/ch.hacker.amtc-web
-	-sudo launchctl remove ch.hacker.amtc-web
-else ifeq ($(PKGTYPE),deb)
-	-sudo apt-get purge -y amtc
-else ifeq ($(PKGTYPE),rpm)
-	-sudo yum remove -y amtc amtc-web amtc-debuginfo
-endif
+	test "$(PKGTYPE)" = "osxpkg" && (sudo pkgutil --forget ch.hacker.amtc; sudo launchctl disable system/ch.hacker.amtc-web; sudo launchctl remove ch.hacker.amtc-web ) || true
+	test "$(PKGTYPE)" = "deb"    && sudo apt-get purge -y amtc || true
+	test "$(PKGTYPE)" = "rpm"    && sudo yum remove -y amtc amtc-web amtc-debuginfo || true
 	sudo rm -rf /etc/amtc-web /var/lib/amtc-web /usr/share/amtc-web /etc/{httpd,apache2}/{other,conf.d}/amtc-web_httpd.conf /Library/LaunchDaemons/ch.hacker.amtc-web.plist
 
 

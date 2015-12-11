@@ -6,12 +6,12 @@
 # Downloads, unpacks, concatenates and compresses JS/CSS dependencies
 
 # define versions to fetch
-export JQUERY      = 2.1.4
-export JQUERYUI    = 1.11.4
-export BOOTSTRAP   = 3.3.6
-export EMBERJS     = 1.13.11
-export EMBERDATA   = 1.13.15
-export FONTAWESOME = 4.5.0
+JQUERY      = 2.1.4
+JQUERYUI    = 1.11.4
+BOOTSTRAP   = 3.3.6
+EMBERJS     = 1.13.11
+EMBERDATA   = 1.13.15
+FONTAWESOME = 4.5.0
 
 SHELL = bash
 MERGE_JS    ?= YES
@@ -35,7 +35,7 @@ FONTS    = fonts/fontawesome-webfont.woff
 
 build: index.html download compress basic-auth/.htaccess
 
-download: $(CSSFILES) $(JSFILES) $(PHPLIBS) $(FONTS)
+download: css/sb-admin-2.css $(CSSFILES) $(JSFILES) $(PHPLIBS) $(FONTS)
 
 concat: download css/styles.css js/jslibs.js
 
@@ -47,23 +47,22 @@ index.html: js/ember-template-compiler.js
 	else \
 	  cat templates/application_header.html > index.html; \
 	fi
-ifeq ($(HAVE_NODEJS),YES)
+	#
 	# NodeJS seems available on buildhost. Pre-compile emberjs
 	# templates to increase client-side GUI performance.
-	cat /dev/null > js/compiled-templates.js
-	for t in templates/*.hbs.html templates/*/*.hbs.html; do \
-	  tpl=`basename $$t | cut -d. -f1`; \
-	  dir=`dirname $$t`; \
-	  if [ $$dir != "templates" ]; then \
-	    tpl="`basename $$dir`/$$tpl"; \
-	  fi; \
-	  echo "// $$t ($$tpl) " >> js/compiled-templates.js; \
-	  ./js/compile-template.js "$$t" "$$tpl"; \
-	  echo " Pre-compiled template $$t"; \
-	done
-else
-	# No NodeJS on buildhost, build index.html that will result in
-	# client-side template compilation.
+	if [ "$(HAVE_NODEJS)" = YES ]; then \
+		cat /dev/null > js/compiled-templates.js; \
+		for t in templates/*.hbs.html templates/*/*.hbs.html; do \
+		  tpl=`basename $$t | cut -d. -f1`; \
+		  dir=`dirname $$t`; \
+		  if [ $$dir != "templates" ]; then \
+		    tpl="`basename $$dir`/$$tpl"; \
+		  fi; \
+		  echo "// $$t ($$tpl) " >> js/compiled-templates.js; \
+		  ./js/compile-template.js "$$t" "$$tpl"; \
+		  echo " Pre-compiled template $$t"; \
+		done ; \
+	else \
 	for t in templates/*.hbs.html templates/*/*.hbs.html; do \
 	  tpl=`basename $$t | cut -d. -f1`; \
 	  dir=`dirname $$t`; \
@@ -74,8 +73,11 @@ else
 	  echo '<script type="text/x-handlebars" id="'$$tpl'">' >> index.html; \
 	  cat $$t >> index.html; \
 	  echo -e '</script>\n' >> index.html; \
-	done
-endif
+	done; \
+	fi
+	# ^ No NodeJS on buildhost, build index.html that will result in
+	#   client-side template compilation.
+
 	if [ $(MERGE_JS) = YES ]; then \
 	  grep -v app/app.js templates/application_footer.html >> index.html; \
 	else \
@@ -84,27 +86,32 @@ endif
 
 
 # concat targets
-css/styles.css: $(CSSFILES) $(ZIPSRC)
+css/styles.css: $(CSSFILES) $(ZIPSRC) css/sb-admin-2.css
 	cat $(CSSFILES) > css/styles.css
 	[ $(MERGE_CSS) = YES ] && cat css/amtc-web.css >> css/styles.css || true
 
 js/jslibs.js: index.html $(JSFILES) $(ZIPSRC)
 	rm -f js/jslibs.js
 	for JSFILE in $(JSFILES); do cat $$JSFILE >> js/jslibs.js; echo >> js/jslibs.js; done
-ifeq ($(HAVE_NODEJS),YES)
-	cat js/compiled-templates.js >> js/jslibs.js
-	[ $(MERGE_JS) = YES ] && node -e 'var u=require("uglify-js"); console.log(u.minify("js/app/app.js").code);' >> js/jslibs.js || true
-else
-	[ $(MERGE_JS) = YES ] && cat js/app/app.js >> js/jslibs.js || true
-endif
+	if [ "$(HAVE_NODEJS)" = YES ]; then \
+	  cat js/compiled-templates.js >> js/jslibs.js ; \
+	  [ $(MERGE_JS) = YES ] && node -e 'var u=require("uglify-js"); console.log(u.minify("js/app/app.js").code);' >> js/jslibs.js || true ; \
+	else \
+		[ $(MERGE_JS) = YES ] && cat js/app/app.js >> js/jslibs.js || true ; \
+	fi
 	test `uname -s` = "Darwin" && perl -pi -e 's@/usr/bin/amtc@/usr/local/bin/amtc@' js/jslibs.js || true
 
 
 # compress targets
-%.gz: js/jslibs.js css/styles.css index.html
-	gzip -c --best $* > $*.gz
+js/jslibs.js.gz:  js/jslibs.js
+	gzip -c --best js/jslibs.js > js/jslibs.js.gz
+css/styles.css.gz: css/styles.css
+	gzip -c --best css/styles.css > css/styles.css.gz
+index.html.gz: index.html
+	gzip -c --best index.html > index.html.gz
 
 # remove any non-repo / downloaded / built files
+# fixme: rm {a,b}*.xxx fails on freebsd
 clean:
 	rm -rf index.html fonts css/plugins js/plugins {.,css,js}/*.gz lib/Slim
 	rm -f css/{b,f,h,sb,st}*.css js/{b,e,h,j,m,s}*.js js/jq*.map \
@@ -122,12 +129,31 @@ distclean:
 	[ $(MERGE_JS) = YES ] && rm -rf js/app || true
 	[ $(MERGE_CSS) = YES ] && rm -f css/amtc-web.css || true
 
-# download any CSS/JSFILES from URLs specified in Makefile.Sources
-%:
-	@URL1=`grep '$*' Makefile.Sources | awk '{print $$2}'`; \
-		URL=`eval echo $$URL1`; \
-		echo "curl -Lso $* $$URL"; \
-		curl -Lso $* $$URL
+# download any CSS/JSFILES from URLs previously specified in Makefile.Sources (bsd make compat)
+js/jquery.min.js:
+	curl -Lso js/jquery.min.js http://code.jquery.com/jquery-$(JQUERY).min.js
+js/jquery.min.map:
+	curl -Lso js/jquery.min.map http://code.jquery.com/jquery-$(JQUERY).min.map
+js/emberjs.min.js:
+	curl -Lso js/emberjs.min.js http://builds.emberjs.com/tags/v$(EMBERJS)/ember.min.js
+js/ember-template-compiler.js:
+	curl -Lso js/ember-template-compiler.js http://builds.emberjs.com/tags/v$(EMBERJS)/ember-template-compiler.js
+js/ember-data.min.js:
+	curl -Lso js/ember-data.min.js http://builds.emberjs.com/tags/v$(EMBERDATA)/ember-data.min.js
+js/showdown.min.js:
+	curl -Lso js/showdown.min.js https://raw.githubusercontent.com/showdownjs/showdown/master/dist/showdown.min.js
+js/moment.min.js:
+	curl -Lso js/moment.min.js http://momentjs.com/downloads/moment.min.js
+js/humane.min.js:
+	curl -Lso js/humane.min.js https://raw.githubusercontent.com/wavded/humane-js/master/humane.min.js
+# Styles (CSS / Fonts)
+css/humane-original.css:
+	curl -Lso css/humane-original.css https://raw.githubusercontent.com/wavded/humane-js/master/themes/original.css
+# PHP libs
+lib/idiorm.php:
+	curl -Lso lib/idiorm.php https://raw.githubusercontent.com/j4mie/idiorm/master/idiorm.php
+lib/paris.php:
+	curl -Lso lib/paris.php https://raw.githubusercontent.com/j4mie/paris/master/paris.php
 
 # ZIPSRC downloads
 js/jquery-ui.min.js:

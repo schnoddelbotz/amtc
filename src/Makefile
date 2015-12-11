@@ -4,8 +4,8 @@
 #
 # Makefile for amtc
 
-LDLIBS=-lcurl -lpthread
-CFLAGS=-I. -Wall
+LDLIBS=-L/usr/local/lib -lcurl -lpthread
+CFLAGS=-I/usr/local/include -I. -Wall
 AMTCV=$(shell cat ../version)
 APP=amtc-$(AMTCV)
 OS=$(shell uname -s)
@@ -20,6 +20,8 @@ HEADERS=amtc_usage cmd_powerdown cmd_powerup cmd_info cmd_powerreset \
 	wsman_webui_enable wsman_webui_disable \
 	wsman_ping_enable wsman_ping_disable \
 	wsman_shutdown_graceful wsman_reset_graceful
+
+all: amtc
 
 amtc: amtc-amtterm.c amtc.c $(AMTTERM_TARGETS)
 	$(CC) $(CFLAGS) $(AMTTERM_DEFINE) $(AMTTERM_TARGETS) amtc.c $(LDLIBS) -o amtc
