@@ -43,11 +43,12 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc
 /usr/bin/amtc
+/usr/share/man/man1/amtc.1.gz
 
 %changelog
 
 ################################################################################
-# binary RPM: amtc-web 
+# binary RPM: amtc-web
 
 %package web
 Summary:	Remote power management Web-GUI for intel vPro/AMT&DASH hosts, using amtc
