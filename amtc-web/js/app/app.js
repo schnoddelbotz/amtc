@@ -181,7 +181,7 @@ App.PageRoute = Ember.Route.extend({
     // fetches static markdown files from server
     // recycled from markdownBrauser
     var store = this.store;
-    var url = 'pages/'+ params.id + '.md';
+    var url = 'page/'+ params.id + '.md';
     var existantRecord = null;
     var test = store.peekAll('page');
     test.forEach(function(item) {
