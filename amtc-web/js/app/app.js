@@ -178,7 +178,31 @@ Ember.Route.reopen({
 
 App.PageRoute = Ember.Route.extend({
   model: function(params) {
-    return this.store.find('page', params.id);
+    // fetches static markdown files from server
+    // recycled from markdownBrauser
+    var store = this.store;
+    var url = 'pages/'+ params.id + '.md';
+    var existantRecord = null;
+    var test = store.peekAll('page');
+    test.forEach(function(item) {
+      if (item.id === params.id) {
+        existantRecord = item;
+      }
+    });
+    if (existantRecord) {
+      return existantRecord;
+    } else {
+      return Ember.$.get(url).then(function(data) {
+        var page = {
+          'id': params.id,
+          'page_content': data,
+          'file_name': params.id+'.md'
+        };
+        // create a real e-d record to enjoy computed propoerties
+        var record = store.createRecord('page', page);
+        return record;
+      });
+    }
   }
 });
 App.OuRoute = Ember.Route.extend({
@@ -1174,7 +1198,7 @@ App.Host = DS.Model.extend({
 });
 // Markdown help / documentation pages
 App.Page = DS.Model.extend({
-  page_name: attr('string'),
+  file_name: attr('string'),
   page_title: attr('string'),
   page_content: attr('string'),
 });

@@ -15,7 +15,7 @@ session_name("amtcweb");
 session_start();
 
 // Block access if unauthenticated - only permit some vital routes
-$allowUnauthenticated = Array('authenticate', 'rest-config.js', 'pages',
+$allowUnauthenticated = Array('authenticate', 'rest-config.js',
                               'phptests', 'submit-configuration');
 $_route = explode('/', $app->request()->getPathInfo());
 $route  = $_route[1];
@@ -185,18 +185,6 @@ $app->get('/rest-config.js', function () use ($app) {
             file_exists(AMTC_CFGFILE) ? 'true' : 'false');
   // what about rootURL ? http://emberjs.com/guides/routing/
   // this response could be done statically if #/setup would write it to config/cfg.js?
-});
-// Return static markdown help pages, json encoded
-$app->get('/pages/:id', function ($id) use ($app) {
-  $file = sprintf("pages/%s.md", $id);
-  is_readable($file) || $app->notFound();
-  $contents = file_get_contents($file);
-  echo json_encode( array('page'=>array(
-    'id' => $id,
-    'page_name' => 'unused',
-    'page_title' => 'unused',
-    'page_content' => $contents
-  )));
 });
 // Installer
 $app->post('/submit-configuration', function () {
