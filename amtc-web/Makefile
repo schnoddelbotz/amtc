@@ -29,12 +29,12 @@ JSFILES  = js/jquery.min.js js/bootstrap.min.js $(TPL_COMPILER) \
 	js/raphael.min.js js/morris.min.js js/jquery-ui.min.js
 
 PHPLIBS  = lib/Slim/Slim.php lib/idiorm.php lib/paris.php
-ZIPSRC   = js/jquery-ui.min.js js/bootstrap.min.js css/sb-admin.css fonts/fontawesome-webfont.woff
+ZIPSRC   = js/jquery-ui.min.js js/bootstrap.min.js css/sb-admin-2.css fonts/fontawesome-webfont.woff
 FONTS    = fonts/fontawesome-webfont.woff
 
 build: index.html download compress basic-auth/.htaccess
 
-download: css/sb-admin.css $(CSSFILES) $(JSFILES) $(PHPLIBS) $(FONTS)
+download: css/sb-admin-2.css $(CSSFILES) $(JSFILES) $(PHPLIBS) $(FONTS)
 
 concat: download css/styles.css js/jslibs.js
 
@@ -85,7 +85,7 @@ index.html: js/ember-template-compiler.js
 
 
 # concat targets
-css/styles.css: $(CSSFILES) $(ZIPSRC) css/sb-admin.css
+css/styles.css: $(CSSFILES) $(ZIPSRC) css/sb-admin-2.css
 	cat $(CSSFILES) > css/styles.css
 	[ $(MERGE_CSS) = YES ] && cat css/amtc-web.css >> css/styles.css || true
 
@@ -172,7 +172,7 @@ js/bootstrap.min.js:
 	cd bootstrap-$(BOOTSTRAP)-dist; mv css/bootstrap.min.css ../css; mv js/bootstrap.min.js ../js; cd ..
 	rm -rf bootstrap-$(BOOTSTRAP)-dist bs.zip
 
-css/sb-admin.css:
+css/sb-admin-2.css:
 	curl -Lso sb.zip https://github.com/BlackrockDigital/startbootstrap-sb-admin-2/archive/v3.3.7+1.zip
 	unzip -q sb.zip
 	cp startbootstrap-sb-admin-2-3.3.7-1/dist/css/sb-admin-2.css css
@@ -208,7 +208,7 @@ basic-auth/.htaccess:
 	fi
 
 # named files are concat targets (CSSFILES/JSFILES) but included in ZIPSRC target downloads
-js/metisMenu.min.js js/morris.min.js js/raphael.min.js css/font-awesome.min.css css/plugins/metisMenu/metisMenu.min.css css/plugins/morris.css css/bootstrap.min.css:
+js/metisMenu.min.js js/morris.min.js js/raphael.min.js css/font-awesome.min.css css/plugins/metisMenu.min.css css/plugins/morris.css css/bootstrap.min.css:
 	@# nothing to do
 
 .PHONY: build concat compress download
