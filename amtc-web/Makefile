@@ -6,12 +6,12 @@
 # Downloads, unpacks, concatenates and compresses JS/CSS dependencies
 
 # define versions to fetch
-JQUERY      = 2.1.4
-JQUERYUI    = 1.11.4
-BOOTSTRAP   = 3.3.6
+JQUERY      = 2.2.4
+JQUERYUI    = 1.12.1
+BOOTSTRAP   = 3.3.7
 EMBERJS     = 1.13.11
 EMBERDATA   = 1.13.15
-FONTAWESOME = 4.6.3
+FONTAWESOME = 4.7.0
 
 SHELL = bash
 MERGE_JS    ?= YES
@@ -19,23 +19,22 @@ MERGE_CSS   ?= YES
 HAVE_NODEJS ?= $(shell /usr/bin/env node -v &>/dev/null && echo YES)
 TPL_COMPILER = $(shell test "$(HAVE_NODEJS)" = "YES" && echo "" || echo "js/ember-template-compiler.js")
 
-CSSFILES = css/bootstrap.min.css css/plugins/metisMenu/metisMenu.min.css \
- 	css/plugins/timeline.css css/sb-admin-2.css css/plugins/morris.css \
+CSSFILES = css/bootstrap.min.css css/plugins/metisMenu.min.css \
+ 	css/sb-admin-2.css css/plugins/morris.css \
  	css/font-awesome.min.css css/humane-original.css
 
 JSFILES  = js/jquery.min.js js/bootstrap.min.js $(TPL_COMPILER) \
 	js/emberjs.min.js js/ember-data.min.js js/showdown.min.js \
-	js/moment.min.js js/humane.min.js js/plugins/metisMenu/metisMenu.min.js \
-	js/plugins/morris/raphael.min.js js/plugins/morris/morris.min.js \
-	js/jquery-ui.min.js
+	js/moment.min.js js/humane.min.js js/metisMenu.min.js \
+	js/raphael.min.js js/morris.min.js js/jquery-ui.min.js
 
 PHPLIBS  = lib/Slim/Slim.php lib/idiorm.php lib/paris.php
-ZIPSRC   = js/jquery-ui.min.js js/bootstrap.min.js css/sb-admin-2.css fonts/fontawesome-webfont.woff
+ZIPSRC   = js/jquery-ui.min.js js/bootstrap.min.js css/sb-admin.css fonts/fontawesome-webfont.woff
 FONTS    = fonts/fontawesome-webfont.woff
 
 build: index.html download compress basic-auth/.htaccess
 
-download: css/sb-admin-2.css $(CSSFILES) $(JSFILES) $(PHPLIBS) $(FONTS)
+download: css/sb-admin.css $(CSSFILES) $(JSFILES) $(PHPLIBS) $(FONTS)
 
 concat: download css/styles.css js/jslibs.js
 
@@ -86,7 +85,7 @@ index.html: js/ember-template-compiler.js
 
 
 # concat targets
-css/styles.css: $(CSSFILES) $(ZIPSRC) css/sb-admin-2.css
+css/styles.css: $(CSSFILES) $(ZIPSRC) css/sb-admin.css
 	cat $(CSSFILES) > css/styles.css
 	[ $(MERGE_CSS) = YES ] && cat css/amtc-web.css >> css/styles.css || true
 
@@ -173,13 +172,17 @@ js/bootstrap.min.js:
 	cd bootstrap-$(BOOTSTRAP)-dist; mv css/bootstrap.min.css ../css; mv js/bootstrap.min.js ../js; cd ..
 	rm -rf bootstrap-$(BOOTSTRAP)-dist bs.zip
 
-css/sb-admin-2.css:
-	curl -Lso sb.zip https://github.com/IronSummitMedia/startbootstrap-sb-admin-2/archive/v1.0.0.zip
+css/sb-admin.css:
+	curl -Lso sb.zip https://github.com/BlackrockDigital/startbootstrap-sb-admin-2/archive/v3.3.7+1.zip
 	unzip -q sb.zip
-	cp startbootstrap-sb-admin-2-1.0.0/css/sb-admin-2.css css
-	cp -R startbootstrap-sb-admin-2-1.0.0/css/plugins css
-	cp -R startbootstrap-sb-admin-2-1.0.0/js/plugins js
-	rm -rf startbootstrap-sb-admin-2-1.0.0 sb.zip
+	cp startbootstrap-sb-admin-2-3.3.7-1/dist/css/sb-admin-2.css css
+	mkdir -p css/plugins
+	cp startbootstrap-sb-admin-2-3.3.7-1/vendor/morrisjs/morris.css css/plugins
+	cp startbootstrap-sb-admin-2-3.3.7-1/vendor/metisMenu/metisMenu.min.css css/plugins
+	cp startbootstrap-sb-admin-2-3.3.7-1/vendor/morrisjs/morris.min.js js
+	cp startbootstrap-sb-admin-2-3.3.7-1/vendor/raphael/raphael.min.js js
+	cp startbootstrap-sb-admin-2-3.3.7-1/vendor/metisMenu/metisMenu.min.js js
+	rm -rf startbootstrap-sb-admin-2-3.3.7-1 sb.zip
 
 fonts/fontawesome-webfont.woff:
 	curl -Lso fa.zip http://fortawesome.github.io/Font-Awesome/assets/font-awesome-$(FONTAWESOME).zip
@@ -205,7 +208,7 @@ basic-auth/.htaccess:
 	fi
 
 # named files are concat targets (CSSFILES/JSFILES) but included in ZIPSRC target downloads
-js/plugins/metisMenu/metisMenu.min.js js/plugins/morris/morris.min.js js/plugins/morris/raphael.min.js css/font-awesome.min.css css/plugins/metisMenu/metisMenu.min.css css/plugins/morris.css css/plugins/timeline.css css/bootstrap.min.css:
+js/metisMenu.min.js js/morris.min.js js/raphael.min.js css/font-awesome.min.css css/plugins/metisMenu/metisMenu.min.css css/plugins/morris.css css/bootstrap.min.css:
 	@# nothing to do
 
 .PHONY: build concat compress download
