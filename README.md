@@ -3,6 +3,11 @@ amtc [![Build Status](https://travis-ci.org/schnoddelbotz/amtc.svg?branch=master
 
 `amtc` - Intel [vPro](http://de.wikipedia.org/wiki/Intel_vPro) [AMT](http://en.wikipedia.org/wiki/Intel_Active_Management_Technology) / [WS-Management](http://en.wikipedia.org/wiki/WS-Management) mass remote power management tool
 
+NOTE!
+=====
+amtc works fine and there are currently no known issues.
+Anyhow -- you may want to look into [amtgo](https://github.com/schnoddelbotz/amtgo), which combines amtc's and amtc-web's functionality in a single, golang-based binary; Apache, PHP and cron no longer needed for amtc-web!
+
 features
 ========
 
@@ -23,12 +28,7 @@ features
   * setup (of atmc-web itself, i.e. providing database connection details etc.)
 * acts as a tool for flexible and robust scheduled remote power management (which is true for amtc itself and amtc-web; amtc-web just adds another layer of comfort regarding shell interaction with your many hosts).
 
-<img src="screenshots/setup.png" width="200px" />
-<img src="screenshots/dashboard.png" width="200px" />
-<img src="screenshots/monitor-states.png" width="200px" />
-<img src="screenshots/monitor-selection.png" width="200px" />
-<img src="screenshots/manage-addhosts.png" width="200px" />
-<img src="screenshots/manage-schedule.png" width="200px" />
+<img src="screenshots/setup.png" width="200px" /> <img src="screenshots/dashboard.png" width="200px" /> <img src="screenshots/monitor-states.png" width="200px" /> <img src="screenshots/monitor-selection.png" width="200px" /> <img src="screenshots/manage-addhosts.png" width="200px" /> <img src="screenshots/manage-schedule.png" width="200px" />
 
 usage
 =====
@@ -83,9 +83,8 @@ sqlite database so you shouldn't be able to make any changes.
 
 `amtc` 0.8.0 introduced the -E option, which serves for retreiving system
 configuration and asset management data. Currently, amtc will not parse
-those replies and just dump the raw SOAP reply. amtc-web currently
-offers no way yet to retreive/display those values. This will improve,
-sooner or later... stay tuned.
+those replies and just dump the raw SOAP reply. amtc-web ~~currently~~
+offers no way yet to retreive/display those values.
 
 Honestly, in some aspects, `amtc` [still] is a hack. The most obvious
 one is: amtc has no clue of SOAP. It dumbly replays control commands
@@ -110,6 +109,7 @@ distributed with any [release of amtc](https://github.com/schnoddelbotz/amtc/rel
 
 alternatives
 ============
+- [amtgo](https://github.com/schnoddelbotz/amtgo) implements functionality of amtc and amtc-web in a single binary. Maybe give it a try first!
 - [amttool](http://www.kraxel.org/cgit/amtterm/tree/amttool):
   Without amttool, there would be no amtc. Thanks!
   amttool is implemented in perl and intended for interactive, verbose single-host operation.
