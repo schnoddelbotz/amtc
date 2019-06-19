@@ -4,7 +4,7 @@ Release:	1%{?dist}
 Summary:	Threaded remote power management commandline tool for intel vPro/AMT&DASH hosts
 
 Group:		Applications/System
-License:	CC BY 3.0
+License:	MIT
 URL:		https://github.com/schnoddelbotz/%{name}
 Source0:	https://github.com/schnoddelbotz/%{name}/archive/v%{version}.tar.gz
 
