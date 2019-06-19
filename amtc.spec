@@ -8,8 +8,12 @@ License:	CC BY 3.0
 URL:		https://github.com/schnoddelbotz/%{name}
 Source0:	https://github.com/schnoddelbotz/%{name}/archive/v%{version}.tar.gz
 
-BuildRequires:  libcurl-devel,gnutls-devel
-Requires: libcurl,gnutls
+BuildRequires:	libcurl-devel
+BuildRequires:	gnutls-devel
+BuildRequires:	git
+BuildRequires:	vim-common
+Requires:	libcurl
+Requires:	gnutls
 
 ################################################################################
 # binary RPM: amtc
