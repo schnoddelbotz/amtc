@@ -1,13 +1,12 @@
 Name:		amtc
-Version:	#AMTCV#
+Version:	0.8.5
 Release:	1%{?dist}
 Summary:	Threaded remote power management commandline tool for intel vPro/AMT&DASH hosts
 
 Group:		Applications/System
 License:	CC BY 3.0
-URL:		https://github.com/schnoddelbotz/amtc
-Source0:	https://github.com/schnoddelbotz/amtc/archive/amtc-#AMTCV#.tar.gz
-BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+URL:		https://github.com/schnoddelbotz/%{name}
+Source0:	https://github.com/schnoddelbotz/%{name}/archive/v%{version}.tar.gz
 
 BuildRequires:  libcurl-devel,gnutls-devel
 Requires: libcurl,gnutls
