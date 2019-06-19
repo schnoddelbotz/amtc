@@ -185,12 +185,12 @@ css/sb-admin-2.css:
 	rm -rf startbootstrap-sb-admin-2-3.3.7-1 sb.zip
 
 fonts/fontawesome-webfont.woff:
-	curl -Lso fa.zip http://fortawesome.github.io/Font-Awesome/assets/font-awesome-$(FONTAWESOME).zip
+	curl -Lso fa.zip https://github.com/FortAwesome/Font-Awesome/archive/v$(FONTAWESOME).zip
 	unzip -q fa.zip
-	mv font-awesome-$(FONTAWESOME)/css/font-awesome.min.css css
+	mv Font-Awesome-$(FONTAWESOME)/css/font-awesome.min.css css
 	mkdir -p fonts
-	mv font-awesome-$(FONTAWESOME)/fonts/* fonts
-	rm -rf fa.zip font-awesome-$(FONTAWESOME)
+	mv Font-Awesome-$(FONTAWESOME)/fonts/* fonts
+	rm -rf fa.zip Font-Awesome-$(FONTAWESOME)
 
 lib/Slim/Slim.php:
 	curl -Lso slim.zip https://github.com/slimphp/Slim/archive/2.x.zip
