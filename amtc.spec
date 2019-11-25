@@ -9,8 +9,11 @@ URL:		https://github.com/schnoddelbotz/amtc
 Source0:	https://github.com/schnoddelbotz/amtc/archive/amtc-#AMTCV#.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
-BuildRequires:  libcurl-devel,gnutls-devel
-Requires: libcurl,gnutls
+BuildRequires:  libcurl-devel
+BuildRequires:  gnutls-devel
+BuildRequires:  vim-common
+Requires:       libcurl
+Requires:       gnutls
 
 ################################################################################
 # binary RPM: amtc
